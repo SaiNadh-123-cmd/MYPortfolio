@@ -244,31 +244,30 @@
     }
 
     /* =====================================================================
-       FIRST PAGE BOX CONTAINER
+       PAGE 1 SPLASH CONTAINER
     ====================================================================== */
-    #first-page-box {
-      min-height: 88vh;
+    #page-1-splash {
+      min-height: 90vh;
       position: relative;
       overflow: hidden;
       border-radius: 28px;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      margin: 1.5rem auto 4rem auto;
+      margin: 1.5rem auto 3rem auto;
     }
 
-    /* Rainbow Grid Cells — First Page Only */
-    .rainbow-cell {
+    /* Colorido Grid Tiles */
+    .c-tile {
       width: 48px;
       height: 48px;
-      background: transparent !important;
-      border: 1px solid rgba(255, 255, 255, 0.03) !important;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.04);
       box-sizing: border-box;
-      transition: background-color 1.1s ease-out;
       margin: 0;
       padding: 0;
     }
 
-    /* Collapsible Intro Box */
-    .intro-box {
+    /* Personal Window */
+    .personal-window {
       background: var(--bg-glass);
       border: 1px solid var(--border-subtle);
       backdrop-filter: blur(20px);
@@ -278,24 +277,29 @@
       transition: height 0.4s ease;
     }
 
-    .intro-box.collapsed .intro-box-body {
+    .personal-window.collapsed .window-body {
       display: none;
     }
 
-    .intro-box-header {
+    .window-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 1.25rem 1.5rem;
-      cursor: pointer;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(10, 16, 23, 0.6);
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .intro-box-toggle {
-      font-size: 1.5rem;
-      line-height: 1;
-      cursor: pointer;
-      user-select: none;
+    .window-toggle {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
     }
 
     /* Profile Photo Card */
@@ -308,15 +312,14 @@
     }
 
     .profile-img {
-      width: 100%;
-      height: auto;
-      max-height: 520px;
-      border-radius: 16px;
+      width: 320px;
+      height: 380px;
+      object-fit: cover;
+      border-radius: 22px;
       border: 2px solid var(--border-glow);
       box-shadow: var(--shadow-ambient);
       transform-style: preserve-3d;
       transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-      object-fit: cover;
       display: block;
     }
 
@@ -428,38 +431,49 @@
   <!-- =====================================================================
        HERO SECTION: 3D INTERACTIVE NEURAL SCULPTURE + EXECUTIVE STORYTELLING
   ====================================================================== -->
-  <section id="first-page-box" data-section-theme="emerald" style="min-height: 88vh; position: relative; overflow: hidden; border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.12); margin: 1.5rem auto 4rem auto;">
-    <!-- Rainbow Grid Background Layer (First Page Only) -->
-    <div id="rainbow-grid" style="position: absolute; inset: 0; z-index: 0; pointer-events: none; display: grid; grid-template-columns: repeat(auto-fill, 48px); grid-template-rows: repeat(auto-fill, 48px); gap: 0; width: 100%; height: 100%;"></div>
+  <section id="page-1-splash" style="min-height: 90vh; position: relative; overflow: hidden; border-radius: 28px; margin: 1.5rem auto 3rem auto; border: 1px solid rgba(255, 255, 255, 0.12);">
+    <!-- Colorido 2026 Grid Background Layer (Page 1 Only) -->
+    <div id="colorido-grid" style="position: absolute; inset: 0; display: grid; z-index: 1; pointer-events: none; width: 100%; height: 100%;"></div>
 
-    <!-- Foreground Content (z-index: 10) -->
-    <div class="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center my-auto pt-28 pb-20 px-4 sm:px-6 lg:px-10">
+    <!-- Page 1 Foreground Layout -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center my-auto pt-28 pb-20 px-4 sm:px-6 lg:px-10" style="pointer-events: none;">
       
-      <!-- Left Column: Collapsible Intro Box -->
-      <div class="lg:col-span-6 space-y-6 z-10">
-        <div class="intro-box" id="intro-box">
-          <div class="intro-box-header" onclick="toggleIntroBox()">
-            <div class="flex items-center gap-3">
-              <h2 class="font-display font-bold text-lg" style="color: var(--text-primary);">Pothumanchi Thri Sai Nadh Raju</h2>
+      <!-- LEFT SIDE: Akshay Mehta-Style Personal Window -->
+      <div class="lg:col-span-6 space-y-6 z-10" style="pointer-events: auto;">
+        <div class="personal-window" style="pointer-events: auto;">
+          <!-- macOS/Terminal Header Bar -->
+          <div class="window-header" style="display: flex; align-items: center; gap-8px; padding: 12px 16px; background: rgba(10, 16, 23, 0.6); border-bottom: 1px solid var(--border-subtle); cursor: default;">
+            <div style="display: flex; gap: 6px;">
+              <div class="window-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></div>
+              <div class="window-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+              <div class="window-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></div>
             </div>
-            <span class="intro-box-toggle" id="intro-toggle">—</span>
+            <button id="window-toggle" style="margin-left: auto; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer;">—</button>
           </div>
-          <div class="intro-box-body p-6">
-            <!-- Status Banner -->
-            <div class="mb-6 px-4 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-sm font-semibold text-emerald-300">Currently Open to Work — Present Working as Intern in O&G Corporation &amp; Infosys</span>
+
+          <!-- Window Body (collapsible) -->
+          <div class="window-body" id="window-body" style="padding: 24px;">
+            <!-- Status Badge -->
+            <div class="mb-6 px-4 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-3" style="pointer-events: auto;">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" style="pointer-events: auto;"></span>
+              <span class="text-sm font-semibold text-emerald-300" style="pointer-events: auto;">Currently Open to Work — Present Working as Intern in O&amp;G Corporation &amp; Infosys</span>
             </div>
 
-            <!-- Contact Info -->
-            <div class="space-y-3 mb-6">
+            <!-- Name -->
+            <h1 class="font-display font-bold text-2xl sm:text-3xl mb-2" style="color: var(--text-primary);" style="pointer-events: auto;">Pothumanchi Thri Sai Nadh Raju</h1>
+
+            <!-- Subtitle -->
+            <p class="text-sm font-mono-tech text-secondary mb-6" style="color: var(--text-secondary);" style="pointer-events: auto;">B.Tech CSE (Data Science) @ RVR &amp; JC College of Engineering ('28)</p>
+
+            <!-- Contact Details -->
+            <div class="space-y-2 mb-6" style="pointer-events: auto;">
               <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📧 nadh8076@gmail.com</p>
               <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📞 +91 8919242206</p>
               <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📍 Guntur, Andhra Pradesh, India</p>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-3">
+            <!-- External Links -->
+            <div class="flex flex-wrap gap-3" style="pointer-events: auto;">
               <button onclick="openResumeModal()" class="px-5 py-2.5 rounded-xl font-medium bg-accent-solid text-slate-900 hover:opacity-95 transition flex items-center gap-2">
                 <i class="fa-regular fa-file-pdf"></i>
                 <span>View / Print Resume</span>
@@ -481,10 +495,10 @@
         </div>
       </div>
 
-      <!-- Right Column: Profile Photo Display -->
-      <div class="lg:col-span-6 relative z-10">
-        <div class="profile-card">
-          <img src="./profile.jpg" alt="Pothumanchi Thri Sai Nadh Raju" class="profile-img">
+      <!-- RIGHT SIDE: Profile Photo Card -->
+      <div class="lg:col-span-6 relative z-10" style="pointer-events: auto;">
+        <div class="profile-card" style="pointer-events: auto; perspective: 1000px; height: 100%; display: flex; align-items: center; justify-content: center;">
+          <img src="./profile.jpg" alt="Pothumanchi Thri Sai Nadh Raju" class="profile-img" style="width: 320px; height: 380px; object-fit: cover; border-radius: 22px; border: 2px solid var(--border-glow); box-shadow: var(--shadow-ambient); transform-style: preserve-3d; transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease; display: block;">
         </div>
       </div>
 
@@ -509,6 +523,128 @@
         <span class="flex items-center gap-3"><i class="fa-solid fa-trophy text-accent"></i> 5x Hackathon Team Leader</span>
         <span class="flex items-center gap-3"><i class="fa-solid fa-database text-accent"></i> SQL, MongoDB, Django &amp; FastAPI</span>
       </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       PAGE 2: ORIGINAL EXECUTIVE HERO (Intro + 3D WebGL Neural Core)
+   ====================================================================== -->
+  <section id="page-2-hero" data-section-theme="emerald" class="relative min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-10 flex flex-col justify-between overflow-hidden">
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center my-auto">
+      
+      <!-- Left Column: Executive Intro -->
+      <div class="lg:col-span-7 space-y-6 z-10">
+        
+        <!-- Location & Role Breadcrumb -->
+        <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full glass-surface text-xs font-mono-tech">
+          <span class="text-accent font-semibold">● POTHUMANCHI THRI SAI NADH RAJU</span>
+          <span style="color: var(--text-muted);">/</span>
+          <span style="color: var(--text-secondary);"><i class="fa-solid fa-location-dot mr-1 text-accent"></i>Guntur, AP, India</span>
+          <span style="color: var(--text-muted);">/</span>
+          <span class="text-accent">RVR & JC ’28</span>
+        </div>
+
+        <!-- Main Hero Headline -->
+        <h1 class="font-display text-4xl sm:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.06]">
+          Engineering <span class="text-gradient-accent">intelligent AI vision</span>, data pipelines &amp; 0→1 products that <span class="underline decoration-2 underline-offset-8" style="text-decoration-color: var(--accent-primary);">ship fast.</span>
+        </h1>
+
+        <!-- Executive Bio Summary -->
+        <p class="text-base sm:text-lg leading-relaxed max-w-2xl" style="color: var(--text-secondary);">
+          Computer Science (<strong style="color: var(--text-primary);">Data Science</strong>) undergraduate with an entrepreneurial, hands-on approach to software engineering. From autonomous <strong style="color: var(--text-primary);">3D edge-vision safety systems</strong> and <strong style="color: var(--text-primary);">RAG legal workflows</strong> to enterprise <strong style="color: var(--text-primary);">Power BI-style analytics platforms</strong>—I architect, lead, and ship end-to-end MVPs.
+        </p>
+
+        <!-- Action CTA Row -->
+        <div class="flex flex-wrap items-center gap-3.5 pt-2">
+          <a href="#work" class="px-6 py-3.5 rounded-xl font-display font-bold text-sm sm:text-base bg-accent-solid shadow-xl hover:scale-[1.02] active:scale-[0.99] transition flex items-center gap-2.5">
+            <span>Explore Case Studies</span>
+            <i class="fa-solid fa-arrow-down-long"></i>
+          </a>
+
+          <button onclick="openCaseStudy('volt')" class="px-5 py-3.5 rounded-xl font-display font-semibold text-sm sm:text-base glass-surface hover:border-accent-glow transition flex items-center gap-2" style="color: var(--text-primary);">
+            <i class="fa-solid fa-cube text-accent"></i>
+            <span>Launch Volt Intercept 3D Sim</span>
+          </button>
+
+          <div class="flex items-center gap-2 pl-1">
+            <a href="https://github.com/SaiNadh-123-cmd" target="_blank" rel="noopener noreferrer" title="GitHub Profile" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/thri-sai-nadh-raju-pothumanchi-47599b381" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-brands fa-linkedin-in"></i>
+            </a>
+            <button onclick="copyToClipboard('nadh8076@gmail.com', 'Email address copied!')" title="Copy Email: nadh8076@gmail.com" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-regular fa-envelope"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Live Telemetry KPI Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">1000+</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">DSA Problems Solved</div>
+              <div class="text-[11px] font-mono-tech mt-0.5 text-accent">CodeChef Diamond 💎</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">5x Lead</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Hackathon Team Lead</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">AWS • OpenAI • Police AI</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">4x</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Virtual Experience &amp; Internships</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">Google Cloud • Alteryx</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">Oracle</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Certified GenAI Pro</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">+7 Industry Credentials</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive 3D WebGL Neural Core Canvas -->
+      <div class="lg:col-span-5 relative">
+        <div class="tilt-card rounded-3xl p-4 sm:p-5 border relative overflow-hidden" style="min-height: 470px;">
+          
+          <!-- Top HUD Overlay -->
+          <div class="relative z-10 flex items-center justify-between border-b pb-3 mb-2" style="border-color: var(--border-subtle);">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-mono-tech ml-2" style="color: var(--text-secondary);">NEURAL_CORE_3D.webgl</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="set3DShape('icosahedron')" id="shape-btn-icosahedron" class="px-2 py-0.5 rounded text-[10px] font-mono-tech pill-badge">Core</button>
+              <button onclick="set3DShape('torus')" id="shape-btn-torus" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">Torus</button>
+              <button onclick="set3DShape('helix')" id="shape-btn-helix" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">DNA/RAG</button>
+            </div>
+          </div>
+
+          <!-- Interactive Three.js Canvas Container -->
+          <div id="hero-3d-container" class="w-full h-[340px] sm:h-[370px] cursor-grab active:cursor-grabbing relative"></div>
+
+          <!-- Bottom Telemetry Overlay inside 3D Card -->
+          <div class="relative z-10 flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-[11px] font-mono-tech" style="border-color: var(--border-subtle); color: var(--text-secondary);">
+            <span><i class="fa-solid fa-hand-pointer text-accent mr-1"></i>Drag to rotate 3D mesh</span>
+            <span id="hud-coords" class="text-accent">ROT: 0.42 rad/s | SYNCED</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1856,89 +1992,80 @@
     }
 
     // =====================================================================
-    // RAINBOW GRID HOVER EFFECT — First Page Only
+    // COLORIDO 2026 MOUSE-MOVE SQUARE GRID — Page 1 Only
     // =====================================================================
-    const RAINBOW_COLORS = ['#ff0055', '#ff6600', '#ffcc00', '#00e676', '#00b0ff', '#7c4dff', '#f50057'];
-    let rainbowColorIndex = 0;
+    const PALETTE = ['#ff0055', '#00f5d4', '#fee440', '#9b5de5', '#00bbf9', '#ff5400', '#00e676', '#ff007f'];
+    let colorIdx = 0;
+    let cols = 0;
+    let rows = 0;
 
-    function initRainbowGrid() {
-      const grid = document.getElementById('rainbow-grid');
-      if (!grid) return;
+    function initColoridoGrid() {
+      const page1 = document.getElementById('page-1-splash');
+      const grid = document.getElementById('colorido-grid');
+      if (!page1 || !grid) return;
 
-      // Generate 48x48px square cells covering the container
-      const rect = grid.getBoundingClientRect();
-      const cols = Math.ceil(rect.width / 48);
-      const rows = Math.ceil(rect.height / 48);
-      const totalCells = cols * rows;
-
-      grid.style.gridTemplateColumns = `repeat(${cols}, 48px)`;
-      grid.style.gridTemplateRows = `repeat(${rows}, 48px)`;
-
-      for (let i = 0; i < totalCells; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'rainbow-cell';
-        cell.dataset.index = i;
-
-        cell.addEventListener('mouseenter', () => {
-          cell.style.backgroundColor = RAINBOW_COLORS[rainbowColorIndex % RAINBOW_COLORS.length];
-          rainbowColorIndex++;
-        });
-
-        cell.addEventListener('mouseleave', () => {
-          cell.style.backgroundColor = 'transparent';
-        });
-
-        grid.appendChild(cell);
+      function buildGrid() {
+        const rect = grid.getBoundingClientRect();
+        const newCols = Math.ceil(rect.width / 48);
+        const newRows = Math.ceil(rect.height / 48);
+        grid.style.gridTemplateColumns = `repeat(${newCols}, 48px)`;
+        grid.style.gridTemplateRows = `repeat(${newRows}, 48px)`;
+        cols = newCols;
+        rows = newRows;
+        const total = cols * rows;
+        grid.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+          const tile = document.createElement('div');
+          tile.className = 'c-tile';
+          grid.appendChild(tile);
+        }
       }
 
-      // Recalculate grid on resize
-      window.addEventListener('resize', () => {
-        const newRect = grid.getBoundingClientRect();
-        const newCols = Math.ceil(newRect.width / 48);
-        const newRows = Math.ceil(newRect.height / 48);
-        if (newCols !== cols || newRows !== rows) {
-          grid.innerHTML = '';
-          grid.style.gridTemplateColumns = `repeat(${newCols}, 48px)`;
-          grid.style.gridTemplateRows = `repeat(${newRows}, 48px)`;
-          const newTotal = newCols * newRows;
-          for (let i = 0; i < newTotal; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'rainbow-cell';
-            cell.dataset.index = i;
+      buildGrid();
 
-            cell.addEventListener('mouseenter', () => {
-              cell.style.backgroundColor = RAINBOW_COLORS[rainbowColorIndex % RAINBOW_COLORS.length];
-              rainbowColorIndex++;
-            });
-
-            cell.addEventListener('mouseleave', () => {
-              cell.style.backgroundColor = 'transparent';
-            });
-
-            grid.appendChild(cell);
-          }
+      // Mouse move directly on page1 — calculates exact tile under cursor
+      page1.addEventListener('mousemove', (e) => {
+        const rect = grid.getBoundingClientRect();
+        const col = Math.floor((e.clientX - rect.left) / 48);
+        const row = Math.floor((e.clientY - rect.top) / 48);
+        if (col < 0 || col >= cols || row < 0 || row >= rows) return;
+        const index = row * cols + col;
+        const tile = grid.children[index];
+        if (tile) {
+          const color = PALETTE[colorIdx++ % PALETTE.length];
+          tile.style.transition = 'none';
+          tile.style.backgroundColor = color;
+          tile.style.boxShadow = `0 0 18px ${color}`;
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              tile.style.transition = 'background-color 1.2s ease-out, box-shadow 1.2s ease-out';
+              tile.style.backgroundColor = 'transparent';
+              tile.style.boxShadow = 'none';
+            }, 60);
+          });
         }
       });
+
+      window.addEventListener('resize', buildGrid);
     }
 
     // =====================================================================
-    // INTRO BOX COLLAPSE / EXPAND TOGGLE
+    // PERSONAL WINDOW MINIMIZE / EXPAND TOGGLE
     // =====================================================================
-    let introBoxCollapsed = false;
+    let windowCollapsed = false;
 
-    function toggleIntroBox() {
-      const box = document.getElementById('intro-box');
-      const toggle = document.getElementById('intro-toggle');
-      if (!box || !toggle) return;
+    function togglePersonalWindow() {
+      const box = document.getElementById('window-body');
+      const btn = document.getElementById('window-toggle');
+      if (!box || !btn) return;
 
-      introBoxCollapsed = !introBoxCollapsed;
-
-      if (introBoxCollapsed) {
-        box.classList.add('collapsed');
-        toggle.textContent = '+';
+      windowCollapsed = !windowCollapsed;
+      if (windowCollapsed) {
+        document.querySelector('.personal-window').classList.add('collapsed');
+        btn.textContent = '+';
       } else {
-        box.classList.remove('collapsed');
-        toggle.textContent = '—';
+        document.querySelector('.personal-window').classList.remove('collapsed');
+        btn.textContent = '—';
       }
     }
 
@@ -1947,7 +2074,11 @@
       renderSkills('all');
       initTiltCards();
       initHero3D();
-      initRainbowGrid();
+      initColoridoGrid();
+
+      // Wire up window toggle button
+      const btn = document.getElementById('window-toggle');
+      if (btn) btn.addEventListener('click', togglePersonalWindow);
     };
   </script>
 </body>

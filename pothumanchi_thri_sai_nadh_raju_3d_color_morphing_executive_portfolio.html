@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pothumanchi Thri Sai Nadh Raju — AI, Data Science & Full-Stack Portfolio</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js r128 for Real-Time Interactive 3D Neural/Data Sculpture -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Font Awesome & Phosphor Icons for crisp technical iconography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Space Grotesk, Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Dynamic Colorido Theme Engine Variables (Default: Cyber Emerald) */
+      --bg-primary: #060a0e;
+      --bg-secondary: #0c131a;
+      --bg-card: rgba(15, 23, 32, 0.72);
+      --bg-glass: rgba(10, 16, 23, 0.78);
+      --text-primary: #f3f7fa;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-primary: #10b981;
+      --accent-secondary: #06b6d4;
+      --accent-tertiary: #34d399;
+      --accent-rgb: 16, 185, 129;
+      --accent-sec-rgb: 6, 182, 212;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(16, 185, 129, 0.42);
+      --shadow-ambient: 0 20px 50px -15px rgba(16, 185, 129, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      selection-background-color: var(--accent-primary);
+    }
+
+    ::selection {
+      background: var(--accent-primary);
+      color: #05080b;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      transition: background-color 0.65s cubic-bezier(0.22, 1, 0.36, 1), color 0.5s ease;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .font-mono-tech {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Ambient Mesh Gradient Backdrop that morphs with theme */
+    .ambient-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(var(--accent-rgb), 0.15) 0%, transparent 42%),
+        radial-gradient(circle at 85% 28%, rgba(var(--accent-sec-rgb), 0.13) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(var(--accent-rgb), 0.10) 0%, transparent 50%);
+      transition: background 0.8s ease;
+    }
+
+    /* Architectural subtle grid pattern */
+    .bg-grid-pattern {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-size: 48px 48px;
+      background-image: 
+        linear-gradient(to right, var(--border-subtle) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px);
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 40%, transparent 100%);
+      opacity: 0.45;
+    }
+
+    /* Cursor Spotlight Follower */
+    #cursor-glow {
+      position: fixed;
+      width: 440px;
+      height: 440px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.13) 0%, rgba(var(--accent-sec-rgb), 0.05) 40%, transparent 70%);
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    /* 3D Tilt Card Surface & Glare */
+    .tilt-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.5s ease;
+      overflow: hidden;
+    }
+
+    .tilt-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-ambient);
+    }
+
+    .tilt-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        550px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(var(--accent-rgb), 0.16),
+        transparent 45%
+      );
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tilt-card:hover::before {
+      opacity: 1;
+    }
+
+    .tilt-content {
+      position: relative;
+      z-index: 2;
+      transform: translateZ(24px);
+    }
+
+    /* Dynamic Accent Utilities */
+    .text-accent {
+      color: var(--accent-primary);
+      transition: color 0.5s ease;
+    }
+
+    .text-gradient-accent {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 55%, var(--accent-tertiary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .bg-accent-solid {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: #04080b;
+    }
+
+    .border-accent-glow {
+      border-color: var(--border-glow);
+    }
+
+    .pill-badge {
+      background: rgba(var(--accent-rgb), 0.11);
+      border: 1px solid rgba(var(--accent-rgb), 0.32);
+      color: var(--accent-primary);
+      transition: all 0.35s ease;
+    }
+
+    .pill-badge:hover {
+      background: rgba(var(--accent-rgb), 0.22);
+      transform: translateY(-1px);
+    }
+
+    /* Infinite Marquee Ticker */
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .animate-marquee {
+      display: flex;
+      width: max-content;
+      animation: marquee 32s linear infinite;
+    }
+
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+
+    /* Scanner Laser Animation for Volt Intercept Live Preview */
+    @keyframes laserScan {
+      0%, 100% { top: 8%; opacity: 0.85; }
+      50% { top: 86%; opacity: 1; }
+    }
+
+    .scanner-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), #fff, var(--accent-secondary), transparent);
+      box-shadow: 0 0 16px 3px var(--accent-primary);
+      animation: laserScan 3.2s ease-in-out infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(var(--accent-rgb), 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    /* Theme swatch pulse */
+    .swatch-active {
+      outline: 2px solid var(--text-primary);
+      outline-offset: 3px;
+      transform: scale(1.15);
+    }
+
+    /* Glass Nav */
+    .glass-surface {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-emerald-400 selection:text-slate-950">
+
+  <!-- Ambient Colorido Background Layers -->
+  <div class="ambient-mesh"></div>
+  <div class="bg-grid-pattern"></div>
+  <div id="cursor-glow" class="hidden md:block"></div>
+
+  <!-- =====================================================================
+       TOP FLOATING EXECUTIVE NAVIGATION (Akshay Mehta + Colorido Fusion)
+  ====================================================================== -->
+  <header class="fixed top-4 inset-x-0 z-50 px-4 sm:px-6 lg:px-10">
+    <div class="max-w-7xl mx-auto glass-surface rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-2xl transition-all duration-500">
+      
+      <!-- Brand / Identity + Live Availability Dot -->
+      <a href="#hero" class="flex items-center gap-3 group">
+        <div class="relative w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-lg bg-accent-solid shadow-lg transition-transform duration-300 group-hover:scale-105">
+          <span>SN</span>
+          <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold tracking-tight text-sm sm:text-base" style="color: var(--text-primary);">Sai Nadh Raju</span>
+            <span class="hidden xl:inline-flex items-center gap-1.5 text-[11px] font-mono-tech px-2 py-0.5 rounded-full pill-badge">
+              <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
+              Open to Internships & AI Roles
+            </span>
+          </div>
+          <p class="text-[11px] font-mono-tech" style="color: var(--text-secondary);">CSE (Data Science) ’28 • 0→1 Builder</p>
+        </div>
+      </a>
+
+      <!-- Center Section Links (Akshay Mehta Editorial Style) -->
+      <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" style="color: var(--text-secondary);">
+        <a href="#work" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Case Studies</a>
+        <a href="#experience" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Experience</a>
+        <a href="#skills" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Architecture & Stack</a>
+        <a href="#arena" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">1000+ DSA & Hackathons</a>
+        <a href="#certifications" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Vault</a>
+      </nav>
+
+      <!-- Right Controls: Colorido Chroma Trigger + Resume + Contact -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Colorido Palette Indicator Pill -->
+        <button id="toggle-chroma-bar" title="Toggle Colorido Theme Dock" class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono-tech border transition-all hover:scale-105" style="border-color: var(--border-glow); background: rgba(var(--accent-rgb), 0.1);">
+          <i class="fa-solid fa-palette text-accent"></i>
+          <span id="active-theme-name" class="hidden sm:inline">Cyber Emerald</span>
+        </button>
+
+        <!-- Interactive Resume Modal Button -->
+        <button onclick="openResumeModal()" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition hover:bg-white/10 flex items-center gap-2" style="border-color: var(--border-subtle); color: var(--text-primary);">
+          <i class="fa-regular fa-file-lines text-accent"></i>
+          <span class="hidden sm:inline">Resume</span>
+        </button>
+
+        <!-- Primary CTA -->
+        <a href="#contact" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-accent-solid shadow-lg hover:opacity-95 transition transform hover:-translate-y-0.5 flex items-center gap-1.5">
+          <span>Let's Talk</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       FLOATING "COLORIDO 2026" CHROMA DOCK (BOTTOM INTERACTIVE CONTROLLER)
+  ====================================================================== -->
+  <div id="chroma-dock" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl glass-surface shadow-2xl flex items-center gap-3 sm:gap-4 transition-all duration-500 border" style="border-color: var(--border-glow);">
+    <div class="flex items-center gap-2 pr-2 border-r" style="border-color: var(--border-subtle);">
+      <span class="w-2 h-2 rounded-full bg-accent-solid animate-pulse"></span>
+      <span class="text-[11px] font-mono-tech uppercase tracking-wider hidden sm:inline" style="color: var(--text-secondary);">Colorido Engine</span>
+    </div>
+
+    <!-- 6 Curated Colorido Themes -->
+    <div class="flex items-center gap-2 sm:gap-2.5" id="theme-swatches">
+      <button onclick="setTheme('emerald', true)" data-theme="emerald" title="Cyber Emerald" class="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-400 transition-transform hover:scale-125 swatch-active"></button>
+      <button onclick="setTheme('violet', true)" data-theme="violet" title="Electric Violet" class="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-600 to-pink-500 transition-transform hover:scale-125"></button>
+      <button onclick="setTheme('solar', true)" data-theme="solar" title="Solar Flare" class="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-300 transition-transform hover:scale-125"></button>
+      <button onclick="setTheme('quantum', true)" data-theme="quantum" title="Quantum Cyan" class="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 transition-transform hover:scale-125"></button>
+      <button onclick="setTheme('crimson', true)" data-theme="crimson" title="Crimson Pulse" class="w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 to-orange-400 transition-transform hover:scale-125"></button>
+      <button onclick="setTheme('daylight', true)" data-theme="daylight" title="Daylight Editorial (Light)" class="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-100 via-white to-blue-500 border border-slate-400 transition-transform hover:scale-125"></button>
+    </div>
+
+    <!-- Custom Color Picker Wheel + Scroll-Morph Toggle -->
+    <div class="flex items-center gap-2 pl-2 border-l" style="border-color: var(--border-subtle);">
+      <label class="relative flex items-center cursor-pointer" title="Pick Any Custom Accent Color">
+        <input type="color" id="custom-color-picker" value="#10b981" class="sr-only" onchange="applyCustomHex(this.value)" oninput="applyCustomHex(this.value)" />
+        <span class="w-6 h-6 rounded-lg border flex items-center justify-center text-xs hover:scale-110 transition" style="border-color: var(--border-subtle); color: var(--text-primary);">
+          <i class="fa-solid fa-eye-dropper text-accent"></i>
+        </span>
+      </label>
+
+      <button id="scroll-morph-btn" onclick="toggleScrollMorph()" class="px-2.5 py-1 rounded-lg text-[11px] font-mono-tech flex items-center gap-1.5 pill-badge" title="Automatically morph theme colors as you scroll through sections">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span id="scroll-morph-label">Scroll-Morph: ON</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       HERO SECTION: 3D INTERACTIVE NEURAL SCULPTURE + EXECUTIVE STORYTELLING
+  ====================================================================== -->
+  <section id="hero" data-section-theme="emerald" class="relative min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-10 flex flex-col justify-between overflow-hidden">
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center my-auto">
+      
+      <!-- Left Column: High-Impact Typography & Executive Identity -->
+      <div class="lg:col-span-7 space-y-6 z-10">
+        
+        <!-- Location & Role Breadcrumb -->
+        <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full glass-surface text-xs font-mono-tech">
+          <span class="text-accent font-semibold">● POTHUMANCHI THRI SAI NADH RAJU</span>
+          <span style="color: var(--text-muted);">/</span>
+          <span style="color: var(--text-secondary);"><i class="fa-solid fa-location-dot mr-1 text-accent"></i>Guntur, AP, India</span>
+          <span style="color: var(--text-muted);">/</span>
+          <span class="text-accent">RVR & JC ’28</span>
+        </div>
+
+        <!-- Main Hero Headline (Inspired by Akshay Mehta's clarity & boldness) -->
+        <h1 class="font-display text-4xl sm:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.06]">
+          Engineering <span class="text-gradient-accent">intelligent AI vision</span>, data pipelines &amp; 0→1 products that <span class="underline decoration-2 underline-offset-8" style="text-decoration-color: var(--accent-primary);">ship fast.</span>
+        </h1>
+
+        <!-- Executive Bio Summary -->
+        <p class="text-base sm:text-lg leading-relaxed max-w-2xl" style="color: var(--text-secondary);">
+          Computer Science (<strong style="color: var(--text-primary);">Data Science</strong>) undergraduate with an entrepreneurial, hands-on approach to software engineering. From autonomous <strong style="color: var(--text-primary);">3D edge-vision safety systems</strong> and <strong style="color: var(--text-primary);">RAG legal workflows</strong> to enterprise <strong style="color: var(--text-primary);">Power BI-style analytics platforms</strong>—I architect, lead, and ship end-to-end MVPs.
+        </p>
+
+        <!-- Action CTA Row -->
+        <div class="flex flex-wrap items-center gap-3.5 pt-2">
+          <a href="#work" class="px-6 py-3.5 rounded-xl font-display font-bold text-sm sm:text-base bg-accent-solid shadow-xl hover:scale-[1.02] active:scale-[0.99] transition flex items-center gap-2.5">
+            <span>Explore Case Studies</span>
+            <i class="fa-solid fa-arrow-down-long"></i>
+          </a>
+
+          <button onclick="openCaseStudy('volt')" class="px-5 py-3.5 rounded-xl font-display font-semibold text-sm sm:text-base glass-surface hover:border-accent-glow transition flex items-center gap-2" style="color: var(--text-primary);">
+            <i class="fa-solid fa-cube text-accent"></i>
+            <span>Launch Volt Intercept 3D Sim</span>
+          </button>
+
+          <div class="flex items-center gap-2 pl-1">
+            <a href="https://github.com/sainadh09" target="_blank" rel="noopener noreferrer" title="GitHub Profile" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="https://linkedin.com/in/pothumanchi-thri-sai-nadh-raju" target="_blank" rel="noopener noreferrer" title="LinkedIn Profile" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-brands fa-linkedin-in"></i>
+            </a>
+            <button onclick="copyToClipboard('nadh8076@gmail.com', 'Email address copied!')" title="Copy Email: nadh8076@gmail.com" class="w-11 h-11 rounded-xl glass-surface flex items-center justify-center hover:text-accent hover:border-accent-glow transition text-lg">
+              <i class="fa-regular fa-envelope"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Live Telemetry KPI Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">1000+</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">DSA Problems Solved</div>
+              <div class="text-[11px] font-mono-tech mt-0.5 text-accent">CodeChef Diamond 💎</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">5x Lead</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Hackathon Team Lead</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">AWS • OpenAI • Police AI</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">4x</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Virtual Experience &amp; Internships</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">Google Cloud • Alteryx</div>
+            </div>
+          </div>
+
+          <div class="tilt-card rounded-2xl p-4">
+            <div class="tilt-content">
+              <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">Oracle</div>
+              <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Certified GenAI Pro</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">+7 Industry Credentials</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive 3D WebGL Neural Core Canvas + HUD Controls -->
+      <div class="lg:col-span-5 relative">
+        <div class="tilt-card rounded-3xl p-4 sm:p-5 border relative overflow-hidden" style="min-height: 470px;">
+          
+          <!-- Top HUD Overlay -->
+          <div class="relative z-10 flex items-center justify-between border-b pb-3 mb-2" style="border-color: var(--border-subtle);">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="text-xs font-mono-tech ml-2" style="color: var(--text-secondary);">NEURAL_CORE_3D.webgl</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="set3DShape('icosahedron')" id="shape-btn-icosahedron" class="px-2 py-0.5 rounded text-[10px] font-mono-tech pill-badge">Core</button>
+              <button onclick="set3DShape('torus')" id="shape-btn-torus" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">Torus</button>
+              <button onclick="set3DShape('helix')" id="shape-btn-helix" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">DNA/RAG</button>
+            </div>
+          </div>
+
+          <!-- Interactive Three.js Canvas Container -->
+          <div id="hero-3d-container" class="w-full h-[340px] sm:h-[370px] cursor-grab active:cursor-grabbing relative"></div>
+
+          <!-- Bottom Telemetry Overlay inside 3D Card -->
+          <div class="relative z-10 flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-[11px] font-mono-tech" style="border-color: var(--border-subtle); color: var(--text-secondary);">
+            <span><i class="fa-solid fa-hand-pointer text-accent mr-1"></i>Drag to rotate 3D mesh</span>
+            <span id="hud-coords" class="text-accent">ROT: 0.42 rad/s | SYNCED</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Infinite Role & Craft Marquee (Wall of Portfolios Signature Element) -->
+    <div class="mt-12 border-y py-3.5 overflow-hidden glass-surface -mx-4 sm:-mx-6 lg:-mx-10" style="border-color: var(--border-subtle);">
+      <div class="animate-marquee flex items-center gap-8 text-xs sm:text-sm font-mono-tech tracking-wider uppercase">
+        <span class="flex items-center gap-3"><i class="fa-solid fa-bolt text-accent"></i> AI &amp; Data Science Undergraduate</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-Microchip text-accent"></i> Generative AI &amp; RAG Pipelines</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-cubes text-accent"></i> React Three Fiber &amp; Edge Vision</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie text-accent"></i> Power BI-Style Executive Dashboards</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-code text-accent"></i> 1000+ DSA Problems (CodeChef Diamond)</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-trophy text-accent"></i> 5x Hackathon Team Leader</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-database text-accent"></i> SQL, MongoDB, Django &amp; FastAPI</span>
+        <!-- Duplicated for seamless loop -->
+        <span class="flex items-center gap-3"><i class="fa-solid fa-bolt text-accent"></i> AI &amp; Data Science Undergraduate</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-microchip text-accent"></i> Generative AI &amp; RAG Pipelines</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-cubes text-accent"></i> React Three Fiber &amp; Edge Vision</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-chart-pie text-accent"></i> Power BI-Style Executive Dashboards</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-code text-accent"></i> 1000+ DSA Problems (CodeChef Diamond)</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-trophy text-accent"></i> 5x Hackathon Team Leader</span>
+        <span class="flex items-center gap-3"><i class="fa-solid fa-database text-accent"></i> SQL, MongoDB, Django &amp; FastAPI</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       FEATURED CASE STUDIES (Akshay Mehta Storytelling + Live Interactive Sim)
+  ====================================================================== -->
+  <section id="work" data-section-theme="violet" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    
+    <!-- Section Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+          <span>01 // SELECTED PRODUCT CASE STUDIES</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+          Built from <span class="text-gradient-accent">0→1 under pressure.</span>
+        </h2>
+      </div>
+      <p class="max-w-md text-sm sm:text-base" style="color: var(--text-secondary);">
+        Every project is engineered end-to-end to solve high-stakes industrial, legal, emergency, or business intelligence challenges. Click any card for a full architectural breakdown.
+      </p>
+    </div>
+
+    <!-- Case Studies Grid -->
+    <div class="space-y-10">
+
+      <!-- CASE STUDY 1: VOLT INTERCEPT (Flagship Featured Bento with Live Scanner Sim) -->
+      <div class="tilt-card rounded-3xl p-6 sm:p-8 lg:p-10 border">
+        <div class="tilt-content grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- Left Narrative -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-mono-tech font-semibold bg-accent-solid">FLAGSHIP HACKATHON MVP</span>
+              <span class="px-3 py-1 rounded-full text-xs font-mono-tech pill-badge">Edge Computer Vision</span>
+              <span class="px-3 py-1 rounded-full text-xs font-mono-tech pill-badge">React Three Fiber 3D HUD</span>
+            </div>
+
+            <h3 class="font-display text-2xl sm:text-4xl font-bold">
+              Volt Intercept — AI-Powered Smart Manufacturing Safety System
+            </h3>
+
+            <p class="text-sm sm:text-base leading-relaxed" style="color: var(--text-secondary);">
+              An autonomous edge-vision safety platform deployed via <strong style="color: var(--text-primary);">Cloudflare Pages</strong> that detects and categorizes hazardous lithium-ion batteries on industrial recycling lines in real time to prevent catastrophic facility fires.
+            </p>
+
+            <!-- Impact & Architecture Bullets -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="p-3.5 rounded-2xl border" style="border-color: var(--border-subtle); background: rgba(255,255,255,0.02);">
+                <div class="text-xs font-mono-tech text-accent mb-1">01 / HOLOGRAPHIC 3D UI</div>
+                <p class="text-xs" style="color: var(--text-secondary);">Responsive Glassmorphism interface with a custom 3D spatial HUD built in React Three Fiber.</p>
+              </div>
+              <div class="p-3.5 rounded-2xl border" style="border-color: var(--border-subtle); background: rgba(255,255,255,0.02);">
+                <div class="text-xs font-mono-tech text-accent mb-1">02 / GEMINI VISION + AUTO-PDF</div>
+                <p class="text-xs" style="color: var(--text-secondary);">Real-time hazard classification via Gemini API with automated PDF incident report generation.</p>
+              </div>
+            </div>
+
+            <!-- Tech Stack Pills -->
+            <div class="flex flex-wrap gap-2 pt-1 text-xs font-mono-tech" style="color: var(--text-secondary);">
+              <span class="px-2.5 py-1 rounded-lg border" style="border-color: var(--border-subtle);">React.js</span>
+              <span class="px-2.5 py-1 rounded-lg border" style="border-color: var(--border-subtle);">React Three Fiber</span>
+              <span class="px-2.5 py-1 rounded-lg border" style="border-color: var(--border-subtle);">Gemini Vision API</span>
+              <span class="px-2.5 py-1 rounded-lg border" style="border-color: var(--border-subtle);">Cloudflare Pages Edge</span>
+              <span class="px-2.5 py-1 rounded-lg border" style="border-color: var(--border-subtle);">Automated PDF Reporting</span>
+            </div>
+
+            <!-- CTA Actions -->
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              <button onclick="openCaseStudy('volt')" class="px-5 py-2.5 rounded-xl font-display font-bold text-xs sm:text-sm bg-accent-solid shadow-lg hover:opacity-95 transition flex items-center gap-2">
+                <span>Read Deep-Dive Case Study</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <a href="https://github.com/sainadh09" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl font-mono-tech text-xs border hover:border-accent-glow transition flex items-center gap-2" style="border-color: var(--border-subtle);">
+                <i class="fa-brands fa-github"></i>
+                <span>Source &amp; Live Demo</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Interactive Preview: Simulated Li-Ion Hazard Edge-Vision HUD -->
+          <div class="lg:col-span-5">
+            <div class="rounded-2xl border p-4 relative overflow-hidden bg-slate-950/90 text-slate-100 shadow-2xl" style="border-color: var(--border-glow);">
+              <div class="scanner-line"></div>
+              <div class="flex items-center justify-between text-[11px] font-mono-tech mb-3 text-emerald-400">
+                <span><i class="fa-solid fa-satellite-dish animate-pulse mr-1"></i>EDGE_CAM_04 // CONVEYOR LINE B</span>
+                <span id="volt-status-badge" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40">HAZARD DETECTED</span>
+              </div>
+
+              <!-- Interactive Conveyor Simulation Box -->
+              <div id="volt-sim-screen" class="relative h-48 rounded-xl border border-emerald-500/20 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col items-center justify-center p-4 select-none">
+                <!-- Target Bounding Box -->
+                <div id="volt-bbox" class="w-48 h-28 border-2 border-rose-500 rounded-lg relative flex flex-col items-center justify-center bg-rose-500/10 transition-all duration-300">
+                  <span class="absolute -top-2.5 left-2 px-1.5 bg-rose-600 text-[9px] font-mono-tech font-bold rounded text-white" id="volt-cell-label">LI-ION SWOLLEN CELL (98.4%)</span>
+                  <i id="volt-cell-icon" class="fa-solid fa-car-battery text-3xl text-rose-400 mb-1 animate-bounce"></i>
+                  <span id="volt-temp-readout" class="text-[11px] font-mono-tech text-rose-300">THERMAL: 142.8°C • CRITICAL</span>
+                </div>
+              </div>
+
+              <!-- Interactive Trigger Controls inside Card -->
+              <div class="mt-3 flex items-center justify-between gap-2">
+                <button onclick="cycleVoltSample()" class="flex-1 py-2 px-3 rounded-lg text-xs font-mono-tech bg-white/10 hover:bg-white/15 text-white transition flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-rotate"></i>
+                  <span>Scan Next Cell on Line</span>
+                </button>
+                <button onclick="openCaseStudy('volt')" class="py-2 px-3 rounded-lg text-xs font-mono-tech pill-badge">
+                  <i class="fa-solid fa-file-pdf mr-1"></i>PDF Log
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SECONDARY CASE STUDIES BENTO ROW (Nyaya-Setu, Disaster Alert, Enterprise BI) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- CASE STUDY 2: NYAYA-SETU -->
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+          <div class="tilt-content space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">AWS "AI for Bharat" Shortlisted</span>
+              <i class="fa-solid fa-scale-balanced text-xl text-accent"></i>
+            </div>
+
+            <h3 class="font-display text-2xl font-bold">
+              Nyaya-Setu — AI Legal Enforcement Platform
+            </h3>
+
+            <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+              College Pre-Incubation project built to assist legal enforcement workflows, statutory cross-referencing, and rapid case synthesis using Retrieval-Augmented Generation (RAG).
+            </p>
+
+            <div class="flex flex-wrap gap-1.5 pt-2 text-[11px] font-mono-tech" style="color: var(--text-secondary);">
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Generative AI</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">RAG Workflow</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Python</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">LegalTech UX</span>
+            </div>
+          </div>
+
+          <div class="tilt-content pt-6 mt-6 border-t flex items-center justify-between" style="border-color: var(--border-subtle);">
+            <button onclick="openCaseStudy('nyaya')" class="text-xs font-mono-tech font-semibold text-accent hover:underline flex items-center gap-1.5">
+              <span>Inspect Architecture</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <a href="https://github.com/sainadh09" target="_blank" rel="noopener noreferrer" class="text-xs font-mono-tech hover:text-accent" style="color: var(--text-secondary);">
+              <i class="fa-brands fa-github text-base"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- CASE STUDY 3: AI DISASTER ALERT APPLICATION -->
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+          <div class="tilt-content space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">NextWave x OpenAI Academy</span>
+              <i class="fa-solid fa-tower-broadcast text-xl text-accent"></i>
+            </div>
+
+            <h3 class="font-display text-2xl font-bold">
+              AI-Based Disaster Alert &amp; Crisis Triage
+            </h3>
+
+            <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+              Selected for the State-Level Hackathon on innovation &amp; problem impact. Engineered around zero-hallucination reliability, high-clarity crisis UX, and responsible AI guardrails.
+            </p>
+
+            <div class="flex flex-wrap gap-1.5 pt-2 text-[11px] font-mono-tech" style="color: var(--text-secondary);">
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">OpenAI APIs</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Responsible AI</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Real-Time Triage</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Crisis UX</span>
+            </div>
+          </div>
+
+          <div class="tilt-content pt-6 mt-6 border-t flex items-center justify-between" style="border-color: var(--border-subtle);">
+            <button onclick="openCaseStudy('disaster')" class="text-xs font-mono-tech font-semibold text-accent hover:underline flex items-center gap-1.5">
+              <span>Inspect Architecture</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <a href="https://github.com/sainadh09" target="_blank" rel="noopener noreferrer" class="text-xs font-mono-tech hover:text-accent" style="color: var(--text-secondary);">
+              <i class="fa-brands fa-github text-base"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- CASE STUDY 4: ENTERPRISE BI & GENAI SUITE -->
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+          <div class="tilt-content space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">Full-Stack + BI Capstone</span>
+              <i class="fa-solid fa-chart-line text-xl text-accent"></i>
+            </div>
+
+            <h3 class="font-display text-2xl font-bold">
+              Enterprise BI &amp; GenAI Evaluation Suite
+            </h3>
+
+            <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+              Full-stack Django + React.js platform that ingests raw company datasets, runs automated ETL &amp; Pandas analytics, and renders Power BI-style interactive executive dashboards.
+            </p>
+
+            <div class="flex flex-wrap gap-1.5 pt-2 text-[11px] font-mono-tech" style="color: var(--text-secondary);">
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Django + React</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Power BI Dashboards</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">Pandas &amp; NumPy</span>
+              <span class="px-2 py-0.5 rounded border" style="border-color: var(--border-subtle);">SQL &amp; MongoDB</span>
+            </div>
+          </div>
+
+          <div class="tilt-content pt-6 mt-6 border-t flex items-center justify-between" style="border-color: var(--border-subtle);">
+            <button onclick="openCaseStudy('bi')" class="text-xs font-mono-tech font-semibold text-accent hover:underline flex items-center gap-1.5">
+              <span>Inspect Architecture</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <a href="https://github.com/sainadh09" target="_blank" rel="noopener noreferrer" class="text-xs font-mono-tech hover:text-accent" style="color: var(--text-secondary);">
+              <i class="fa-brands fa-github text-base"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       EXPERIENCE & VIRTUAL FELLOWSHIPS TIMELINE (Google Cloud, Alteryx, EduSkills)
+  ====================================================================== -->
+  <section id="experience" data-section-theme="solar" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+          <span>02 // INDUSTRY VIRTUAL EXPERIENCE &amp; INTERNSHIPS</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+          Proven across <span class="text-gradient-accent">4 intensive tracks.</span>
+        </h2>
+      </div>
+      <p class="max-w-md text-sm sm:text-base" style="color: var(--text-secondary);">
+        Hands-on execution in Generative AI, enterprise data analytics, full-stack product engineering, and relational/NoSQL database optimization.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- EXP 1: Google Cloud -->
+      <div class="tilt-card rounded-3xl p-6 sm:p-8">
+        <div class="tilt-content space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl pill-badge">
+                <i class="fa-brands fa-google"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-xl font-bold">Generative AI &amp; Data Analytics</h3>
+                <p class="text-xs font-mono-tech text-accent">Google Cloud (AICTE &amp; Forage, Remote)</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech border shrink-0" style="border-color: var(--border-subtle); color: var(--text-secondary);">6 Months</span>
+          </div>
+
+          <ul class="space-y-2.5 text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Applied Generative AI techniques to accelerate analytics workflows, designing structured prompts for executive data summarization and automated insight generation.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Evaluated AI-generated outputs for factual correctness, relevance, bias mitigation, and usability across multiple enterprise Forage simulations.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EXP 2: Alteryx -->
+      <div class="tilt-card rounded-3xl p-6 sm:p-8">
+        <div class="tilt-content space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl pill-badge">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-xl font-bold">Data Analytics Virtual Experience</h3>
+                <p class="text-xs font-mono-tech text-accent">Alteryx (AICTE EduSkills, Remote)</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech border shrink-0" style="border-color: var(--border-subtle); color: var(--text-secondary);">10 Weeks</span>
+          </div>
+
+          <ul class="space-y-2.5 text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Interpreted complex business datasets to uncover growth trends and KPIs, cleaning and structuring raw data with Python-based analytical pipelines.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Built visual executive summaries and BI reporting artifacts to drive data-backed decision-making.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EXP 3: Python Fullstack & Startup Track -->
+      <div class="tilt-card rounded-3xl p-6 sm:p-8">
+        <div class="tilt-content space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl pill-badge">
+                <i class="fa-solid fa-rocket"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-xl font-bold">Python Fullstack &amp; Entrepreneurship</h3>
+                <p class="text-xs font-mono-tech text-accent">EduSkills (AICTE, Remote)</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech border shrink-0" style="border-color: var(--border-subtle); color: var(--text-secondary);">10 Weeks</span>
+          </div>
+
+          <ul class="space-y-2.5 text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Built full-stack capstone applications with <strong>Django</strong> (backend) and <strong>React.js</strong> (frontend) that ingest enterprise data and present Power BI-style analytics dashboards.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Completed an intensive startup track covering ideation, market validation, business model canvas, and go-to-market strategy.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EXP 4: SQL & DBMS Internship -->
+      <div class="tilt-card rounded-3xl p-6 sm:p-8">
+        <div class="tilt-content space-y-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl pill-badge">
+                <i class="fa-solid fa-database"></i>
+              </div>
+              <div>
+                <h3 class="font-display text-xl font-bold">SQL &amp; Database Management Internship</h3>
+                <p class="text-xs font-mono-tech text-accent">EduSkills Academy (Remote)</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech border shrink-0" style="border-color: var(--border-subtle); color: var(--text-secondary);">8 Weeks</span>
+          </div>
+
+          <ul class="space-y-2.5 text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Designed normalized relational (SQL) and NoSQL (MongoDB) schemas, engineered ETL pipelines, and integrated REST APIs via Node.js, Express, Python, and FastAPI.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <i class="fa-solid fa-check text-accent mt-1"></i>
+              <span>Applied query performance indexing and security hardening to ship a complete Library Management System capstone project.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       INTERACTIVE ARCHITECTURE & TECHNICAL SKILL MATRIX
+  ====================================================================== -->
+  <section id="skills" data-section-theme="quantum" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+          <span>03 // TECHNICAL ARSENAL &amp; SYSTEM ARCHITECTURE</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+          Full-Spectrum <span class="text-gradient-accent">Data, AI &amp; Web Stack.</span>
+        </h2>
+      </div>
+
+      <!-- Interactive Category Filter Buttons -->
+      <div class="flex flex-wrap gap-2" id="skill-filters">
+        <button onclick="filterSkills('all')" data-filter="all" class="px-3.5 py-1.5 rounded-xl text-xs font-mono-tech bg-accent-solid font-bold transition">All Domains (28)</button>
+        <button onclick="filterSkills('ai')" data-filter="ai" class="px-3.5 py-1.5 rounded-xl text-xs font-mono-tech glass-surface hover:border-accent-glow transition">Data Science, BI &amp; GenAI</button>
+        <button onclick="filterSkills('fullstack')" data-filter="fullstack" class="px-3.5 py-1.5 rounded-xl text-xs font-mono-tech glass-surface hover:border-accent-glow transition">Full-Stack &amp; DBs</button>
+        <button onclick="filterSkills('core')" data-filter="core" class="px-3.5 py-1.5 rounded-xl text-xs font-mono-tech glass-surface hover:border-accent-glow transition">Languages &amp; Core CS</button>
+      </div>
+    </div>
+
+    <!-- Interactive Skill Matrix Grid -->
+    <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+      <!-- Dynamically populated by JS for crisp filtering & 3D tilt -->
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       COMPETITIVE PROGRAMMING (1000+ DSA) & 5x HACKATHON LEADERSHIP ARENA
+  ====================================================================== -->
+  <section id="arena" data-section-theme="crimson" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+          <span>04 // COMPETITIVE ARENA &amp; LEADERSHIP</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+          1000+ DSA Solved &amp; <span class="text-gradient-accent">5x Hackathon Lead.</span>
+        </h2>
+      </div>
+      <p class="max-w-md text-sm sm:text-base" style="color: var(--text-secondary);">
+        Sustained algorithmic discipline paired with high-velocity hackathon execution—leading teams under tight deadlines to ship working prototypes.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Bento: 1000+ Problems Solved Breakdown -->
+      <div class="lg:col-span-5 tilt-card rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
+        <div class="tilt-content space-y-6">
+          <div class="flex items-center justify-between">
+            <span class="px-3 py-1 rounded-full text-xs font-mono-tech pill-badge">ALGORITHMIC MASTERY</span>
+            <span class="text-2xl">💎</span>
+          </div>
+
+          <div>
+            <div class="text-4xl sm:text-6xl font-display font-bold text-gradient-accent">1,000+</div>
+            <p class="text-sm sm:text-base font-medium mt-1">Cumulative DSA Problems Solved in Python, Java &amp; C</p>
+          </div>
+
+          <!-- Platform Breakdown Bars -->
+          <div class="space-y-4 pt-2">
+            <div>
+              <div class="flex justify-between text-xs font-mono-tech mb-1">
+                <span class="font-bold">CodeChef (Diamond Badge 💎)</span>
+                <span class="text-accent">Top Tier Milestone</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full rounded-full bg-accent-solid" style="width: 92%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono-tech mb-1">
+                <span class="font-bold">LeetCode &amp; NeetCode 150</span>
+                <span class="text-accent">Arrays, Trees, Graphs, DP</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full rounded-full bg-accent-solid" style="width: 86%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-mono-tech mb-1">
+                <span class="font-bold">Google Prompt Wars Event</span>
+                <span class="text-accent">Certificate of Appreciation</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full rounded-full bg-accent-solid" style="width: 95%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tilt-content pt-6 mt-6 border-t text-xs font-mono-tech flex items-center justify-between" style="border-color: var(--border-subtle); color: var(--text-secondary);">
+          <span>B.Tech CSE (Data Science) • RVR &amp; JC College</span>
+          <span class="text-accent">Class of 2028</span>
+        </div>
+      </div>
+
+      <!-- Right Bento: 5x Hackathon Leadership Showcase -->
+      <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        
+        <div class="tilt-card rounded-2xl p-5">
+          <div class="tilt-content space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono-tech text-accent">01 // FORENSIC AI</span>
+              <i class="fa-solid fa-shield-halved text-accent"></i>
+            </div>
+            <h4 class="font-display font-bold text-lg">Ananthapur Police AI Hackathon</h4>
+            <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+              Led team to scope and ship a working forensic research AI MVP under strict law-enforcement evaluation criteria.
+            </p>
+          </div>
+        </div>
+
+        <div class="tilt-card rounded-2xl p-5">
+          <div class="tilt-content space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono-tech text-accent">02 // SMART MOBILITY</span>
+              <i class="fa-solid fa-truck-medical text-accent"></i>
+            </div>
+            <h4 class="font-display font-bold text-lg">VVIT National Hackathon</h4>
+            <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+              Engineered a Smart-Ambulance Traffic-Coordination prototype to dynamically clear emergency green corridors.
+            </p>
+          </div>
+        </div>
+
+        <div class="tilt-card rounded-2xl p-5">
+          <div class="tilt-content space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono-tech text-accent">03 // GLOBAL SHORTLIST</span>
+              <i class="fa-brands fa-aws text-accent"></i>
+            </div>
+            <h4 class="font-display font-bold text-lg">AWS "AI for Bharat" Global Hackathon</h4>
+            <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+              Shortlisted nationally for Nyaya-Setu, an AI-powered legal enforcement workflow and statutory assistant.
+            </p>
+          </div>
+        </div>
+
+        <div class="tilt-card rounded-2xl p-5">
+          <div class="tilt-content space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono-tech text-accent">04 // RAPID DEPLOYMENT</span>
+              <i class="fa-solid fa-award text-accent"></i>
+            </div>
+            <h4 class="font-display font-bold text-lg">DEPLOY-IT Mini Hackathon (RVR &amp; JC)</h4>
+            <p class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+              Awarded Certificate of Appreciation; active member of the College Pre-Incubation Center shipping rapid MVPs.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       VERIFIED CERTIFICATIONS VAULT
+  ====================================================================== -->
+  <section id="certifications" class="py-16 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    <div class="mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+        <span>05 // VERIFIED CREDENTIALS &amp; CERTIFICATIONS</span>
+      </div>
+      <h2 class="font-display text-2xl sm:text-4xl font-bold">
+        Industry-Validated <span class="text-gradient-accent">Certifications Vault.</span>
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="tilt-card rounded-2xl p-5">
+        <div class="tilt-content">
+          <div class="text-xs font-mono-tech text-accent mb-1">ORACLE UNIVERSITY</div>
+          <h4 class="font-display font-bold text-base">Oracle Certified Generative AI Professional</h4>
+          <p class="text-xs mt-2" style="color: var(--text-secondary);">LLMs, OCI GenAI Service, RAG &amp; Semantic Search</p>
+        </div>
+      </div>
+
+      <div class="tilt-card rounded-2xl p-5">
+        <div class="tilt-content">
+          <div class="text-xs font-mono-tech text-accent mb-1">IBM</div>
+          <h4 class="font-display font-bold text-base">Data Analysis with Python</h4>
+          <p class="text-xs mt-2" style="color: var(--text-secondary);">Pandas, NumPy, Exploratory Data Analysis &amp; Modeling</p>
+        </div>
+      </div>
+
+      <div class="tilt-card rounded-2xl p-5">
+        <div class="tilt-content">
+          <div class="text-xs font-mono-tech text-accent mb-1">DELOITTE AUSTRALIA</div>
+          <h4 class="font-display font-bold text-base">Data Analytics Job Simulation</h4>
+          <p class="text-xs mt-2" style="color: var(--text-secondary);">Enterprise forensic data analysis &amp; client storytelling</p>
+        </div>
+      </div>
+
+      <div class="tilt-card rounded-2xl p-5">
+        <div class="tilt-content">
+          <div class="text-xs font-mono-tech text-accent mb-1">NEXT WAVE &amp; INFOSYS</div>
+          <h4 class="font-display font-bold text-base">GenAI Mastery + DBMS, Python &amp; SQL</h4>
+          <p class="text-xs mt-2" style="color: var(--text-secondary);">Infosys Springboard, CodeChef UX &amp; EduSkills DBMS</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       CONTACT & EXECUTIVE FOOTER (Akshay Mehta Signature Style)
+  ====================================================================== -->
+  <footer id="contact" class="pt-20 pb-28 px-4 sm:px-6 lg:px-10 border-t mt-16" style="border-color: var(--border-subtle);">
+    <div class="max-w-7xl mx-auto">
+      <div class="tilt-card rounded-3xl p-8 sm:p-12 lg:p-14 border text-center relative overflow-hidden">
+        <div class="tilt-content max-w-3xl mx-auto space-y-6">
+          <span class="px-3.5 py-1.5 rounded-full text-xs font-mono-tech pill-badge">
+            ● READY TO SHIP YOUR NEXT AI OR DATA MVP
+          </span>
+
+          <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+            Let’s build something <span class="text-gradient-accent">extraordinary together.</span>
+          </h2>
+
+          <p class="text-sm sm:text-base max-w-xl mx-auto" style="color: var(--text-secondary);">
+            Available for AI/ML, Data Science, Analytics, and Full-Stack Software Engineering internships, freelance MVPs, and hackathon collaborations.
+          </p>
+
+          <!-- One-Click Copy & Direct Contact Pills -->
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
+            <button onclick="copyToClipboard('nadh8076@gmail.com', 'Copied email: nadh8076@gmail.com')" class="px-5 py-3.5 rounded-xl font-mono-tech text-xs sm:text-sm bg-accent-solid font-bold shadow-xl hover:scale-105 transition flex items-center gap-2">
+              <i class="fa-regular fa-copy"></i>
+              <span>nadh8076@gmail.com</span>
+            </button>
+
+            <button onclick="copyToClipboard('+91 8919242206', 'Copied phone: +91 8919242206')" class="px-5 py-3.5 rounded-xl font-mono-tech text-xs sm:text-sm glass-surface hover:border-accent-glow transition flex items-center gap-2">
+              <i class="fa-solid fa-phone text-accent"></i>
+              <span>+91 8919242206</span>
+            </button>
+
+            <button onclick="openResumeModal()" class="px-5 py-3.5 rounded-xl font-mono-tech text-xs sm:text-sm glass-surface hover:border-accent-glow transition flex items-center gap-2">
+              <i class="fa-regular fa-file-pdf text-accent"></i>
+              <span>View Full Interactive Resume</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Credits Bar -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono-tech" style="color: var(--text-secondary);">
+        <div>
+          © 2026 Pothumanchi Thri Sai Nadh Raju ● Guntur, Andhra Pradesh, India
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Engineered with 0→1 Hustle 🚀, Clean Data 📊 &amp; Colorido 3D Shaders ✨</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       MODAL 1: AKSHAY MEHTA-STYLE DEEP-DIVE CASE STUDY DRAWER
+  ====================================================================== -->
+  <div id="case-study-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+    <div class="glass-surface rounded-3xl max-w-3xl w-full max-h-[88vh] overflow-y-auto p-6 sm:p-8 border shadow-2xl relative" style="border-color: var(--border-glow);">
+      <button onclick="closeCaseStudy()" class="sticky top-2 float-right w-10 h-10 rounded-xl glass-surface flex items-center justify-center hover:text-accent transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div id="case-study-content" class="space-y-6"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: FULL INTERACTIVE RESUME VIEWER (FROM UPLOADED PDF)
+  ====================================================================== -->
+  <div id="resume-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+    <div class="glass-surface rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-10 border shadow-2xl relative" style="border-color: var(--border-glow);">
+      <div class="flex items-center justify-between border-b pb-4 mb-6" style="border-color: var(--border-subtle);">
+        <div>
+          <span class="text-xs font-mono-tech text-accent">VERIFIED CURRICULUM VITAE</span>
+          <h3 class="font-display text-2xl font-bold">Pothumanchi Thri Sai Nadh Raju</h3>
+          <p class="text-xs font-mono-tech" style="color: var(--text-secondary);">Guntur, AP, India | 8919242206 | nadh8076@gmail.com</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl text-xs font-mono-tech bg-accent-solid font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i>
+            <span>Print / Save PDF</span>
+          </button>
+          <button onclick="closeResumeModal()" class="w-10 h-10 rounded-xl glass-surface flex items-center justify-center hover:text-accent">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-6 text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
+        <div>
+          <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Summary</h4>
+          <p>Computer Science (Data Science) undergraduate with a hands-on, entrepreneurial approach to software development: builds and ships side projects and hackathon MVPs end-to-end, learns new tools quickly, and has hands-on experience in data processing, analytics, databases, BI reporting and AI Tools.</p>
+        </div>
+
+        <div>
+          <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Education</h4>
+          <div class="flex justify-between font-semibold" style="color: var(--text-primary);">
+            <span>RVR &amp; JC College of Engineering — B.Tech in CSE (Data Science)</span>
+            <span>Expected 2028 | Guntur, AP</span>
+          </div>
+          <p class="mt-1">Relevant Coursework: Data Structures &amp; Algorithms, Object-Oriented Programming, Database Systems (SQL/DBMS), Artificial Intelligence, Machine Learning, Generative AI &amp; RAG, Frontend Development, Data Analytics, Power BI.</p>
+        </div>
+
+        <div>
+          <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Technical Skills</h4>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><strong style="color: var(--text-primary);">Languages:</strong> Python, Java, C, JavaScript, SQL, HTML, CSS</li>
+            <li><strong style="color: var(--text-primary);">Frameworks &amp; Tools:</strong> React, Django, Node.js, Express, FastAPI, Supabase, Git, Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn, UX</li>
+            <li><strong style="color: var(--text-primary);">Databases, BI &amp; AI:</strong> SQL, Relational DB Design, MongoDB, Database Performance Optimization &amp; Security, Power BI-style Dashboards, Generative AI, Prompt Engineering, RAG, Claude, ChatGPT, Vibe Coding</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Experience &amp; Virtual Internships</h4>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><strong style="color: var(--text-primary);">Google Cloud (AICTE &amp; Forage, 6 Months):</strong> Generative AI &amp; Data Analytics Virtual Experience — Applied GenAI to enhance analytics workflows and evaluated outputs for accuracy &amp; relevance.</li>
+            <li><strong style="color: var(--text-primary);">Alteryx (AICTE EduSkills, 10 Weeks):</strong> Data Analytics Virtual Experience — Cleaned and structured business datasets in Python to surface KPIs and visual summaries.</li>
+            <li><strong style="color: var(--text-primary);">EduSkills (AICTE, 10 Weeks):</strong> Python Fullstack Development &amp; Startup Entrepreneurship — Built Django + React.js BI dashboard capstones and completed startup GTM validation track.</li>
+            <li><strong style="color: var(--text-primary);">EduSkills Academy (8 Weeks):</strong> SQL &amp; DBMS Internship — Engineered SQL/MongoDB schemas, ETL pipelines, REST APIs (Node.js/FastAPI), and a Library Management System.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Leadership &amp; Achievements</h4>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Team Leader in 5 hackathons (Ananthapur Police AI Hackathon, VVIT National Hackathon Smart-Ambulance prototype, DEPLOY-IT Mini Hackathon, AWS AI for Bharat, NextWave x OpenAI Academy).</li>
+            <li>Solved 1000+ problems cumulatively on CodeChef (Diamond Badge), LeetCode, and NeetCode in Python, Java, and C.</li>
+            <li>Oracle Certified Generative AI Professional &amp; Certificate of Appreciation from Google Prompt Wars.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl bg-accent-solid font-mono-tech text-xs font-bold shadow-2xl transform translate-x-96 transition-transform duration-300">
+    Copied to clipboard!
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT: COLORIDO THEME ENGINE, THREE.JS 3D SCULPTURE, TILT & MODALS
+  ====================================================================== -->
+  <script>
+    // 1. COLORIDO 2026 THEME PALETTE DEFINITIONS
+    const THEMES = {
+      emerald: {
+        name: 'Cyber Emerald',
+        bgPrimary: '#060a0e',
+        bgSecondary: '#0c131a',
+        bgCard: 'rgba(14, 23, 32, 0.72)',
+        bgGlass: 'rgba(9, 15, 22, 0.80)',
+        textPrimary: '#f3f7fa',
+        textSecondary: '#94a3b8',
+        accentPrimary: '#10b981',
+        accentSecondary: '#06b6d4',
+        accentTertiary: '#34d399',
+        accentRgb: '16, 185, 129',
+        accentSecRgb: '6, 182, 212',
+        borderSubtle: 'rgba(255, 255, 255, 0.08)',
+        threeColor1: 0x10b981,
+        threeColor2: 0x06b6d4
+      },
+      violet: {
+        name: 'Electric Violet',
+        bgPrimary: '#080612',
+        bgSecondary: '#120e24',
+        bgCard: 'rgba(22, 16, 42, 0.72)',
+        bgGlass: 'rgba(13, 10, 26, 0.80)',
+        textPrimary: '#f8f5ff',
+        textSecondary: '#a79ec7',
+        accentPrimary: '#a855f7',
+        accentSecondary: '#ec4899',
+        accentTertiary: '#c084fc',
+        accentRgb: '168, 85, 247',
+        accentSecRgb: '236, 72, 153',
+        borderSubtle: 'rgba(255, 255, 255, 0.08)',
+        threeColor1: 0xa855f7,
+        threeColor2: 0xec4899
+      },
+      solar: {
+        name: 'Solar Flare',
+        bgPrimary: '#0c0806',
+        bgSecondary: '#18100c',
+        bgCard: 'rgba(29, 19, 14, 0.74)',
+        bgGlass: 'rgba(18, 12, 9, 0.82)',
+        textPrimary: '#fffaf5',
+        textSecondary: '#bba699',
+        accentPrimary: '#f97316',
+        accentSecondary: '#eab308',
+        accentTertiary: '#fb923c',
+        accentRgb: '249, 115, 22',
+        accentSecRgb: '234, 179, 8',
+        borderSubtle: 'rgba(255, 255, 255, 0.08)',
+        threeColor1: 0xf97316,
+        threeColor2: 0xeab308
+      },
+      quantum: {
+        name: 'Quantum Cyan',
+        bgPrimary: '#040914',
+        bgSecondary: '#0a1528',
+        bgCard: 'rgba(12, 24, 46, 0.72)',
+        bgGlass: 'rgba(7, 15, 30, 0.80)',
+        textPrimary: '#f0f7ff',
+        textSecondary: '#8da9c4',
+        accentPrimary: '#06b6d4',
+        accentSecondary: '#3b82f6',
+        accentTertiary: '#38bdf8',
+        accentRgb: '6, 182, 212',
+        accentSecRgb: '59, 130, 246',
+        borderSubtle: 'rgba(255, 255, 255, 0.08)',
+        threeColor1: 0x06b6d4,
+        threeColor2: 0x3b82f6
+      },
+      crimson: {
+        name: 'Crimson Pulse',
+        bgPrimary: '#0d0608',
+        bgSecondary: '#190b10',
+        bgCard: 'rgba(31, 14, 20, 0.74)',
+        bgGlass: 'rgba(20, 9, 13, 0.82)',
+        textPrimary: '#fff5f7',
+        textSecondary: '#b8949e',
+        accentPrimary: '#f43f5e',
+        accentSecondary: '#fb7185',
+        accentTertiary: '#fda4af',
+        accentRgb: '244, 63, 94',
+        accentSecRgb: '251, 113, 133',
+        borderSubtle: 'rgba(255, 255, 255, 0.08)',
+        threeColor1: 0xf43f5e,
+        threeColor2: 0xfb7185
+      },
+      daylight: {
+        name: 'Daylight Editorial',
+        bgPrimary: '#f8f6f2',
+        bgSecondary: '#ede9e1',
+        bgCard: 'rgba(255, 255, 255, 0.86)',
+        bgGlass: 'rgba(250, 248, 244, 0.88)',
+        textPrimary: '#0f172a',
+        textSecondary: '#475569',
+        accentPrimary: '#2563eb',
+        accentSecondary: '#0d9488',
+        accentTertiary: '#3b82f6',
+        accentRgb: '37, 99, 235',
+        accentSecRgb: '13, 148, 136',
+        borderSubtle: 'rgba(15, 23, 42, 0.11)',
+        threeColor1: 0x2563eb,
+        threeColor2: 0x0d9488
+      }
+    };
+
+    let currentThemeKey = 'emerald';
+    let scrollMorphEnabled = true;
+
+    function setTheme(themeKey, manualLock = false) {
+      const t = THEMES[themeKey];
+      if (!t) return;
+      currentThemeKey = themeKey;
+
+      if (manualLock && scrollMorphEnabled) {
+        // Keep scroll morph active unless user clicks a theme while wanting to inspect it
+      }
+
+      const root = document.documentElement;
+      root.style.setProperty('--bg-primary', t.bgPrimary);
+      root.style.setProperty('--bg-secondary', t.bgSecondary);
+      root.style.setProperty('--bg-card', t.bgCard);
+      root.style.setProperty('--bg-glass', t.bgGlass);
+      root.style.setProperty('--text-primary', t.textPrimary);
+      root.style.setProperty('--text-secondary', t.textSecondary);
+      root.style.setProperty('--accent-primary', t.accentPrimary);
+      root.style.setProperty('--accent-secondary', t.accentSecondary);
+      root.style.setProperty('--accent-tertiary', t.accentTertiary);
+      root.style.setProperty('--accent-rgb', t.accentRgb);
+      root.style.setProperty('--accent-sec-rgb', t.accentSecRgb);
+      root.style.setProperty('--border-subtle', t.borderSubtle);
+      root.style.setProperty('--border-glow', `rgba(${t.accentRgb}, 0.45)`);
+      root.style.setProperty('--shadow-ambient', `0 20px 50px -15px rgba(${t.accentRgb}, 0.22)`);
+
+      document.getElementById('active-theme-name').textContent = t.name;
+
+      // Update active swatch ring
+      document.querySelectorAll('#theme-swatches button').forEach(btn => {
+        if (btn.dataset.theme === themeKey) {
+          btn.classList.add('swatch-active');
+        } else {
+          btn.classList.remove('swatch-active');
+        }
+      });
+
+      // Update Three.js 3D material colors smoothly
+      if (window.updateThreeColors) {
+        window.updateThreeColors(t.threeColor1, t.threeColor2);
+      }
+    }
+
+    function applyCustomHex(hex) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const root = document.documentElement;
+      root.style.setProperty('--accent-primary', hex);
+      root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+      root.style.setProperty('--border-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
+      document.getElementById('active-theme-name').textContent = `Custom (${hex.toUpperCase()})`;
+      if (window.updateThreeColors) {
+        window.updateThreeColors(parseInt(hex.replace('#', '0x')), 0x06b6d4);
+      }
+    }
+
+    function toggleScrollMorph() {
+      scrollMorphEnabled = !scrollMorphEnabled;
+      const label = document.getElementById('scroll-morph-label');
+      label.textContent = `Scroll-Morph: ${scrollMorphEnabled ? 'ON' : 'OFF'}`;
+    }
+
+    // Toggle Chroma Dock visibility from top nav
+    document.getElementById('toggle-chroma-bar').addEventListener('click', () => {
+      const dock = document.getElementById('chroma-dock');
+      dock.classList.toggle('translate-y-28');
+    });
+
+    // Scroll-triggered Colorido Theme Morphing across sections
+    window.addEventListener('scroll', () => {
+      if (!scrollMorphEnabled) return;
+      const sections = document.querySelectorAll('section[data-section-theme]');
+      const scrollPos = window.scrollY + window.innerHeight * 0.38;
+      sections.forEach(sec => {
+        const top = sec.offsetTop;
+        const height = sec.offsetHeight;
+        if (scrollPos >= top && scrollPos < top + height) {
+          const targetTheme = sec.getAttribute('data-section-theme');
+          if (targetTheme && targetTheme !== currentThemeKey) {
+            setTheme(targetTheme, false);
+          }
+        }
+      });
+    }, { passive: true });
+
+    // 2. SKILLS MATRIX DATA & INTERACTIVE FILTERING
+    const SKILLS_DATA = [
+      { name: 'Python', cat: 'core', icon: 'fa-brands fa-python', level: 'Primary Language' },
+      { name: 'Java', cat: 'core', icon: 'fa-brands fa-java', level: 'DSA & Backend' },
+      { name: 'C Language', cat: 'core', icon: 'fa-solid fa-microchip', level: 'Systems & DSA' },
+      { name: 'JavaScript (ES6+)', cat: 'fullstack', icon: 'fa-brands fa-js', level: 'Interactive Web' },
+      { name: 'SQL', cat: 'fullstack', icon: 'fa-solid fa-database', level: 'Query Optimization' },
+      { name: 'React.js', cat: 'fullstack', icon: 'fa-brands fa-react', level: 'Frontend & 3D HUD' },
+      { name: 'Django', cat: 'fullstack', icon: 'fa-solid fa-server', level: 'Full-Stack Capstone' },
+      { name: 'FastAPI', cat: 'fullstack', icon: 'fa-solid fa-bolt', level: 'High-Speed AI APIs' },
+      { name: 'Node.js & Express', cat: 'fullstack', icon: 'fa-brands fa-node-js', level: 'REST Microservices' },
+      { name: 'Supabase & MongoDB', cat: 'fullstack', icon: 'fa-solid fa-leaf', level: 'NoSQL & Realtime' },
+      { name: 'Generative AI & LLMs', cat: 'ai', icon: 'fa-solid fa-brain', level: 'Oracle Certified Pro' },
+      { name: 'RAG Pipelines', cat: 'ai', icon: 'fa-solid fa-network-wired', level: 'Nyaya-Setu & Docs' },
+      { name: 'Prompt Engineering', cat: 'ai', icon: 'fa-solid fa-wand-magic-sparkles', level: 'Google Prompt Wars' },
+      { name: 'Pandas & NumPy', cat: 'ai', icon: 'fa-solid fa-table', level: 'Data Processing' },
+      { name: 'Power BI Dashboards', cat: 'ai', icon: 'fa-solid fa-chart-column', level: 'Executive BI' },
+      { name: 'Scikit-Learn & ML', cat: 'ai', icon: 'fa-solid fa-robot', level: 'Predictive Modeling' },
+      { name: 'Matplotlib & Seaborn', cat: 'ai', icon: 'fa-solid fa-chart-area', level: 'Visual Storytelling' },
+      { name: 'Data Structures & Algos', cat: 'core', icon: 'fa-solid fa-code-branch', level: '1000+ Solved 💎' },
+      { name: 'OOP & System Design', cat: 'core', icon: 'fa-solid fa-sitemap', level: 'Modular Architecture' },
+      { name: 'ETL Pipelines', cat: 'ai', icon: 'fa-solid fa-arrows-spin', level: 'Data Engineering' },
+      { name: 'React Three Fiber', cat: 'fullstack', icon: 'fa-solid fa-cube', level: '3D Spatial Web' },
+      { name: 'Claude, ChatGPT & Vibe Coding', cat: 'ai', icon: 'fa-solid fa-terminal', level: 'AI-Augmented Dev' },
+      { name: 'Git & Cloudflare Edge', cat: 'fullstack', icon: 'fa-brands fa-git-alt', level: 'CI/CD Deployment' },
+      { name: 'UX & Glassmorphism', cat: 'fullstack', icon: 'fa-solid fa-layer-group', level: 'CodeChef Certified' }
+    ];
+
+    function renderSkills(filter = 'all') {
+      const grid = document.getElementById('skills-grid');
+      const filtered = filter === 'all' ? SKILLS_DATA : SKILLS_DATA.filter(s => s.cat === filter);
+      grid.innerHTML = filtered.map(s => `
+        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group">
+          <div class="tilt-content">
+            <div class="w-9 h-9 rounded-xl pill-badge flex items-center justify-center text-base mb-3">
+              <i class="${s.icon}"></i>
+            </div>
+            <h4 class="font-display font-bold text-sm" style="color: var(--text-primary);">${s.name}</h4>
+            <p class="text-[11px] font-mono-tech mt-1" style="color: var(--text-secondary);">${s.level}</p>
+          </div>
+        </div>
+      `).join('');
+      initTiltCards();
+    }
+
+    function filterSkills(category) {
+      document.querySelectorAll('#skill-filters button').forEach(btn => {
+        if (btn.dataset.filter === category) {
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-mono-tech bg-accent-solid font-bold transition';
+        } else {
+          btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-mono-tech glass-surface hover:border-accent-glow transition';
+        }
+      });
+      renderSkills(category);
+    }
+
+    // 3. VOLT INTERCEPT MINI LIVE CONVEYOR SIMULATOR
+    const VOLT_SAMPLES = [
+      {
+        label: 'LI-ION SWOLLEN CELL (98.4%)',
+        status: 'HAZARD DETECTED',
+        statusClass: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
+        boxClass: 'border-rose-500 bg-rose-500/10',
+        tagClass: 'bg-rose-600',
+        icon: 'fa-solid fa-car-battery text-rose-400 animate-bounce',
+        temp: 'THERMAL: 142.8°C • PNEUMATIC EJECT'
+      },
+      {
+        label: 'SAFE ALKALINE PACK (99.1%)',
+        status: 'LINE CLEAR',
+        statusClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+        boxClass: 'border-emerald-500 bg-emerald-500/10',
+        tagClass: 'bg-emerald-600',
+        icon: 'fa-solid fa-battery-full text-emerald-400',
+        temp: 'THERMAL: 26.4°C • PASS TO SORTING'
+      },
+      {
+        label: 'PUNCTURED POUCH CELL (96.7%)',
+        status: 'CRITICAL ALERT + PDF LOGGED',
+        statusClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        boxClass: 'border-amber-500 bg-amber-500/10',
+        tagClass: 'bg-amber-600',
+        icon: 'fa-solid fa-fire-flame-curved text-amber-400 animate-pulse',
+        temp: 'THERMAL: 178.2°C • AUTO-REPORT SENT'
+      }
+    ];
+    let voltIdx = 0;
+
+    function cycleVoltSample() {
+      voltIdx = (voltIdx + 1) % VOLT_SAMPLES.length;
+      const item = VOLT_SAMPLES[voltIdx];
+      document.getElementById('volt-cell-label').textContent = item.label;
+      document.getElementById('volt-cell-label').className = `absolute -top-2.5 left-2 px-1.5 ${item.tagClass} text-[9px] font-mono-tech font-bold rounded text-white`;
+      document.getElementById('volt-status-badge').textContent = item.status;
+      document.getElementById('volt-status-badge').className = `px-2 py-0.5 rounded border ${item.statusClass}`;
+      document.getElementById('volt-bbox').className = `w-48 h-28 border-2 rounded-lg relative flex flex-col items-center justify-center transition-all duration-300 ${item.boxClass}`;
+      document.getElementById('volt-cell-icon').className = `${item.icon} text-3xl mb-1`;
+      document.getElementById('volt-temp-readout').textContent = item.temp;
+    }
+
+    // 4. DEEP-DIVE CASE STUDY MODAL DATA (Akshay Mehta Structure)
+    const CASE_STUDIES = {
+      volt: {
+        tag: 'HACKATHON FLAGSHIP PROJECT • EDGE VISION & 3D HUD',
+        title: 'Volt Intercept — AI-Powered Smart Manufacturing Safety System',
+        problem: 'Industrial battery recycling facilities face frequent, catastrophic fires caused by damaged or swollen lithium-ion cells entering shredders undetected on high-speed conveyor belts.',
+        approach: 'Engineered an autonomous edge-vision system deployed on Cloudflare Pages that pairs Gemini API real-time computer vision with a custom React Three Fiber 3D Holographic HUD for plant operators.',
+        architecture: [
+          'Edge Camera Feed Ingestion → Frame Pre-processing',
+          'Gemini Vision API Multi-Modal Classification (Swollen / Punctured / Safe)',
+          'React Three Fiber 3D Spatial HUD + Glassmorphism Operator Console',
+          'Automated PDF Incident Report Generator for Compliance & Safety Audits'
+        ],
+        outcome: 'Delivers sub-second hazard triage with an intuitive 3D command interface and instant PDF compliance documentation.'
+      },
+      nyaya: {
+        tag: 'COLLEGE PRE-INCUBATION • SHORTLISTED FOR AWS "AI FOR BHARAT"',
+        title: 'Nyaya-Setu — AI-Based Legal Enforcement Workflow Platform',
+        problem: 'Legal enforcement officers and citizens often struggle to rapidly cross-reference complex statutory provisions and precedent workflows during time-sensitive case documentation.',
+        approach: 'Built a self-directed Generative AI and Retrieval-Augmented Generation (RAG) application grounded in verified Indian statutory corpora to assist legal enforcement workflows.',
+        architecture: [
+          'Verified Legal Corpus Chunking & Vector Embedding Pipeline',
+          'Context-Aware RAG Query Engine with Citation Grounding',
+          'Clean Full-Stack Web Interface for Field & Administrative Use'
+        ],
+        outcome: 'Shortlisted for the prestigious AWS "AI for Bharat" Global Hackathon for practical social and governance impact.'
+      },
+      disaster: {
+        tag: 'STATE-LEVEL HACKATHON SELECTED • NEXTWAVE x OPENAI ACADEMY',
+        title: 'AI-Based Disaster Alert & Crisis Communication Application',
+        problem: 'During natural disasters, misinformation and cluttered interfaces delay evacuation and emergency response triage.',
+        approach: 'Designed an AI-powered alert verification and broadcast platform prioritizing information reliability, zero-hallucination guardrails, and high-contrast crisis UX.',
+        architecture: [
+          'Multi-Source Emergency Feed Ingestion & Prompt-Driven Verification',
+          'Severity Triage & Responsible AI Hallucination Filter',
+          'Low-Bandwidth, High-Clarity Citizen Alert Interface'
+        ],
+        outcome: 'Selected for the State-Level Hackathon by NextWave x OpenAI Academy for innovation and responsible AI execution.'
+      },
+      bi: {
+        tag: 'FULL-STACK & ANALYTICS CAPSTONE • AICTE EDUSKILLS',
+        title: 'Enterprise BI Dashboard & GenAI Evaluation Suite',
+        problem: 'Growing startups and mid-market teams need unified ingestion of fragmented CSV/SQL/NoSQL operational data into actionable executive KPIs without expensive enterprise licenses.',
+        approach: 'Built a full-stack Django + React.js data ingestion platform with Pandas/NumPy ETL pipelines and Power BI-style interactive visual dashboards, alongside GenAI prompt evaluation workflows.',
+        architecture: [
+          'SQL & MongoDB Multi-Database Ingestion via REST APIs (Django / FastAPI)',
+          'Python (Pandas & NumPy) Automated Data Cleaning & KPI Aggregation',
+          'React.js Interactive Executive Dashboard + GenAI Insight Summarizer'
+        ],
+        outcome: 'Demonstrated end-to-end mastery across relational database optimization, ETL engineering, and executive BI storytelling.'
+      }
+    };
+
+    function openCaseStudy(key) {
+      const data = CASE_STUDIES[key];
+      if (!data) return;
+      const container = document.getElementById('case-study-content');
+      container.innerHTML = `
+        <div class="space-y-5">
+          <span class="px-3 py-1 rounded-full text-xs font-mono-tech pill-badge">${data.tag}</span>
+          <h3 class="font-display text-2xl sm:text-3xl font-bold">${data.title}</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="p-4 rounded-2xl border" style="border-color: var(--border-subtle); background: rgba(255,255,255,0.02);">
+              <div class="text-xs font-mono-tech text-accent mb-1">01 // PROBLEM STATEMENT</div>
+              <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">${data.problem}</p>
+            </div>
+            <div class="p-4 rounded-2xl border" style="border-color: var(--border-subtle); background: rgba(255,255,255,0.02);">
+              <div class="text-xs font-mono-tech text-accent mb-1">02 // ENGINEERING APPROACH</div>
+              <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">${data.approach}</p>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl border" style="border-color: var(--border-glow); background: rgba(var(--accent-rgb), 0.05);">
+            <div class="text-xs font-mono-tech text-accent mb-3">03 // SYSTEM ARCHITECTURE FLOW</div>
+            <div class="space-y-2.5">
+              ${data.architecture.map((step, i) => `
+                <div class="flex items-center gap-3 text-xs sm:text-sm font-mono-tech">
+                  <span class="w-6 h-6 rounded-lg bg-accent-solid font-bold flex items-center justify-center text-xs shrink-0">${i + 1}</span>
+                  <span>${step}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl border" style="border-color: var(--border-subtle);">
+            <div class="text-xs font-mono-tech text-accent mb-1">04 // IMPACT & OUTCOME</div>
+            <p class="text-xs sm:text-sm" style="color: var(--text-primary);">${data.outcome}</p>
+          </div>
+        </div>
+      `;
+      const modal = document.getElementById('case-study-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCaseStudy() {
+      const modal = document.getElementById('case-study-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openResumeModal() {
+      const modal = document.getElementById('resume-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeResumeModal() {
+      const modal = document.getElementById('resume-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyToClipboard(text, message) {
+      navigator.clipboard.writeText(text);
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('translate-x-96');
+      setTimeout(() => {
+        toast.classList.add('translate-x-96');
+      }, 2600);
+    }
+
+    // 5. 3D PERSPECTIVE TILT PHYSICS & CURSOR SPOTLIGHT
+    function initTiltCards() {
+      const cards = document.querySelectorAll('.tilt-card');
+      cards.forEach(card => {
+        card.onmousemove = (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -5.5;
+          const rotateY = ((x - centerX) / centerX) * 5.5;
+          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        };
+        card.onmouseleave = () => {
+          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+        };
+      });
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      const glow = document.getElementById('cursor-glow');
+      if (glow) {
+        glow.style.left = `${e.clientX}px`;
+        glow.style.top = `${e.clientY}px`;
+      }
+    });
+
+    // 6. THREE.JS INTERACTIVE 3D NEURAL DATA SCULPTURE
+    let scene, camera, renderer, mainGroup, wireframeMesh, coreMesh, particleSystem;
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+    let targetRotation = { x: 0.2, y: 0.4 };
+
+    function initHero3D() {
+      const container = document.getElementById('hero-3d-container');
+      if (!container || typeof THREE === 'undefined') return;
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.z = 5.5;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+
+      mainGroup = new THREE.Group();
+      scene.add(mainGroup);
+
+      // Ambient & Point Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const pointLight1 = new THREE.PointLight(0x10b981, 2.5, 20);
+      pointLight1.position.set(4, 4, 4);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0x06b6d4, 2, 20);
+      pointLight2.position.set(-4, -3, 2);
+      scene.add(pointLight2);
+
+      // Build Initial Geometry
+      build3DGeometry('icosahedron');
+
+      // Surrounding Floating Data Nodes
+      const particlesGeo = new THREE.BufferGeometry();
+      const count = 260;
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 7.5;
+      }
+      particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particlesMat = new THREE.PointsMaterial({
+        color: 0x10b981,
+        size: 0.045,
+        transparent: true,
+        opacity: 0.75
+      });
+      particleSystem = new THREE.Points(particlesGeo, particlesMat);
+      scene.add(particleSystem);
+
+      // Expose color updater for Colorido Theme Switcher
+      window.updateThreeColors = (col1, col2) => {
+        if (wireframeMesh) wireframeMesh.material.color.setHex(col1);
+        if (coreMesh) coreMesh.material.color.setHex(col2);
+        if (particleSystem) particleSystem.material.color.setHex(col1);
+        pointLight1.color.setHex(col1);
+        pointLight2.color.setHex(col2);
+      };
+
+      // Mouse & Touch Drag Interaction
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMouse = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = (e.clientX - prevMouse.x) * 0.01;
+        const dy = (e.clientY - prevMouse.y) * 0.01;
+        targetRotation.y += dx;
+        targetRotation.x += dy;
+        prevMouse = { x: e.clientX, y: e.clientY };
+      });
+
+      // Touch support
+      container.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }, { passive: true });
+      window.addEventListener('touchend', () => { isDragging = false; });
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || !e.touches[0]) return;
+        const dx = (e.touches[0].clientX - prevMouse.x) * 0.01;
+        const dy = (e.touches[0].clientY - prevMouse.y) * 0.01;
+        targetRotation.y += dx;
+        targetRotation.x += dy;
+        prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }, { passive: true });
+
+      // Responsive Resize
+      window.addEventListener('resize', () => {
+        if (!container) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      animate3D();
+    }
+
+    function build3DGeometry(type) {
+      if (!mainGroup) return;
+      while (mainGroup.children.length > 0) {
+        mainGroup.remove(mainGroup.children[0]);
+      }
+
+      const activeTheme = THEMES[currentThemeKey] || THEMES.emerald;
+      let outerGeo, innerGeo;
+
+      if (type === 'torus') {
+        outerGeo = new THREE.TorusKnotGeometry(1.15, 0.34, 100, 16);
+        innerGeo = new THREE.SphereGeometry(0.65, 24, 24);
+      } else if (type === 'helix') {
+        outerGeo = new THREE.OctahedronGeometry(1.65, 2);
+        innerGeo = new THREE.TorusGeometry(0.95, 0.22, 16, 60);
+      } else {
+        outerGeo = new THREE.IcosahedronGeometry(1.62, 1);
+        innerGeo = new THREE.DodecahedronGeometry(0.95, 0);
+      }
+
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: activeTheme.threeColor1,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.72
+      });
+
+      const innerMat = new THREE.MeshStandardMaterial({
+        color: activeTheme.threeColor2,
+        roughness: 0.25,
+        metalness: 0.8,
+        flatShading: true
+      });
+
+      wireframeMesh = new THREE.Mesh(outerGeo, wireMat);
+      coreMesh = new THREE.Mesh(innerGeo, innerMat);
+
+      mainGroup.add(wireframeMesh);
+      mainGroup.add(coreMesh);
+    }
+
+    function set3DShape(shape) {
+      build3DGeometry(shape);
+      ['icosahedron', 'torus', 'helix'].forEach(s => {
+        const btn = document.getElementById(`shape-btn-${s}`);
+        if (!btn) return;
+        if (s === shape) {
+          btn.className = 'px-2 py-0.5 rounded text-[10px] font-mono-tech pill-badge';
+        } else {
+          btn.className = 'px-2 py-0.5 rounded text-[10px] font-mono-tech border';
+        }
+      });
+    }
+
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      if (mainGroup) {
+        targetRotation.y += 0.0045;
+        mainGroup.rotation.y += (targetRotation.y - mainGroup.rotation.y) * 0.08;
+        mainGroup.rotation.x += (targetRotation.x - mainGroup.rotation.x) * 0.08;
+        if (coreMesh) {
+          coreMesh.rotation.y -= 0.012;
+          coreMesh.rotation.z += 0.008;
+        }
+      }
+      if (particleSystem) {
+        particleSystem.rotation.y += 0.0012;
+      }
+      const hud = document.getElementById('hud-coords');
+      if (hud && mainGroup) {
+        hud.textContent = `X: ${mainGroup.rotation.x.toFixed(2)} | Y: ${mainGroup.rotation.y.toFixed(2)} | 60FPS`;
+      }
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }
+
+    // Initialize everything on Window Load
+    window.onload = function () {
+      renderSkills('all');
+      initTiltCards();
+      initHero3D();
+    };
+  </script>
+</body>
+</html>

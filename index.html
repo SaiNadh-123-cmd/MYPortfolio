@@ -381,18 +381,23 @@
 
     /* 3D Scroll-Triggered Laptop Section */
     #laptop-scroll-container {
-      height: 250vh;
+      height: 130vh;
       position: relative;
-      background: transparent;
+      margin-top: 10vh;
+      margin-bottom: 5vh;
+      z-index: 5;
+      clear: both;
+      display: block;
     }
 
     .macbook-wrapper {
       position: sticky;
-      top: 20vh;
+      top: 25vh;
       margin: 0 auto;
-      width: 70vw;
-      max-width: 850px;
-      perspective: 2000px;
+      width: 55vw;
+      min-width: 320px;
+      max-width: 650px;
+      perspective: 1200px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -401,10 +406,11 @@
 
     .macbook-base {
       width: 100%;
-      height: 400px;
+      height: 350px;
       background: linear-gradient(to bottom, #d4d4d7, #99999b);
       border-radius: 12px;
-      transform: rotateX(60deg);
+      transform-origin: center;
+      transform: rotateX(65deg);
       transform-style: preserve-3d;
       position: relative;
       box-shadow: 0 25px 35px rgba(0,0,0,0.8), inset 0 3px 6px rgba(255,255,255,0.4);
@@ -415,12 +421,12 @@
 
     .macbook-lid {
       width: 100%;
-      height: 480px;
+      height: 400px;
       background: #a0a0a5;
       border-radius: 16px 16px 0 0;
       position: absolute;
       bottom: 100%;
-      transform-origin: bottom;
+      transform-origin: bottom center;
       transform: rotateX(-90deg);
       transition: transform 0.1s linear;
       padding: 12px;
@@ -2356,17 +2362,20 @@
 
       window.addEventListener('scroll', () => {
         if (!laptopSection || !laptopLid) return;
-
+    
         const rect = laptopSection.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-
-        const startOpening = windowHeight * 0.8;
-        const fullyOpen = 0;
-
+    
+        // Start opening when the laptop section enters the screen
+        const startOpening = windowHeight * 0.9;
+        // Fully open right as the section finishes scrolling
+        const fullyOpen = windowHeight * 0.2; 
+    
         let progress = (startOpening - rect.top) / (startOpening - fullyOpen);
-        progress = Math.max(0, Math.min(1, progress));
-
-        const angle = -90 + (progress * 95);
+        progress = Math.max(0, Math.min(1, progress)); 
+    
+        // closed = -90deg, open = 0deg (perfectly straight up)
+        const angle = -90 + (progress * 90); 
         laptopLid.style.transform = `rotateX(${angle}deg)`;
       });
 

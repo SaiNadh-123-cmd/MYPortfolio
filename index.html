@@ -989,32 +989,11 @@
       transform: translateY(-4px) !important;
     }
 
-    /* Step 1 & Step 4: Synchronized Inward Convergence & Elastic Return Keyframes */
+    /* Step 1 & Step 4: Active collision state (coordinated via Web Animations API) */
     .skill-card.is-colliding {
-      animation: skillCollisionKeyframes 1.08s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    @keyframes skillCollisionKeyframes {
-      0% {
-        transform: translate3d(0, 0, 0) scale(1);
-        opacity: 1;
-        animation-timing-function: cubic-bezier(0.38, 0, 0.22, 1); /* Rapid, energetic acceleration inward */
-      }
-      44% {
-        transform: translate3d(var(--converge-x, 0px), var(--converge-y, 0px), 0) scale(0.38);
-        opacity: 0.92;
-        animation-timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.15); /* Elastic, smooth spring return */
-      }
-      48% {
-        transform: translate3d(var(--converge-x, 0px), var(--converge-y, 0px), 0) scale(0.38);
-        opacity: 1;
-      }
-      100% {
-        transform: translate3d(0, 0, 0) scale(1);
-        opacity: 1;
-      }
+      pointer-events: none !important;
+      z-index: 15 !important;
+      transition: none !important;
     }
 
     /* Step 2: Subtle Center Collision Effect (Energy Ring, Glow Pulse & Subtle Sparks) */
@@ -2609,6 +2588,9 @@
       renderSkills(category);
     }
 
+    // Immediately render all skill cards so DOM is ready before any observer attaches
+    renderSkills('all');
+
     // 3. VOLT INTERCEPT MINI LIVE CONVEYOR SIMULATOR
     const VOLT_SAMPLES = [
       {
@@ -3519,13 +3501,25 @@
       candidateCards.forEach(card => repeatableCardObserver.observe(card));
 
       // =========================================================================
-      // PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER
+      // PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER (WAAPI)
       // =========================================================================
       const skillsSection = document.getElementById('skills');
       let isCollisionRunning = false;
       let hasCollisionPlayed = false;
 
-      function triggerSkillsCollision() {
+      // Cross-browser helper to await Web Animations API completion
+      function awaitAnimation(anim) {
+        if (!anim) return Promise.resolve();
+        if (anim.finished && typeof anim.finished.then === 'function') {
+          return anim.finished;
+        }
+        return new Promise(resolve => {
+          anim.onfinish = resolve;
+          anim.onerror = resolve;
+        });
+      }
+
+      async function triggerSkillsCollision() {
         if (isCollisionRunning) return;
 
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3536,57 +3530,100 @@
         const glowHalo = document.getElementById('skills-glow-halo');
         if (!grid || !skillsSection) return;
 
-        const cards = Array.from(grid.querySelectorAll('.skill-card'));
-        if (!cards.length) return;
+        let cards = Array.from(grid.querySelectorAll('.skill-card'));
+        if (!cards.length) {
+          if (typeof renderSkills === 'function') {
+            renderSkills('all');
+            cards = Array.from(grid.querySelectorAll('.skill-card'));
+          }
+          if (!cards.length) return;
+        }
 
         isCollisionRunning = true;
 
-        // Step 1: Calculate vector from each card's center to grid's center
+        // Calculate dynamic geometric center of #skills-grid and relative vectors for every card
         const gridRect = grid.getBoundingClientRect();
         const gridCenterX = gridRect.left + gridRect.width / 2;
         const gridCenterY = gridRect.top + gridRect.height / 2;
 
-        cards.forEach(card => {
+        const cardVectors = cards.map(card => {
           const cardRect = card.getBoundingClientRect();
           const cardCenterX = cardRect.left + cardRect.width / 2;
           const cardCenterY = cardRect.top + cardRect.height / 2;
-
-          const dx = gridCenterX - cardCenterX;
-          const dy = gridCenterY - cardCenterY;
-
-          card.style.setProperty('--converge-x', `${dx.toFixed(1)}px`);
-          card.style.setProperty('--converge-y', `${dy.toFixed(1)}px`);
-          card.classList.add('is-colliding');
+          return {
+            card,
+            dx: gridCenterX - cardCenterX,
+            dy: gridCenterY - cardCenterY
+          };
         });
 
-        // Step 2 & Step 3: Trigger collision effect & section glow at impact (t = 475ms)
-        setTimeout(() => {
-          if (emitter) {
-            emitter.classList.add('active');
-            setTimeout(() => {
-              emitter.classList.remove('active');
-            }, 330); // 330ms collision effect duration
-          }
+        // Set card collision state (disables pointer events and CSS transitions during animation)
+        cards.forEach(card => card.classList.add('is-colliding'));
 
-          if (glowHalo) {
-            glowHalo.classList.add('active');
-            // Keep glow active for approx 1 second, then smoothly return
-            setTimeout(() => {
-              glowHalo.classList.remove('active');
-            }, 1000);
-          }
-        }, 475);
-
-        // Step 4: Sequence completion at t = 1100ms
-        setTimeout(() => {
-          cards.forEach(card => {
-            card.classList.remove('is-colliding');
-            card.style.removeProperty('--converge-x');
-            card.style.removeProperty('--converge-y');
+        // STEP 1: SIMULTANEOUS INWARD CONVERGENCE (Duration: 700ms)
+        // All cards launch together and converge simultaneously toward the center focal point
+        const convergenceAnimations = cardVectors.map(({ card, dx, dy }) => {
+          return card.animate([
+            { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 },
+            { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(0.38)`, opacity: 0.95 }
+          ], {
+            duration: 700,
+            easing: 'cubic-bezier(0.32, 0, 0.2, 1)',
+            fill: 'forwards'
           });
-          isCollisionRunning = false;
-          hasCollisionPlayed = true;
-        }, 1100);
+        });
+
+        await Promise.all(convergenceAnimations.map(awaitAnimation));
+
+        // STEP 2: SMALL COLLISION EFFECT (~260ms)
+        // Trigger subtle center energy ring, glow pulse, and radial sparks
+        if (emitter) {
+          emitter.classList.add('active');
+        }
+
+        // STEP 3: FULL SKILLS SECTION GLOW (~1000ms)
+        // Soft ambient illumination along section edges & background using cyan & violet
+        if (glowHalo) {
+          glowHalo.classList.add('active');
+          setTimeout(() => {
+            glowHalo.classList.remove('active');
+          }, 1000);
+        }
+
+        // Brief impact pause (80ms) for high-impact visual feedback while sparks radiate
+        await new Promise(resolve => setTimeout(resolve, 80));
+
+        if (emitter) {
+          setTimeout(() => {
+            emitter.classList.remove('active');
+          }, 200);
+        }
+
+        // STEP 4: RESTORE / RETURN TO NORMAL GRID POSITIONS (Duration: 650ms)
+        // Smooth elastic spring return back to original starting coordinates
+        const returnAnimations = cardVectors.map(({ card, dx, dy }) => {
+          return card.animate([
+            { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(0.38)`, opacity: 0.95 },
+            { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 }
+          ], {
+            duration: 650,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          });
+        });
+
+        await Promise.all(returnAnimations.map(awaitAnimation));
+
+        // CLEANUP: Cancel fills and remove collision classes so native hover & 3D tilt are 100% active
+        cards.forEach(card => {
+          card.getAnimations().forEach(anim => anim.cancel());
+          card.classList.remove('is-colliding');
+          card.style.transform = '';
+          card.style.opacity = '';
+        });
+
+        isCollisionRunning = false;
+        hasCollisionPlayed = true;
       }
 
       // Viewport IntersectionObserver
@@ -3606,7 +3643,7 @@
               }
             }
           });
-        }, { threshold: 0.15, rootMargin: '20px 0px -20px 0px' });
+        }, { threshold: 0.12, rootMargin: '30px 0px -30px 0px' });
 
         skillsObserver.observe(skillsSection);
       }
@@ -3616,9 +3653,10 @@
         link.addEventListener('click', () => {
           setTimeout(() => {
             if (!isCollisionRunning) {
+              hasCollisionPlayed = false;
               triggerSkillsCollision();
             }
-          }, 350);
+          }, 450);
         });
       });
 

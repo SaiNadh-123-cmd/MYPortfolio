@@ -380,28 +380,34 @@
     }
 
     /* 3D Scroll-Triggered Laptop Section */
-    #laptop-scroll-container {
-      height: 130vh;
+    #laptop-scroll-track {
+      height: 250vh;
       position: relative;
-      margin-top: 10vh;
-      margin-bottom: 5vh;
-      z-index: 5;
-      clear: both;
-      display: block;
+      z-index: 20;
+      background: var(--bg-main, #07050f);
+      margin: 0;
+      padding: 0;
+    }
+
+    .laptop-sticky-frame {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .macbook-wrapper {
-      position: sticky;
-      top: 25vh;
-      margin: 0 auto;
-      width: 55vw;
+      width: 60vw;
       min-width: 320px;
-      max-width: 650px;
+      max-width: 700px;
       perspective: 1200px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      z-index: 10;
     }
 
     .macbook-base {
@@ -874,21 +880,21 @@
        FEATURED CASE STUDIES (Akshay Mehta Storytelling + Live Interactive Sim)
   ====================================================================== -->
   <!-- 3D Scroll-Triggered Laptop Intro -->
-  <section id="laptop-scroll-container">
-    <div class="macbook-wrapper">
-      <div class="macbook-lid">
-        <div class="macbook-screen">
-          <div class="mac-camera"></div>
-          <h2 class="laptop-title">EXPLORE PROJECTS</h2>
-          <div class="click-indicator">Click to Enter</div>
+  <section id="laptop-scroll-track">
+    <div class="laptop-sticky-frame">
+      <div class="macbook-wrapper">
+        <div class="macbook-lid">
+          <div class="macbook-screen">
+            <div class="mac-camera"></div>
+            <h2 class="laptop-title">EXPLORE PROJECTS</h2>
+            <div class="click-indicator">Click or Scroll to Enter</div>
+          </div>
         </div>
-      </div>
-      <div class="macbook-base">
-        <div class="mac-keyboard">
-          <div class="keyboard-grid"></div>
+        <div class="macbook-base">
+          <div class="mac-keyboard"><div class="keyboard-grid"></div></div>
+          <div class="mac-trackpad"></div>
+          <div class="mac-indent"></div>
         </div>
-        <div class="mac-trackpad"></div>
-        <div class="mac-indent"></div>
       </div>
     </div>
   </section>
@@ -2355,33 +2361,35 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const laptopSection = document.getElementById('laptop-scroll-container');
-      const laptopLid = document.querySelector('.macbook-lid');
-      const laptopScreen = document.querySelector('.macbook-screen');
-      const projectsSection = document.getElementById('work');
+      const track = document.getElementById('laptop-scroll-track');
+      const lid = document.querySelector('.macbook-lid');
+      const screen = document.querySelector('.macbook-screen');
+      const projects = document.getElementById('work');
 
       window.addEventListener('scroll', () => {
-        if (!laptopSection || !laptopLid) return;
+        if (!track || !lid) return;
     
-        const rect = laptopSection.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
+        const rect = track.getBoundingClientRect();
     
-        // Start opening when the laptop section enters the screen
-        const startOpening = windowHeight * 0.9;
-        // Fully open right as the section finishes scrolling
-        const fullyOpen = windowHeight * 0.2; 
+        // Calculate how far we have scrolled PAST the top of the track container
+        const scrollDistance = -rect.top;
     
-        let progress = (startOpening - rect.top) / (startOpening - fullyOpen);
-        progress = Math.max(0, Math.min(1, progress)); 
+        // The total distance the sticky frame stays pinned on screen
+        const maxScroll = rect.height - window.innerHeight;
     
-        // closed = -90deg, open = 0deg (perfectly straight up)
-        const angle = -90 + (progress * 90); 
-        laptopLid.style.transform = `rotateX(${angle}deg)`;
+        // Math: If scrollDistance is 0 or less, we haven't reached the section (progress = 0).
+        // If it's equal to maxScroll, we are at the bottom of the track (progress = 1).
+        let progress = scrollDistance / maxScroll;
+        progress = Math.max(0, Math.min(1, progress));
+    
+        // -90deg is fully closed flat. 0deg is standing straight up.
+        const angle = -90 + (progress * 90);
+        lid.style.transform = `rotateX(${angle}deg)`;
       });
 
-      if (laptopScreen && projectsSection) {
-        laptopScreen.addEventListener('click', () => {
-          projectsSection.scrollIntoView({ behavior: 'smooth' });
+      if (screen && projects) {
+        screen.addEventListener('click', () => {
+          projects.scrollIntoView({ behavior: 'smooth' });
         });
       }
     });

@@ -378,6 +378,97 @@
         transform: translateX(24px) !important;
       }
     }
+
+    /* 3D Scroll-Triggered Laptop Section */
+    #laptop-scroll-container {
+      height: 200vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+    }
+
+    .laptop-sticky {
+      position: sticky;
+      top: 15vh;
+      height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1500px;
+    }
+
+    .laptop-base {
+      width: 60vw;
+      max-width: 800px;
+      height: 400px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      transform: rotateX(60deg);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+
+    .laptop-lid {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      width: 100%;
+      height: 450px;
+      background: #0f0c20;
+      border-radius: 12px 12px 0 0;
+      transform-origin: bottom;
+      transform: rotateX(-90deg);
+      transition: transform 0.1s ease-out;
+    }
+
+    .laptop-screen {
+      margin: 20px;
+      height: calc(100% - 40px);
+      background: #000;
+      border: 2px solid #a855f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+      cursor: pointer;
+    }
+
+    .laptop-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
+      transition: transform 0.3s ease;
+    }
+
+    .laptop-screen:hover .laptop-title {
+      transform: scale(1.1);
+    }
+
+    /* Slide-in project card animations */
+    .project-card {
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease-out;
+    }
+
+    .slide-left {
+      transform: translateX(-100px);
+    }
+
+    .slide-right {
+      transform: translateX(100px);
+    }
+
+    .project-card.visible,
+    .slide-left.visible,
+    .slide-right.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-emerald-400 selection:text-slate-950">
@@ -709,6 +800,19 @@
   <!-- =====================================================================
        FEATURED CASE STUDIES (Akshay Mehta Storytelling + Live Interactive Sim)
   ====================================================================== -->
+  <!-- 3D Scroll-Triggered Laptop Intro -->
+  <section id="laptop-scroll-container">
+    <div class="laptop-sticky">
+      <div class="laptop-base">
+        <div class="laptop-lid">
+          <div class="laptop-screen">
+            <h2 class="laptop-title">EXPLORE PROJECTS</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="work" data-section-theme="violet" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
     
     <!-- Section Header -->
@@ -730,7 +834,7 @@
     <div class="space-y-10">
 
       <!-- CASE STUDY 1: VOLT INTERCEPT (Flagship Featured Bento with Live Scanner Sim) -->
-      <div class="tilt-card rounded-3xl p-6 sm:p-8 lg:p-10 border">
+      <div class="tilt-card rounded-3xl p-6 sm:p-8 lg:p-10 border project-card slide-left">
         <div class="tilt-content grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           <!-- Left Narrative -->
@@ -826,7 +930,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- CASE STUDY 2: NYAYA-SETU -->
-        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between project-card slide-right">
           <div class="tilt-content space-y-4">
             <div class="flex items-center justify-between gap-2">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">AWS "AI for Bharat" Shortlisted</span>
@@ -861,7 +965,7 @@
         </div>
 
         <!-- CASE STUDY 3: AI DISASTER ALERT APPLICATION -->
-        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between project-card slide-left">
           <div class="tilt-content space-y-4">
             <div class="flex items-center justify-between gap-2">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">NextWave x OpenAI Academy</span>
@@ -896,7 +1000,7 @@
         </div>
 
         <!-- CASE STUDY 4: ENTERPRISE BI & GENAI SUITE -->
-        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+        <div class="tilt-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between project-card slide-right">
           <div class="tilt-content space-y-4">
             <div class="flex items-center justify-between gap-2">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-mono-tech pill-badge">Full-Stack + BI Capstone</span>
@@ -2166,6 +2270,43 @@
         setTimeout(typeEffect, isDeleting ? 40 : 100);
       }
       typeEffect();
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const laptopSection = document.getElementById('laptop-scroll-container');
+      const laptopLid = document.querySelector('.laptop-lid');
+      const laptopScreen = document.querySelector('.laptop-screen');
+      const projectsSection = document.getElementById('work');
+
+      window.addEventListener('scroll', () => {
+        if (!laptopSection || !laptopLid) return;
+        const rect = laptopSection.getBoundingClientRect();
+        const scrollProgress = Math.max(0, Math.min(1, -rect.top / (rect.height / 2)));
+        const angle = -90 + (scrollProgress * 90);
+        laptopLid.style.transform = `rotateX(${angle}deg)`;
+      });
+
+      if (laptopScreen && projectsSection) {
+        laptopScreen.addEventListener('click', () => {
+          projectsSection.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateX(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.slide-left, .slide-right').forEach(card => {
+      observer.observe(card);
     });
   </script>
 </body>

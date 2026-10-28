@@ -749,7 +749,7 @@
       justify-content: center;
       perspective: 1000px;
       cursor: grab;
-      touch-action: none;
+      touch-action: none; /* Prevents mobile/scroll lag */
     }
 
     .cube-scene:active {
@@ -771,8 +771,10 @@
       height: 190px;
       position: relative;
       transform-style: preserve-3d;
-      transform: rotateX(-18deg) rotateY(-28deg);
-      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+      /* Clean absolute rotation state, no compounding offsets */
+      transform: rotateX(var(--cube-rx, -18deg)) rotateY(var(--cube-ry, -28deg));
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .nav-cube.is-dragging {
@@ -3099,15 +3101,14 @@
       const statusText = document.getElementById('cube-status-text');
       if (!cube || !scene) return;
 
-      let rotX = -18;
-      let rotY = -28;
+      let currentRx = -18;
+      let currentRy = -28;
       let isDragging = false;
       let startX = 0, startY = 0;
-      let dragDistance = 0;
-      let lastRolledIndex = -1;
+      let totalDragMove = 0;
 
-      // Map each cube face to its target rotation and page section
-      const faces = [
+      // Exact angles for the 6 faces
+      const cubeFaces = [
         { key: 'profile',    label: 'PROFILE',    rx: 0,   ry: 0 },
         { key: 'skills',     label: 'SKILLS',     rx: 0,   ry: -90 },
         { key: 'projects',   label: 'PROJECTS',   rx: 0,   ry: -180 },
@@ -3116,110 +3117,98 @@
         { key: 'arena',      label: 'SIMULATOR',  rx: 90,  ry: 0 }
       ];
 
-      // Smart resolver to locate the exact section in index.html
-      function findSectionElement(key) {
-        const selectors = {
-          profile:    ['#page-1-splash', '#top', 'header', 'body'],
-          background: ['#page-2-hero', '#hero', '#about', '#page-2'],
-          projects:   ['#work', '#projects', '#laptop-scroll-track'],
-          skills:     ['#skills', '#tech-stack', '[id*="skill"]'],
-          experience: ['#leadership', '#experience', '#achievements', '[id*="hack"]', '[id*="lead"]'],
-          arena:      ['#arena', '#simulator', '#contact', 'footer']
-        };
-        const list = selectors[key] || [];
-        for (const sel of list) {
-          const el = document.querySelector(sel);
-          if (el) return el;
+      function updateCubeTransform(rx, ry, animate = false) {
+        if (animate) {
+          cube.style.transition = 'transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+        } else {
+          cube.style.transition = 'none';
         }
-        // Fallback: search headings by keyword
-        const headings = Array.from(document.querySelectorAll('h1, h2, h3, section'));
-        return headings.find(h => h.textContent.toLowerCase().includes(key)) || document.body;
+        cube.style.setProperty('--cube-rx', `${rx}deg`);
+        cube.style.setProperty('--cube-ry', `${ry}deg`);
       }
 
-      function navigateToSection(key, label) {
-        if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${label}</strong>`;
-        if (statusText) statusText.textContent = `⚡ REDIRECTING TO ${label}...`;
+      // Initial set
+      updateCubeTransform(currentRx, currentRy, false);
 
-        const targetEl = findSectionElement(key);
+      function findSection(key) {
+        const map = {
+          profile: '#page-1-splash',
+          background: '#page-2-hero',
+          projects: '#laptop-scroll-track',
+          skills: '#skills',
+          experience: '#work',
+          arena: '#arena'
+        };
+        return document.querySelector(map[key]) || document.querySelector('#hero') || document.body;
+      }
+
+      function jumpToFace(key, label) {
+        const face = cubeFaces.find(f => f.key === key);
+        if (!face) return;
+
+        currentRx = face.rx;
+        currentRy = face.ry;
+        updateCubeTransform(currentRx, currentRy, true);
+
+        if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${label}</strong>`;
+        if (statusText) statusText.textContent = `⚡ JUMPING TO ${label}...`;
+
+        const target = findSection(key);
         setTimeout(() => {
-          if (key === 'profile') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          } else if (targetEl) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           setTimeout(() => {
             if (statusText) statusText.textContent = 'DRAG TO ROTATE • CLICK FACE OR ROLL';
-          }, 1200);
-        }, 650);
+          }, 1000);
+        }, 450);
       }
 
-      // Pointer / Mouse Drag Rotation
+      // Smooth Drag Controls
       scene.addEventListener('pointerdown', (e) => {
         isDragging = true;
-        dragDistance = 0;
+        totalDragMove = 0;
         startX = e.clientX;
         startY = e.clientY;
         cube.classList.add('is-dragging');
+        scene.setPointerCapture(e.pointerId);
       });
 
-      window.addEventListener('pointermove', (e) => {
+      scene.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-        dragDistance += Math.hypot(dx, dy);
-        rotY += dx * 0.65;
-        rotX -= dy * 0.65;
-        cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        totalDragMove += Math.hypot(dx, dy);
+
+        currentRy += dx * 0.5;
+        currentRx -= dy * 0.5;
+        updateCubeTransform(currentRx, currentRy, false);
+
         startX = e.clientX;
         startY = e.clientY;
       });
 
-      window.addEventListener('pointerup', () => {
+      scene.addEventListener('pointerup', (e) => {
         if (!isDragging) return;
         isDragging = false;
         cube.classList.remove('is-dragging');
+        try { scene.releasePointerCapture(e.pointerId); } catch(err) {}
       });
 
-      // Click on any Cube Face -> Snap face forward & redirect to that section
-      document.querySelectorAll('.cube-face').forEach((faceEl) => {
+      // Face Click Handlers
+      document.querySelectorAll('.cube-face').forEach(faceEl => {
         faceEl.addEventListener('click', (e) => {
-          // Ignore if the user was dragging to rotate instead of clicking
-          if (dragDistance > 10) return;
+          if (totalDragMove > 8) return; // Prevent triggering click during drag
           e.stopPropagation();
           const key = faceEl.getAttribute('data-section');
-          const faceData = faces.find(f => f.key === key);
-          if (!faceData) return;
-
-          // Snap cube smoothly to show the clicked face
-          rotX = faceData.rx - 10;
-          rotY = faceData.ry - 15;
-          cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-          navigateToSection(faceData.key, faceData.label);
+          const face = cubeFaces.find(f => f.key === key);
+          if (face) jumpToFace(face.key, face.label);
         });
       });
 
-      // 🎲 ROLL CUBE Button -> Spins cube in 3D, lands on a face, and redirects
+      // 🎲 Roll Cube Button (Clean randomized picker without broken math)
       if (rollBtn) {
         rollBtn.addEventListener('click', () => {
-          let nextIndex;
-          do {
-            nextIndex = Math.floor(Math.random() * faces.length);
-          } while (nextIndex === lastRolledIndex);
-          lastRolledIndex = nextIndex;
-
-          const chosen = faces[nextIndex];
-          if (statusText) statusText.textContent = '🎲 ROLLING CUBE...';
-
-          // Add multiple full 360-degree spins so it tumbles like a real 3D die
-          const extraSpinsX = (Math.floor(Math.random() * 2) + 2) * 360;
-          const extraSpinsY = (Math.floor(Math.random() * 2) + 2) * 360;
-
-          rotX = chosen.rx + extraSpinsX - 12;
-          rotY = chosen.ry + extraSpinsY - 16;
-          cube.classList.remove('is-dragging');
-          cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-
-          navigateToSection(chosen.key, chosen.label);
+          const randomFace = cubeFaces[Math.floor(Math.random() * cubeFaces.length)];
+          jumpToFace(randomFace.key, randomFace.label);
         });
       }
     });

@@ -945,22 +945,42 @@
     }
 
     /* =========================================================================
-       SKILLS SECTION: CLEAN, STABLE ENTRANCE ANIMATION & CARD STYLING
+       SKILLS SECTION: SYNCHRONIZED COLLISION ANIMATION & CARD STYLING
        ========================================================================= */
-    .skill-card {
+    #skills {
+      position: relative;
+    }
+
+    /* Step 3: Ambient Soft Edge Glow Layer (active for 1s on collision, then fades away completely) */
+    #skills-glow-halo {
+      position: absolute;
+      inset: -12px;
+      border-radius: 28px;
+      pointer-events: none;
       opacity: 0;
-      transform: translateY(20px);
+      transition: opacity 0.5s ease-out;
+      box-shadow:
+        0 0 50px rgba(56, 189, 248, 0.32),
+        0 0 100px rgba(168, 85, 247, 0.22),
+        inset 0 0 35px rgba(56, 189, 248, 0.15);
+      border: 1.5px solid rgba(56, 189, 248, 0.42);
+      z-index: 1;
+    }
+
+    #skills-glow-halo.active {
+      opacity: 1;
+    }
+
+    /* Base Skill Card Style */
+    .skill-card {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
       transition:
-        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
         border-color 0.25s ease,
         box-shadow 0.25s ease;
       will-change: transform, opacity;
-    }
-
-    .skill-card.in-view {
-      opacity: 1;
-      transform: translateY(0);
+      position: relative;
+      z-index: 2;
     }
 
     .skill-card:hover {
@@ -969,11 +989,156 @@
       transform: translateY(-4px) !important;
     }
 
+    /* Step 1 & Step 4: Synchronized Inward Convergence & Elastic Return Keyframes */
+    .skill-card.is-colliding {
+      animation: skillCollisionKeyframes 1.08s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    @keyframes skillCollisionKeyframes {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.38, 0, 0.22, 1); /* Rapid, energetic acceleration inward */
+      }
+      44% {
+        transform: translate3d(var(--converge-x, 0px), var(--converge-y, 0px), 0) scale(0.38);
+        opacity: 0.92;
+        animation-timing-function: cubic-bezier(0.18, 0.89, 0.32, 1.15); /* Elastic, smooth spring return */
+      }
+      48% {
+        transform: translate3d(var(--converge-x, 0px), var(--converge-y, 0px), 0) scale(0.38);
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Step 2: Subtle Center Collision Effect (Energy Ring, Glow Pulse & Subtle Sparks) */
+    #skills-collision-emitter {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 25;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .collision-ring {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 16px #38bdf8, inset 0 0 12px #a855f7;
+      opacity: 0;
+      transform: scale(0.2);
+    }
+
+    #skills-collision-emitter.active .collision-ring {
+      animation: collisionRingExpand 0.32s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+    }
+
+    @keyframes collisionRingExpand {
+      0% {
+        opacity: 1;
+        transform: scale(0.2);
+        border-color: #ffffff;
+      }
+      50% {
+        opacity: 0.95;
+        border-color: #38bdf8;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(8.5);
+        border-color: #a855f7;
+      }
+    }
+
+    .collision-glow {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(56, 189, 248, 0.7) 40%, rgba(168, 85, 247, 0.4) 70%, transparent 100%);
+      filter: blur(5px);
+      opacity: 0;
+      transform: scale(0.2);
+    }
+
+    #skills-collision-emitter.active .collision-glow {
+      animation: collisionGlowPulse 0.3s ease-out forwards;
+    }
+
+    @keyframes collisionGlowPulse {
+      0% {
+        opacity: 0;
+        transform: scale(0.2);
+      }
+      40% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(2.2);
+      }
+    }
+
+    .collision-sparks {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+
+    .collision-sparks span {
+      position: absolute;
+      width: 3.5px;
+      height: 3.5px;
+      border-radius: 50%;
+      background: #7dd3fc;
+      box-shadow: 0 0 6px #38bdf8;
+      opacity: 0;
+      top: 0;
+      left: 0;
+    }
+
+    #skills-collision-emitter.active .collision-sparks span {
+      animation: collisionSparkRadiate 0.32s ease-out forwards;
+    }
+
+    @keyframes collisionSparkRadiate {
+      0% {
+        opacity: 1;
+        transform: rotate(var(--angle)) translateX(0px) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: rotate(var(--angle)) translateX(var(--dist)) scale(0.2);
+      }
+    }
+
+    /* Motion Sensitivity Fallback */
     @media (prefers-reduced-motion: reduce) {
-      .skill-card {
+      .skill-card,
+      .skill-card.is-colliding {
         opacity: 1 !important;
         transform: none !important;
+        animation: none !important;
         transition: none !important;
+      }
+      #skills-collision-emitter,
+      #skills-glow-halo {
+        display: none !important;
       }
     }
 
@@ -1781,8 +1946,11 @@
   <!-- =====================================================================
        INTERACTIVE ARCHITECTURE & TECHNICAL SKILL MATRIX
   ====================================================================== -->
-  <section id="skills" data-section-theme="quantum" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+  <section id="skills" data-section-theme="quantum" class="py-24 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto relative">
+    <!-- Ambient Soft Glow Halo Layer (Step 3: triggers on collision, lasts 1s, then fades completely) -->
+    <div id="skills-glow-halo" class="pointer-events-none" aria-hidden="true"></div>
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6 relative z-10">
       <div>
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
           <span>03 // TECHNICAL ARSENAL &amp; SYSTEM ARCHITECTURE</span>
@@ -1802,7 +1970,7 @@
     </div>
 
     <!-- Interactive Skill Matrix Grid -->
-    <div id="skills-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+    <div id="skills-grid" class="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
       <!-- Dynamically populated by JS for crisp filtering & 3D tilt -->
     </div>
   </section>
@@ -2392,8 +2560,30 @@
       const grid = document.getElementById('skills-grid');
       if (!grid) return;
       const filtered = filter === 'all' ? SKILLS_DATA : SKILLS_DATA.filter(s => s.cat === filter);
-      grid.innerHTML = filtered.map((s, index) => `
-        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group skill-card in-view" data-cat="${s.cat}" style="transition-delay: ${(index % 12) * 0.035}s;">
+
+      const emitterHtml = `
+        <div id="skills-collision-emitter" class="pointer-events-none" aria-hidden="true">
+          <div class="collision-ring"></div>
+          <div class="collision-glow"></div>
+          <div class="collision-sparks">
+            <span style="--angle: 0deg; --dist: 48px;"></span>
+            <span style="--angle: 30deg; --dist: 40px;"></span>
+            <span style="--angle: 60deg; --dist: 52px;"></span>
+            <span style="--angle: 90deg; --dist: 44px;"></span>
+            <span style="--angle: 120deg; --dist: 50px;"></span>
+            <span style="--angle: 150deg; --dist: 42px;"></span>
+            <span style="--angle: 180deg; --dist: 52px;"></span>
+            <span style="--angle: 210deg; --dist: 40px;"></span>
+            <span style="--angle: 240deg; --dist: 48px;"></span>
+            <span style="--angle: 270deg; --dist: 44px;"></span>
+            <span style="--angle: 300deg; --dist: 50px;"></span>
+            <span style="--angle: 330deg; --dist: 42px;"></span>
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = filtered.map(s => `
+        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group skill-card" data-cat="${s.cat}">
           <div class="tilt-content">
             <div class="w-9 h-9 rounded-xl pill-badge flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
               <i class="${s.icon}"></i>
@@ -2403,6 +2593,8 @@
           </div>
         </div>
       `).join('');
+
+      grid.innerHTML = emitterHtml + cardsHtml;
       initTiltCards();
     }
 
@@ -3327,44 +3519,106 @@
       candidateCards.forEach(card => repeatableCardObserver.observe(card));
 
       // =========================================================================
-      // PART B: SKILLS SECTION — CLEAN, STABLE SCROLL ENTRANCE OBSERVER
+      // PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER
       // =========================================================================
       const skillsSection = document.getElementById('skills');
+      let isCollisionRunning = false;
+      let hasCollisionPlayed = false;
 
-      function revealSkillsCards() {
-        const cards = document.querySelectorAll('#skills-grid .skill-card');
-        cards.forEach((card, index) => {
-          card.style.transitionDelay = `${(index % 12) * 0.035}s`;
-          card.classList.add('in-view');
-        });
-      }
+      function triggerSkillsCollision() {
+        if (isCollisionRunning) return;
 
-      function resetSkillsCards() {
-        const cards = document.querySelectorAll('#skills-grid .skill-card');
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        const grid = document.getElementById('skills-grid');
+        const emitter = document.getElementById('skills-collision-emitter');
+        const glowHalo = document.getElementById('skills-glow-halo');
+        if (!grid || !skillsSection) return;
+
+        const cards = Array.from(grid.querySelectorAll('.skill-card'));
+        if (!cards.length) return;
+
+        isCollisionRunning = true;
+
+        // Step 1: Calculate vector from each card's center to grid's center
+        const gridRect = grid.getBoundingClientRect();
+        const gridCenterX = gridRect.left + gridRect.width / 2;
+        const gridCenterY = gridRect.top + gridRect.height / 2;
+
         cards.forEach(card => {
-          card.style.transitionDelay = '0s';
-          card.classList.remove('in-view');
+          const cardRect = card.getBoundingClientRect();
+          const cardCenterX = cardRect.left + cardRect.width / 2;
+          const cardCenterY = cardRect.top + cardRect.height / 2;
+
+          const dx = gridCenterX - cardCenterX;
+          const dy = gridCenterY - cardCenterY;
+
+          card.style.setProperty('--converge-x', `${dx.toFixed(1)}px`);
+          card.style.setProperty('--converge-y', `${dy.toFixed(1)}px`);
+          card.classList.add('is-colliding');
         });
+
+        // Step 2 & Step 3: Trigger collision effect & section glow at impact (t = 475ms)
+        setTimeout(() => {
+          if (emitter) {
+            emitter.classList.add('active');
+            setTimeout(() => {
+              emitter.classList.remove('active');
+            }, 330); // 330ms collision effect duration
+          }
+
+          if (glowHalo) {
+            glowHalo.classList.add('active');
+            // Keep glow active for approx 1 second, then smoothly return
+            setTimeout(() => {
+              glowHalo.classList.remove('active');
+            }, 1000);
+          }
+        }, 475);
+
+        // Step 4: Sequence completion at t = 1100ms
+        setTimeout(() => {
+          cards.forEach(card => {
+            card.classList.remove('is-colliding');
+            card.style.removeProperty('--converge-x');
+            card.style.removeProperty('--converge-y');
+          });
+          isCollisionRunning = false;
+          hasCollisionPlayed = true;
+        }, 1100);
       }
 
+      // Viewport IntersectionObserver
       if (skillsSection) {
         const skillsObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              revealSkillsCards();
+              if (!hasCollisionPlayed && !isCollisionRunning) {
+                requestAnimationFrame(() => {
+                  triggerSkillsCollision();
+                });
+              }
             } else {
-              resetSkillsCards();
+              // Reset trigger when user scrolls away so animation can replay on revisit
+              if (!isCollisionRunning) {
+                hasCollisionPlayed = false;
+              }
             }
           });
-        }, { threshold: 0.1, rootMargin: '40px 0px -40px 0px' });
+        }, { threshold: 0.15, rootMargin: '20px 0px -20px 0px' });
 
         skillsObserver.observe(skillsSection);
       }
 
-      // Ensure cards are revealed if navigating directly to #skills via navbar or 3D cube
+      // Smooth trigger when navigating via navbar or 3D cube
       document.querySelectorAll('a[href="#skills"]').forEach(link => {
         link.addEventListener('click', () => {
-          setTimeout(revealSkillsCards, 200);
+          setTimeout(() => {
+            if (!isCollisionRunning) {
+              triggerSkillsCollision();
+            }
+          }, 350);
         });
       });
 

@@ -1044,6 +1044,26 @@
       z-index: 20;
     }
 
+    /* Accessible Reduced-Motion Fallback for Skills Assembly */
+    @media (prefers-reduced-motion: reduce) {
+      .skill-rocket-item,
+      .skill-rocket-item.rocket-assembling,
+      .skill-rocket-item.rocket-docked {
+        opacity: 1 !important;
+        transform: translate3d(0px, 0px, 0px) rotate(0deg) scale(1) !important;
+        transition: none !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 12px rgba(56, 189, 248, 0.2) !important;
+        border-color: rgba(56, 189, 248, 0.45) !important;
+      }
+      .skill-rocket-item::after {
+        display: none !important;
+        animation: none !important;
+      }
+      #skills-spark-canvas {
+        display: none !important;
+      }
+    }
+
 
 
   </style>
@@ -1061,23 +1081,38 @@
   <header class="fixed top-4 inset-x-0 z-50 px-4 sm:px-6 lg:px-10">
     <div class="max-w-7xl mx-auto glass-surface rounded-2xl px-4 sm:px-6 py-3 flex items-center justify-between shadow-2xl transition-all duration-500">
       
-      <!-- Brand / Identity + Live Availability Dot -->
-      <a href="#hero" class="flex items-center gap-3 group">
-        <div class="relative w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-lg bg-accent-solid shadow-lg transition-transform duration-300 group-hover:scale-105">
-          <span>SN</span>
-          <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse"></span>
-        </div>
-        <div>
+      <!-- Brand / Identity + Clickable Image Logo + Live Availability Dot -->
+      <div class="flex items-center gap-3">
+        <!-- Clickable Logo Button opening Full-Screen Image Preview Modal -->
+        <button
+          type="button"
+          id="navbar-logo-btn"
+          aria-label="View enlarged profile photo"
+          title="Click to view photo"
+          class="relative w-10 h-10 rounded-xl p-0.5 overflow-visible flex items-center justify-center bg-accent-solid shadow-lg transition-transform duration-300 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-400 cursor-pointer group"
+        >
+          <div class="w-full h-full rounded-[10px] overflow-hidden bg-slate-900/60 flex items-center justify-center">
+            <img
+              src="./LOGOPIC.jpeg"
+              alt="Sai Nadh Raju"
+              class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
+          <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse pointer-events-none" title="Open to Internships & AI Roles"></span>
+        </button>
+
+        <!-- Brand Name & Title Link (Smooth navigation to #hero) -->
+        <a href="#hero" class="flex flex-col justify-center group">
           <div class="flex items-center gap-2">
-            <span class="font-display font-bold tracking-tight text-sm sm:text-base" style="color: var(--text-primary);">Sai Nadh Raju</span>
+            <span class="font-display font-bold tracking-tight text-sm sm:text-base group-hover:text-cyan-400 transition-colors" style="color: var(--text-primary);">Sai Nadh Raju</span>
             <span class="hidden xl:inline-flex items-center gap-1.5 text-[11px] font-mono-tech px-2 py-0.5 rounded-full pill-badge">
               <span class="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
-              Open to Internships & AI Roles
+              Open to Internships &amp; AI Roles
             </span>
           </div>
           <p class="text-[11px] font-mono-tech" style="color: var(--text-secondary);">CSE (Data Science) ’28 • 0→1 Builder</p>
-        </div>
-      </a>
+        </a>
+      </div>
 
       <!-- Center Section Links (Akshay Mehta Editorial Style) -->
       <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" style="color: var(--text-secondary);">
@@ -2109,6 +2144,41 @@
   </div>
 
   <!-- =====================================================================
+       MODAL 0: FULL-SCREEN PROFILE IMAGE PREVIEW (NAVBAR LOGO)
+  ====================================================================== -->
+  <div
+    id="image-preview-modal"
+    class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6 md:p-8 bg-black/80 backdrop-blur-md transition-opacity duration-300 opacity-0"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Profile Photo Preview"
+    tabindex="-1"
+  >
+    <!-- Accessible Close Button in Top-Right Corner -->
+    <button
+      type="button"
+      id="close-image-preview"
+      aria-label="Close image preview"
+      title="Close (Esc)"
+      class="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center text-xl transition-all duration-200 border border-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-400 cursor-pointer shadow-lg"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <!-- Modal Content Card (Clicking inside does NOT close) -->
+    <div
+      id="preview-image-container"
+      class="relative max-w-[92vw] max-h-[88vh] flex items-center justify-center rounded-2xl overflow-hidden border border-white/15 shadow-2xl bg-slate-950/80 p-2 sm:p-3 transition-transform duration-300 scale-95"
+    >
+      <img
+        src="./LOGOPIC.jpeg"
+        alt="Sai Nadh Raju - Profile Photo"
+        class="max-w-full max-h-[82vh] w-auto h-auto object-contain rounded-xl select-none"
+      />
+    </div>
+  </div>
+
+  <!-- =====================================================================
        MODAL 2: FULL INTERACTIVE RESUME VIEWER (FROM UPLOADED PDF)
   ====================================================================== -->
   <div id="resume-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
@@ -2409,9 +2479,10 @@
 
     function renderSkills(filter = 'all') {
       const grid = document.getElementById('skills-grid');
+      if (!grid) return;
       const filtered = filter === 'all' ? SKILLS_DATA : SKILLS_DATA.filter(s => s.cat === filter);
       grid.innerHTML = filtered.map(s => `
-        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group">
+        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group skill-rocket-item" data-skill-item="true">
           <div class="tilt-content">
             <div class="w-9 h-9 rounded-xl pill-badge flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
               <i class="${s.icon}"></i>
@@ -2422,6 +2493,9 @@
         </div>
       `).join('');
       initTiltCards();
+      if (typeof syncSkillsWithController === 'function') {
+        syncSkillsWithController();
+      }
     }
 
     function filterSkills(category) {
@@ -2592,6 +2666,82 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
+
+    // Full-Screen Image Preview Modal Controller
+    function openImagePreviewModal() {
+      const modal = document.getElementById('image-preview-modal');
+      const container = document.getElementById('preview-image-container');
+      const closeBtn = document.getElementById('close-image-preview');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      void modal.offsetWidth; // Force layout reflow for CSS opacity transition
+      modal.classList.remove('opacity-0');
+      modal.classList.add('opacity-100');
+      if (container) {
+        container.classList.remove('scale-95');
+        container.classList.add('scale-100');
+      }
+      document.body.style.overflow = 'hidden';
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeImagePreviewModal() {
+      const modal = document.getElementById('image-preview-modal');
+      const container = document.getElementById('preview-image-container');
+      const logoBtn = document.getElementById('navbar-logo-btn');
+      if (!modal || modal.classList.contains('hidden')) return;
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0');
+      if (container) {
+        container.classList.remove('scale-100');
+        container.classList.add('scale-95');
+      }
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        if (logoBtn) logoBtn.focus();
+      }, 250);
+    }
+
+    // Wire up Image Preview Modal events on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoBtn = document.getElementById('navbar-logo-btn');
+      const modal = document.getElementById('image-preview-modal');
+      const closeBtn = document.getElementById('close-image-preview');
+      const container = document.getElementById('preview-image-container');
+
+      if (logoBtn) {
+        logoBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openImagePreviewModal();
+        });
+      }
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeImagePreviewModal();
+        });
+      }
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (container && !container.contains(e.target)) {
+            closeImagePreviewModal();
+          }
+        });
+      }
+      if (container) {
+        container.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+          closeImagePreviewModal();
+        }
+      });
+    });
 
     function copyToClipboard(text, message) {
       navigator.clipboard.writeText(text);
@@ -2896,8 +3046,12 @@
 
     // Initialize everything on Window Load
     window.onload = function () {
-      renderSkills('all');
-      initTiltCards();
+      const grid = document.getElementById('skills-grid');
+      if (!grid || !grid.children.length) {
+        renderSkills('all');
+      } else {
+        initTiltCards();
+      }
       initHero3D();
       initColoridoGrid();
 
@@ -3265,17 +3419,9 @@
       candidateCards.forEach(card => repeatableCardObserver.observe(card));
 
       // =========================================================================
-      // PART B: SKILLS SECTION — SHUFFLED CHAOS TO 4.5s ROCKET SPARK PROPULSION
+      // PART B: SKILLS SECTION — SYNCHRONIZED ROCKET SPARK PROPULSION ENGINE
       // =========================================================================
-      // Locate the Skills section
-      let skillsSection = document.querySelector('#skills, #tech-stack, [id*="skill"]');
-      if (!skillsSection) {
-        const skillHeading = Array.from(document.querySelectorAll('h2, h3')).find(
-          h => h.textContent.toLowerCase().includes('skill') || h.textContent.toLowerCase().includes('tech')
-        );
-        if (skillHeading) skillsSection = skillHeading.closest('section, div');
-      }
-
+      const skillsSection = document.getElementById('skills') || document.querySelector('[data-section-theme="quantum"]');
       if (!skillsSection) return;
       skillsSection.classList.add('skills-rocket-stage');
 
@@ -3289,67 +3435,66 @@
       const sCtx = sparkCanvas.getContext('2d');
 
       function resizeSparkCanvas() {
+        if (!sparkCanvas || !skillsSection) return;
         sparkCanvas.width = skillsSection.offsetWidth + 120;
         sparkCanvas.height = skillsSection.offsetHeight + 120;
       }
       resizeSparkCanvas();
       window.addEventListener('resize', resizeSparkCanvas);
 
-      // Ensure skills are rendered if dynamically generated
-      if (typeof renderSkills === 'function' && document.getElementById('skills-grid') && !document.getElementById('skills-grid').children.length) {
-        renderSkills('all');
+      // Helper to always retrieve the actual, live skill card elements in the DOM
+      function getActiveSkillCards() {
+        const grid = document.getElementById('skills-grid');
+        if (!grid) return [];
+        return Array.from(grid.querySelectorAll(':scope > div'));
       }
 
-      // Collect all skill cards / pills / badges inside the Skills section
-      let skillItems = Array.from(skillsSection.querySelectorAll(
-        '#skills-grid > div, .skill-tag, .skill-pill, .skill-card, .tech-badge, .chip, span[class*="skill"], div[class*="skill-"], li'
-      )).filter(el => el.children.length <= 4 && el.textContent.trim().length > 0);
-
-      // Fallback if skills are grouped in cards
-      if (skillItems.length < 4) {
-        skillItems = Array.from(skillsSection.querySelectorAll('#skills-grid > div, :scope > div > div > div, :scope > div > div')).filter(
-          el => el.offsetHeight > 35 && el.offsetHeight < 450
-        );
+      // Check whether Skills section or its grid is currently in the viewport
+      function isSkillsInViewport() {
+        if (!skillsSection) return false;
+        const rect = skillsSection.getBoundingClientRect();
+        return rect.top < (window.innerHeight || document.documentElement.clientHeight) + 80 && rect.bottom > -80;
       }
 
-      // Shuffle helper: scatters all skills randomly across the stage
-      function shuffleSkills() {
-        if (typeof renderSkills === 'function' && document.getElementById('skills-grid') && !document.getElementById('skills-grid').children.length) {
-          renderSkills('all');
+      // Initialize individual card shuffle state and properties
+      function applyCardShuffleState(item, index) {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        item.classList.remove('rocket-assembling', 'rocket-thruster-active', 'rocket-docked');
+        item.classList.add('skill-rocket-item');
+
+        if (prefersReduced) {
+          item.classList.add('rocket-docked');
+          item.style.setProperty('--shuffle-x', '0px');
+          item.style.setProperty('--shuffle-y', '0px');
+          item.style.setProperty('--shuffle-rot', '0deg');
+          item.style.setProperty('--rocket-delay', '0s');
+          return;
         }
-        skillItems = Array.from(skillsSection.querySelectorAll(
-          '#skills-grid > div, .skill-tag, .skill-pill, .skill-card, .tech-badge, .chip, span[class*="skill"], div[class*="skill-"], li'
-        )).filter(el => el.children.length <= 4 && el.textContent.trim().length > 0);
-        if (skillItems.length < 4) {
-          skillItems = Array.from(skillsSection.querySelectorAll('#skills-grid > div, :scope > div > div > div, :scope > div > div')).filter(
-            el => el.offsetHeight > 35 && el.offsetHeight < 450
-          );
-        }
 
-        skillItems.forEach((item, index) => {
-          item.classList.remove('rocket-assembling', 'rocket-thruster-active', 'rocket-docked');
-          item.classList.add('skill-rocket-item');
+        // Staggered delay: 0s to 0.315s smooth sequence
+        const delay = (index % 8) * 0.045;
 
-          // Clean stagger delay for rocket propulsion
-          const delay = (index % 8) * 0.05;
+        // Chaotic shuffled offsets from both sides & vertical scatter
+        const angle = (index * 137.5) * (Math.PI / 180);
+        const radiusX = 140 + (index % 5) * 60;
+        const radiusY = 85 + (index % 4) * 45;
+        const randX = Math.round(Math.cos(angle) * radiusX + (Math.random() - 0.5) * 85);
+        const randY = Math.round(Math.sin(angle) * radiusY + (Math.random() - 0.5) * 65);
+        const randRot = Math.round((Math.random() - 0.5) * 75);
 
-          // Generate chaotic shuffled offsets from both sides & vertical scatter
-          const angle = (index * 137.5) * (Math.PI / 180);
-          const radiusX = 180 + (index % 5) * 75;
-          const radiusY = 110 + (index % 4) * 55;
-          const randX = Math.round(Math.cos(angle) * radiusX + (Math.random() - 0.5) * 120);
-          const randY = Math.round(Math.sin(angle) * radiusY + (Math.random() - 0.5) * 90);
-          const randRot = Math.round((Math.random() - 0.5) * 110);
+        item.style.setProperty('--shuffle-x', `${randX}px`);
+        item.style.setProperty('--shuffle-y', `${randY}px`);
+        item.style.setProperty('--shuffle-rot', `${randRot}deg`);
+        item.style.setProperty('--rocket-delay', `${delay.toFixed(3)}s`);
+      }
 
-          item.style.setProperty('--shuffle-x', `${randX}px`);
-          item.style.setProperty('--shuffle-y', `${randY}px`);
-          item.style.setProperty('--shuffle-rot', `${randRot}deg`);
-          item.style.setProperty('--rocket-delay', `${delay.toFixed(3)}s`);
+      // Shuffle all currently rendered skill cards
+      function shuffleAllSkillCards() {
+        const cards = getActiveSkillCards();
+        cards.forEach((card, idx) => {
+          applyCardShuffleState(card, idx);
         });
       }
-
-      // Initialize in shuffled state before user visits
-      shuffleSkills();
 
       // Rocket Spark Particle Engine
       let sparks = [];
@@ -3359,12 +3504,13 @@
       const ASSEMBLY_DURATION = 4600; // 4.6 seconds total arrangement time
 
       function spawnRocketSparks() {
+        if (!skillsSection) return;
         const stageRect = skillsSection.getBoundingClientRect();
         const blueShuttlePalette = ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7'];
+        const cards = getActiveSkillCards();
 
-        skillItems.forEach((item) => {
+        cards.forEach((item) => {
           if (!item.classList.contains('rocket-thruster-active')) return;
-          // Emit on only ~35% of frames per item to keep intensity clean and subtle
           if (Math.random() > 0.35) return;
 
           const r = item.getBoundingClientRect();
@@ -3374,7 +3520,7 @@
           sparks.push({
             x: cx,
             y: cy,
-            vx: (Math.random() - 0.5) * 1.1, // Tight, focused shuttle exhaust stream
+            vx: (Math.random() - 0.5) * 1.1,
             vy: 1.5 + Math.random() * 2.4,
             size: 1.2 + Math.random() * 1.3,
             alpha: 0.48,
@@ -3388,33 +3534,34 @@
         if (!launchStartTime) launchStartTime = timestamp;
         const elapsed = timestamp - launchStartTime;
 
-        sCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+        if (sCtx && sparkCanvas) {
+          sCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
 
-        // Emit sparks while skills are actively flying into position (first 4.3 seconds)
-        if (elapsed < ASSEMBLY_DURATION - 300) {
-          spawnRocketSparks();
-        }
-
-        for (let i = sparks.length - 1; i >= 0; i--) {
-          const p = sparks[i];
-          p.x += p.vx;
-          p.y += p.vy;
-          p.alpha -= p.decay;
-
-          if (p.alpha <= 0) {
-            sparks.splice(i, 1);
-            continue;
+          if (elapsed < ASSEMBLY_DURATION - 300) {
+            spawnRocketSparks();
           }
 
-          sCtx.save();
-          sCtx.globalAlpha = Math.max(0, p.alpha);
-          sCtx.fillStyle = p.color;
-          sCtx.shadowColor = p.color;
-          sCtx.shadowBlur = 10;
-          sCtx.beginPath();
-          sCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          sCtx.fill();
-          sCtx.restore();
+          for (let i = sparks.length - 1; i >= 0; i--) {
+            const p = sparks[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0) {
+              sparks.splice(i, 1);
+              continue;
+            }
+
+            sCtx.save();
+            sCtx.globalAlpha = Math.max(0, p.alpha);
+            sCtx.fillStyle = p.color;
+            sCtx.shadowColor = p.color;
+            sCtx.shadowBlur = 10;
+            sCtx.beginPath();
+            sCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            sCtx.fill();
+            sCtx.restore();
+          }
         }
 
         if (elapsed < ASSEMBLY_DURATION + 600 || sparks.length > 0) {
@@ -3422,15 +3569,27 @@
         }
       }
 
-      function triggerSkillsRocketAssembly() {
+      // Launch the rocket assembly for all active skill cards
+      function launchSkillsAssembly() {
+        const cards = getActiveSkillCards();
+        if (!cards.length) return;
+
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) {
+          cards.forEach(card => {
+            card.classList.remove('rocket-assembling', 'rocket-thruster-active');
+            card.classList.add('rocket-docked');
+          });
+          return;
+        }
+
         resizeSparkCanvas();
-        // Force reflow so browser registers the shuffled starting coordinates
-        void skillsSection.offsetWidth;
+        void skillsSection.offsetWidth; // Force layout reflow
 
         launchStartTime = 0;
         sparks = [];
 
-        skillItems.forEach(item => {
+        cards.forEach(item => {
           item.classList.add('rocket-assembling', 'rocket-thruster-active');
           item.classList.remove('rocket-docked');
         });
@@ -3438,43 +3597,97 @@
         if (rocketAnimFrame) cancelAnimationFrame(rocketAnimFrame);
         rocketAnimFrame = requestAnimationFrame(renderRocketSparks);
 
-        // After 4.5 seconds, shut off rocket thrusters and flash the docked cyan/violet glow
         clearTimeout(dockTimeout);
         dockTimeout = setTimeout(() => {
-          skillItems.forEach(item => {
+          const currentCards = getActiveSkillCards();
+          currentCards.forEach(item => {
             item.classList.remove('rocket-thruster-active');
             item.classList.add('rocket-docked');
           });
         }, ASSEMBLY_DURATION);
       }
 
-      // Observe Skills Section: Launch rockets on every visit, re-shuffle when leaving
-      const skillsObserver = new IntersectionObserver((entries) => {
+      // Expose controller sync function for dynamic filter clicks and re-renders
+      window.syncSkillsWithController = function () {
+        const cards = getActiveSkillCards();
+        if (!cards.length) return;
+
+        // Register each dynamically rendered card with individual card observer
+        cards.forEach((card, idx) => {
+          applyCardShuffleState(card, idx);
+          skillCardObserver.observe(card);
+          attachInteractiveTilt(card);
+        });
+
+        if (isSkillsInViewport()) {
+          requestAnimationFrame(() => {
+            launchSkillsAssembly();
+          });
+        }
+      };
+
+      // Ensure skills are rendered initially if not already in DOM
+      const skillsGrid = document.getElementById('skills-grid');
+      if (typeof renderSkills === 'function' && skillsGrid && !skillsGrid.children.length) {
+        renderSkills('all');
+      } else {
+        shuffleAllSkillCards();
+      }
+
+      // Individual Card IntersectionObserver — guarantees each card animates into view
+      const skillCardObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            triggerSkillsRocketAssembly();
+            const card = entry.target;
+            if (!card.classList.contains('rocket-assembling') && !card.classList.contains('rocket-docked')) {
+              card.classList.add('rocket-assembling', 'rocket-thruster-active');
+              setTimeout(() => {
+                card.classList.remove('rocket-thruster-active');
+                card.classList.add('rocket-docked');
+              }, ASSEMBLY_DURATION);
+            }
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '50px 0px -30px 0px' });
+
+      // Section-level IntersectionObserver — controls stage assembly and replay on revisits
+      const skillsSectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            launchSkillsAssembly();
           } else {
             clearTimeout(dockTimeout);
             if (rocketAnimFrame) cancelAnimationFrame(rocketAnimFrame);
-            sCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
-            shuffleSkills();
+            if (sCtx && sparkCanvas) sCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+            shuffleAllSkillCards();
           }
         });
-      }, { threshold: 0.18 });
+      }, { threshold: 0.08, rootMargin: '60px 0px -40px 0px' });
 
-      skillsObserver.observe(skillsSection);
+      skillsSectionObserver.observe(skillsSection);
+
+      // Register initially loaded cards
+      getActiveSkillCards().forEach(card => {
+        skillCardObserver.observe(card);
+      });
+
+      // Listen for navbar clicks or direct hash navigation to #skills
+      document.querySelectorAll('a[href="#skills"]').forEach(link => {
+        link.addEventListener('click', () => {
+          setTimeout(() => {
+            launchSkillsAssembly();
+          }, 350);
+        });
+      });
 
       // =========================================================================
-      // PART C: SNAPPY 3D MOUSE TILT ON EXPERIENCE, PROJECTS & DOCKED SKILLS
+      // PART C: SNAPPY 3D MOUSE TILT ON LOWER SECTION CARDS & DOCKED SKILLS
       // =========================================================================
-      const interactiveBoxes = [
-        ...candidateCards,
-        ...skillItems
-      ];
+      function attachInteractiveTilt(box) {
+        if (!box || box._hasTilt) return;
+        box._hasTilt = true;
 
-      interactiveBoxes.forEach(box => {
         box.addEventListener('mousemove', (e) => {
-          // Only tilt once the card has finished its entrance/rocket animation
           if (box.classList.contains('rocket-thruster-active')) return;
           const rect = box.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -3490,7 +3703,10 @@
           box.style.transform = '';
           box.style.removeProperty('transform');
         });
-      });
+      }
+
+      candidateCards.forEach(card => attachInteractiveTilt(card));
+      getActiveSkillCards().forEach(card => attachInteractiveTilt(card));
     });
   </script>
 

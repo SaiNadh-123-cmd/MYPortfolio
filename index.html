@@ -912,12 +912,28 @@
       transform: translate3d(160px, 35px, 0) scale(0.92) rotate(2deg);
     }
 
-    /* Active state when section is visited */
+    /* Snappy hover lift & tilt for Experience, Projects, Leadership & Arena boxes */
     .side-fly-left.card-in-view,
     .side-fly-right.card-in-view {
-      opacity: 1 !important;
-      transform: translate3d(0, 0, 0) scale(1) rotate(0deg) !important;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(168, 85, 247, 0.28);
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      transition:
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s ease,
+        border-color 0.35s ease,
+        opacity 0.6s ease-out !important;
+      transition-delay: 0s !important;
+    }
+
+    .side-fly-left.card-in-view:hover,
+    .side-fly-right.card-in-view:hover {
+      transform: translate3d(0, -10px, 0) scale(1.025) !important;
+      border-color: #38bdf8 !important;
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.75),
+        0 0 28px rgba(56, 189, 248, 0.45),
+        0 0 15px rgba(168, 85, 247, 0.35) !important;
+      z-index: 15;
     }
 
     /* =========================================================================
@@ -928,13 +944,15 @@
       overflow: visible !important;
     }
 
+    /* Place canvas strictly BEHIND skill cards so text visibility is 100% clear */
     #skills-spark-canvas {
       position: absolute;
-      inset: -60px;
-      width: calc(100% + 120px);
-      height: calc(100% + 120px);
+      inset: -40px;
+      width: calc(100% + 80px);
+      height: calc(100% + 80px);
       pointer-events: none;
-      z-index: 30;
+      z-index: 1 !important;
+      opacity: 0.65;
     }
 
     /* Shuffled state BEFORE user visits Skills section */
@@ -946,7 +964,7 @@
                  scale(0.82);
       transition: none;
       will-change: transform, opacity, box-shadow;
-      z-index: 5;
+      z-index: 5 !important; /* Always sits above the blue fire canvas */
     }
 
     /* 4.5-Second Rocket-Propelled Assembly when user enters Skills page */
@@ -960,41 +978,62 @@
       transition-delay: var(--rocket-delay, 0s);
     }
 
-    /* Glowing Rocket Exhaust Plume attached to each moving skill */
+    /* Subtle Space Shuttle Blue Rim Glow while flying (no inner glare over text) */
     .skill-rocket-item.rocket-thruster-active {
       box-shadow:
-        0 0 18px rgba(251, 146, 60, 0.85),
-        0 0 34px rgba(168, 85, 247, 0.65),
-        inset 0 0 12px rgba(250, 204, 21, 0.45) !important;
-      border-color: #fb923c !important;
+        0 8px 20px rgba(2, 132, 199, 0.35),
+        0 0 14px rgba(56, 189, 248, 0.4) !important;
+      border-color: rgba(56, 189, 248, 0.7) !important;
     }
 
+    /* Focused Space Shuttle Blue Mach-Cone Flame Underneath Each Skill */
     .skill-rocket-item.rocket-thruster-active::after {
       content: "";
       position: absolute;
-      bottom: -14px;
+      bottom: -13px;
       left: 50%;
       transform: translateX(-50%);
-      width: 65%;
-      height: 18px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fef08a 0%, #fb923c 45%, #ec4899 75%, transparent 100%);
-      filter: blur(4px);
-      animation: thrusterFlicker 0.12s infinite alternate;
+      width: 26px;
+      height: 15px;
+      clip-path: polygon(20% 0%, 80% 0%, 50% 100%);
+      background: linear-gradient(
+        to bottom,
+        #ffffff 0%,
+        #7dd3fc 28%,
+        #0ea5e9 65%,
+        rgba(2, 132, 199, 0) 100%
+      );
+      filter: drop-shadow(0 4px 6px rgba(56, 189, 248, 0.6));
+      animation: shuttleBlueFlame 0.1s infinite alternate;
       pointer-events: none;
+      z-index: -1;
     }
 
-    /* Final Docked Lock-In Glow after 4.5s */
+    @keyframes shuttleBlueFlame {
+      0%   { transform: translateX(-50%) scaleY(0.85) scaleX(0.92); opacity: 0.7; }
+      100% { transform: translateX(-50%) scaleY(1.2) scaleX(1.05); opacity: 0.95; }
+    }
+
+    /* Restore fast hover movement on Skills once they finish their 4.5s assembly */
     .skill-rocket-item.rocket-docked {
-      box-shadow:
-        0 0 20px rgba(34, 211, 238, 0.55),
-        0 0 35px rgba(168, 85, 247, 0.35) !important;
-      border-color: rgba(34, 211, 238, 0.7) !important;
+      opacity: 1;
+      transform: translate3d(0px, 0px, 0px) rotate(0deg) scale(1);
+      transition:
+        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.28s ease,
+        border-color 0.28s ease !important;
+      transition-delay: 0s !important;
+      border-color: rgba(56, 189, 248, 0.45) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 12px rgba(56, 189, 248, 0.2) !important;
     }
 
-    @keyframes thrusterFlicker {
-      0%   { transform: translateX(-50%) scaleY(0.8) scaleX(0.9); opacity: 0.75; }
-      100% { transform: translateX(-50%) scaleY(1.35) scaleX(1.15); opacity: 1; }
+    .skill-rocket-item.rocket-docked:hover {
+      transform: translate3d(0, -8px, 0) scale(1.06) !important;
+      border-color: #38bdf8 !important;
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.65),
+        0 0 22px rgba(56, 189, 248, 0.6) !important;
+      z-index: 20;
     }
 
   </style>
@@ -3288,25 +3327,27 @@
 
       function spawnRocketSparks() {
         const stageRect = skillsSection.getBoundingClientRect();
+        const blueShuttlePalette = ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7'];
+
         skillItems.forEach((item) => {
           if (!item.classList.contains('rocket-thruster-active')) return;
+          // Emit on only ~35% of frames per item to keep intensity clean and subtle
+          if (Math.random() > 0.35) return;
+
           const r = item.getBoundingClientRect();
-          // Emit 2-3 fiery rocket sparks per skill item per frame
-          for (let k = 0; k < 2; k++) {
-            const cx = (r.left - stageRect.left) + r.width / 2 + 60 + (Math.random() - 0.5) * (r.width * 0.6);
-            const cy = (r.bottom - stageRect.top) + 60;
-            const colors = ['#fef08a', '#fb923c', '#f97316', '#ec4899', '#a855f7', '#22d3ee'];
-            sparks.push({
-              x: cx,
-              y: cy,
-              vx: (Math.random() - 0.5) * 3.8,
-              vy: 1.8 + Math.random() * 4.2,
-              size: 2 + Math.random() * 3.5,
-              alpha: 1,
-              decay: 0.025 + Math.random() * 0.03,
-              color: colors[Math.floor(Math.random() * colors.length)]
-            });
-          }
+          const cx = (r.left - stageRect.left) + r.width / 2 + 40 + (Math.random() - 0.5) * 8;
+          const cy = (r.bottom - stageRect.top) + 42;
+
+          sparks.push({
+            x: cx,
+            y: cy,
+            vx: (Math.random() - 0.5) * 1.1, // Tight, focused shuttle exhaust stream
+            vy: 1.5 + Math.random() * 2.4,
+            size: 1.2 + Math.random() * 1.3,
+            alpha: 0.48,
+            decay: 0.03 + Math.random() * 0.025,
+            color: blueShuttlePalette[Math.floor(Math.random() * blueShuttlePalette.length)]
+          });
         });
       }
 
@@ -3389,6 +3430,34 @@
       }, { threshold: 0.18 });
 
       skillsObserver.observe(skillsSection);
+
+      // =========================================================================
+      // PART C: SNAPPY 3D MOUSE TILT ON EXPERIENCE, PROJECTS & DOCKED SKILLS
+      // =========================================================================
+      const interactiveBoxes = [
+        ...candidateCards,
+        ...skillItems
+      ];
+
+      interactiveBoxes.forEach(box => {
+        box.addEventListener('mousemove', (e) => {
+          // Only tilt once the card has finished its entrance/rocket animation
+          if (box.classList.contains('rocket-thruster-active')) return;
+          const rect = box.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const tiltY = ((x / rect.width) - 0.5) * 10;
+          const tiltX = ((y / rect.height) - 0.5) * -10;
+          const transformVal = `perspective(800px) translate3d(0, -8px, 0) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+          box.style.transform = transformVal;
+          box.style.setProperty('transform', transformVal, 'important');
+        });
+
+        box.addEventListener('mouseleave', () => {
+          box.style.transform = '';
+          box.style.removeProperty('transform');
+        });
+      });
     });
   </script>
 

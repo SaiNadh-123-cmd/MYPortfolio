@@ -401,25 +401,26 @@
     }
 
     .macbook-wrapper {
-      width: 60vw;
-      min-width: 320px;
-      max-width: 700px;
-      perspective: 1200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 18vh;
+      position: relative;
+      width: 50vw;
+      min-width: 280px;
+      max-width: 550px;
+      height: 340px;
+      perspective: 1500px;
+      margin: 0 auto;
+      margin-top: 10vh;
     }
 
     .macbook-base {
-      width: 100%;
-      height: 350px;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; 
+      height: 100%;
       background: linear-gradient(to bottom, #d4d4d7, #99999b);
       border-radius: 12px;
-      transform-origin: center;
-      transform: rotateX(65deg);
+      transform-origin: top center;
+      transform: rotateX(60deg);
       transform-style: preserve-3d;
-      position: relative;
       box-shadow: 0 25px 35px rgba(0,0,0,0.8), inset 0 3px 6px rgba(255,255,255,0.4);
       display: flex;
       flex-direction: column;
@@ -427,16 +428,16 @@
     }
 
     .macbook-lid {
-      width: 100%;
-      height: 400px;
-      background: #a0a0a5;
-      border-radius: 16px 16px 0 0;
       position: absolute;
       bottom: 100%;
+      left: 0; right: 0;
+      width: 100%;
+      height: 340px;
+      background: #a0a0a5;
+      border-radius: 16px 16px 0 0;
       transform-origin: bottom center;
-      transform: rotateX(-90deg);
       transition: transform 0.1s linear;
-      padding: 12px;
+      padding: 10px;
       box-shadow: inset 0 2px 5px rgba(255,255,255,0.5);
     }
 

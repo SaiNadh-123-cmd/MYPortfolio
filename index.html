@@ -750,9 +750,12 @@
       perspective: 1000px;
       cursor: grab;
       touch-action: none; /* Prevents mobile/scroll lag */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .cube-scene:active {
+    .cube-scene:active,
+    .cube-scene.is-grabbing {
       cursor: grabbing;
     }
 
@@ -774,7 +777,8 @@
       will-change: transform;
       /* Clean absolute rotation state, no compounding offsets */
       transform: rotateX(var(--cube-rx, -18deg)) rotateY(var(--cube-ry, -28deg));
-      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: auto;
     }
 
     .nav-cube.is-dragging {
@@ -786,8 +790,7 @@
       width: 190px;
       height: 190px;
       border-radius: 18px;
-      background: rgba(16, 12, 34, 0.88);
-      backdrop-filter: blur(12px);
+      background: rgba(16, 12, 34, 0.92);
       border: 2px solid rgba(168, 85, 247, 0.65);
       box-shadow:
         0 0 20px rgba(168, 85, 247, 0.25),
@@ -800,13 +803,16 @@
       padding: 14px;
       text-align: center;
       cursor: pointer;
-      backface-visibility: visible;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .cube-face:hover {
       border-color: #22d3ee;
-      background: rgba(28, 20, 58, 0.95);
+      background: rgba(28, 20, 58, 0.98);
       box-shadow:
         0 0 28px rgba(34, 211, 238, 0.65),
         inset 0 0 25px rgba(168, 85, 247, 0.45);
@@ -1038,30 +1044,7 @@
       z-index: 20;
     }
 
-    /* Primary Skill Badges — Glowing Cyan / Accent Priority Hierarchy */
-    .skill-card-primary {
-      border: 1.5px solid rgba(56, 189, 248, 0.55) !important;
-      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 16px rgba(56, 189, 248, 0.18), inset 0 0 12px rgba(56, 189, 248, 0.08) !important;
-    }
 
-    .skill-card-primary:hover {
-      border-color: #38bdf8 !important;
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7), 0 0 28px rgba(56, 189, 248, 0.65), inset 0 0 18px rgba(56, 189, 248, 0.22) !important;
-    }
-
-    /* Secondary Skill Badges — Muted Styling (e.g. Java, C, Git, Cloud) */
-    .skill-card-secondary {
-      border: 1px solid rgba(148, 163, 184, 0.2) !important;
-      background: rgba(15, 23, 42, 0.45) !important;
-      opacity: 0.85;
-    }
-
-    .skill-card-secondary:hover {
-      opacity: 1;
-      border-color: rgba(148, 163, 184, 0.45) !important;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5) !important;
-    }
 
   </style>
 </head>
@@ -2396,63 +2379,48 @@
       });
     }, { passive: true });
 
-    // 2. SKILLS MATRIX DATA & INTERACTIVE FILTERING (Python, DSA & Backend as Primary; Java as Secondary)
+    // 2. SKILLS MATRIX DATA & INTERACTIVE FILTERING
     const SKILLS_DATA = [
-      // PRIMARY & CORE TECH STACK (Front of rocket assembly & prominent hierarchy)
-      { name: 'Python', cat: 'core', priority: 'primary', icon: 'fa-brands fa-python', level: 'Primary Language • Core' },
-      { name: 'Data Structures & Algorithms', cat: 'core', priority: 'primary', icon: 'fa-solid fa-code-branch', level: 'DSA • 1000+ Solved 💎' },
-      { name: 'Django', cat: 'fullstack', priority: 'primary', icon: 'fa-solid fa-server', level: 'Backend & REST Architecture' },
-      { name: 'FastAPI', cat: 'fullstack', priority: 'primary', icon: 'fa-solid fa-bolt', level: 'High-Speed Python AI APIs' },
-      { name: 'Node.js & Express', cat: 'fullstack', priority: 'primary', icon: 'fa-brands fa-node-js', level: 'Backend Microservices' },
-      { name: 'SQL & Database Systems', cat: 'fullstack', priority: 'primary', icon: 'fa-solid fa-database', level: 'Relational Design & Indexing' },
-      { name: 'Supabase & MongoDB', cat: 'fullstack', priority: 'primary', icon: 'fa-solid fa-leaf', level: 'NoSQL & Realtime DBs' },
-      { name: 'Generative AI & LLMs', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-brain', level: 'Oracle Certified Pro' },
-      { name: 'RAG & Vector Pipelines', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-network-wired', level: 'Enterprise Doc Intelligence' },
-      { name: 'Pandas & NumPy', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-table', level: 'Data Analytics & Processing' },
-      { name: 'Power BI Dashboards', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-chart-column', level: 'Executive BI & Analytics' },
-      { name: 'React.js & Tailwind CSS', cat: 'fullstack', priority: 'primary', icon: 'fa-brands fa-react', level: 'Modern Frontend & 3D HUD' },
-      { name: 'JavaScript (ES6+)', cat: 'fullstack', priority: 'primary', icon: 'fa-brands fa-js', level: 'Interactive Web & Async Logic' },
-      { name: 'OOP & System Design', cat: 'core', priority: 'primary', icon: 'fa-solid fa-sitemap', level: 'Scalable Architecture' },
-      { name: 'Scikit-Learn & ML', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-robot', level: 'Predictive Modeling' },
-      { name: 'Prompt Engineering', cat: 'ai', priority: 'primary', icon: 'fa-solid fa-wand-magic-sparkles', level: 'Google Prompt Wars' },
-
-      // SECONDARY TECH STACK
-      { name: 'Java', cat: 'core', priority: 'secondary', icon: 'fa-brands fa-java', level: 'Secondary Language • OOP' },
-      { name: 'C / C++', cat: 'core', priority: 'secondary', icon: 'fa-solid fa-microchip', level: 'Secondary • Systems Foundations' },
-      { name: 'Git & Version Control', cat: 'core', priority: 'secondary', icon: 'fa-brands fa-git-alt', level: 'Secondary • CI/CD & Collaboration' },
-      { name: 'Cloud (Netlify & Cloudflare)', cat: 'fullstack', priority: 'secondary', icon: 'fa-solid fa-cloud', level: 'Secondary • Edge Hosting' },
-      { name: 'Matplotlib & Seaborn', cat: 'ai', priority: 'secondary', icon: 'fa-solid fa-chart-area', level: 'Visual Storytelling' },
-      { name: 'ETL Pipelines', cat: 'ai', priority: 'secondary', icon: 'fa-solid fa-arrows-spin', level: 'Data Ingestion & Transform' },
-      { name: 'React Three Fiber', cat: 'fullstack', priority: 'secondary', icon: 'fa-solid fa-cube', level: '3D Spatial WebGL' },
-      { name: 'UX & Glassmorphism', cat: 'fullstack', priority: 'secondary', icon: 'fa-solid fa-layer-group', level: 'Design Systems' }
+      { name: 'Python', cat: 'core', icon: 'fa-brands fa-python', level: 'Core Language • 0→1 Builder' },
+      { name: 'Data Structures & Algorithms', cat: 'core', icon: 'fa-solid fa-code-branch', level: '1000+ Solved • CodeChef Diamond 💎' },
+      { name: 'Django', cat: 'fullstack', icon: 'fa-solid fa-server', level: 'Backend & REST Architecture' },
+      { name: 'FastAPI', cat: 'fullstack', icon: 'fa-solid fa-bolt', level: 'High-Speed Python AI APIs' },
+      { name: 'Node.js & Express', cat: 'fullstack', icon: 'fa-brands fa-node-js', level: 'Backend Microservices' },
+      { name: 'SQL & Database Systems', cat: 'fullstack', icon: 'fa-solid fa-database', level: 'Relational Design & Indexing' },
+      { name: 'Supabase & MongoDB', cat: 'fullstack', icon: 'fa-solid fa-leaf', level: 'NoSQL & Realtime DBs' },
+      { name: 'Generative AI & LLMs', cat: 'ai', icon: 'fa-solid fa-brain', level: 'Oracle Certified Pro' },
+      { name: 'RAG & Vector Pipelines', cat: 'ai', icon: 'fa-solid fa-network-wired', level: 'Enterprise Doc Intelligence' },
+      { name: 'Pandas & NumPy', cat: 'ai', icon: 'fa-solid fa-table', level: 'Data Analytics & Processing' },
+      { name: 'Power BI Dashboards', cat: 'ai', icon: 'fa-solid fa-chart-column', level: 'Executive BI & Analytics' },
+      { name: 'React.js & Tailwind CSS', cat: 'fullstack', icon: 'fa-brands fa-react', level: 'Modern Frontend & 3D HUD' },
+      { name: 'JavaScript (ES6+)', cat: 'fullstack', icon: 'fa-brands fa-js', level: 'Interactive Web & Async Logic' },
+      { name: 'OOP & System Design', cat: 'core', icon: 'fa-solid fa-sitemap', level: 'Scalable Architecture' },
+      { name: 'Scikit-Learn & ML', cat: 'ai', icon: 'fa-solid fa-robot', level: 'Predictive Modeling' },
+      { name: 'Prompt Engineering', cat: 'ai', icon: 'fa-solid fa-wand-magic-sparkles', level: 'Google Prompt Wars' },
+      { name: 'Java', cat: 'core', icon: 'fa-brands fa-java', level: 'OOP & Systems Development' },
+      { name: 'C / C++', cat: 'core', icon: 'fa-solid fa-microchip', level: 'Systems & Low-Level Foundations' },
+      { name: 'Git & Version Control', cat: 'core', icon: 'fa-brands fa-git-alt', level: 'CI/CD & Collaboration' },
+      { name: 'Cloud (Netlify & Cloudflare)', cat: 'fullstack', icon: 'fa-solid fa-cloud', level: 'Edge Hosting & Serverless' },
+      { name: 'Matplotlib & Seaborn', cat: 'ai', icon: 'fa-solid fa-chart-area', level: 'Visual Storytelling' },
+      { name: 'ETL Pipelines', cat: 'ai', icon: 'fa-solid fa-arrows-spin', level: 'Data Ingestion & Transform' },
+      { name: 'React Three Fiber', cat: 'fullstack', icon: 'fa-solid fa-cube', level: '3D Spatial WebGL' },
+      { name: 'UX & Glassmorphism', cat: 'fullstack', icon: 'fa-solid fa-layer-group', level: 'Design Systems' }
     ];
 
     function renderSkills(filter = 'all') {
       const grid = document.getElementById('skills-grid');
       const filtered = filter === 'all' ? SKILLS_DATA : SKILLS_DATA.filter(s => s.cat === filter);
-      grid.innerHTML = filtered.map(s => {
-        const isPrimary = s.priority === 'primary';
-        const cardBorderClass = isPrimary ? 'skill-card-primary' : 'skill-card-secondary';
-        const badgeTag = isPrimary 
-          ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-mono-tech font-bold bg-cyan-400/15 text-cyan-300 border border-cyan-400/35">PRIMARY</span>`
-          : `<span class="px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-slate-400 border border-slate-700/60">SECONDARY</span>`;
-        const iconBg = isPrimary ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/40' : 'pill-badge';
-
-        return `
-        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group ${cardBorderClass}" data-priority="${s.priority}">
+      grid.innerHTML = filtered.map(s => `
+        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group">
           <div class="tilt-content">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center text-base">
-                <i class="${s.icon}"></i>
-              </div>
-              ${badgeTag}
+            <div class="w-9 h-9 rounded-xl pill-badge flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
+              <i class="${s.icon}"></i>
             </div>
             <h4 class="font-display font-bold text-sm" style="color: var(--text-primary);">${s.name}</h4>
             <p class="text-[11px] font-mono-tech mt-1" style="color: var(--text-secondary);">${s.level}</p>
           </div>
         </div>
-      `;
-      }).join('');
+      `).join('');
       initTiltCards();
     }
 
@@ -3106,6 +3074,7 @@
       let targetRx = -18;
       let targetRy = -28;
       let isDragging = false;
+      let activePointerId = null;
       let startX = 0, startY = 0;
       let totalDragMove = 0;
       let animFrameId = null;
@@ -3125,15 +3094,15 @@
         } else {
           cube.style.transition = 'none';
         }
-        cube.style.setProperty('--cube-rx', `${currentRx}deg`);
-        cube.style.setProperty('--cube-ry', `${currentRy}deg`);
+        cube.style.setProperty('--cube-rx', `${currentRx.toFixed(2)}deg`);
+        cube.style.setProperty('--cube-ry', `${currentRy.toFixed(2)}deg`);
       }
 
-      // Smooth 60 FPS lerp loop during drag to eliminate lag
+      // Smooth 60 FPS lerp loop during drag to eliminate jitter
       function renderLoop() {
         if (isDragging) {
-          currentRx += (targetRx - currentRx) * 0.25;
-          currentRy += (targetRy - currentRy) * 0.25;
+          currentRx += (targetRx - currentRx) * 0.3;
+          currentRy += (targetRy - currentRy) * 0.3;
           applyTransform(false);
           animFrameId = requestAnimationFrame(renderLoop);
         }
@@ -3154,7 +3123,7 @@
       }
 
       function jumpToFace(key, label) {
-        isDragging = false;
+        if (isDragging) stopDragging();
         if (animFrameId) cancelAnimationFrame(animFrameId);
         
         const face = cubeFaces.find(f => f.key === key);
@@ -3177,14 +3146,18 @@
       }
 
       scene.addEventListener('pointerdown', (e) => {
+        // Only react to primary mouse button or touch
+        if (e.button !== undefined && e.button !== 0) return;
         isDragging = true;
+        activePointerId = e.pointerId;
         totalDragMove = 0;
         startX = e.clientX;
         startY = e.clientY;
         targetRx = currentRx;
         targetRy = currentRy;
         cube.classList.add('is-dragging');
-        scene.setPointerCapture(e.pointerId);
+        scene.classList.add('is-grabbing');
+        try { scene.setPointerCapture(e.pointerId); } catch(err) {}
         if (animFrameId) cancelAnimationFrame(animFrameId);
         animFrameId = requestAnimationFrame(renderLoop);
       });
@@ -3202,17 +3175,30 @@
         startY = e.clientY;
       });
 
-      scene.addEventListener('pointerup', (e) => {
+      function stopDragging(e) {
         if (!isDragging) return;
         isDragging = false;
         cube.classList.remove('is-dragging');
+        scene.classList.remove('is-grabbing');
         if (animFrameId) cancelAnimationFrame(animFrameId);
-        try { scene.releasePointerCapture(e.pointerId); } catch(err) {}
-      });
+        currentRx = targetRx;
+        currentRy = targetRy;
+        applyTransform(false);
+        const pid = (e && e.pointerId) ? e.pointerId : activePointerId;
+        if (pid !== null) {
+          try { scene.releasePointerCapture(pid); } catch(err) {}
+          activePointerId = null;
+        }
+      }
+
+      scene.addEventListener('pointerup', stopDragging);
+      scene.addEventListener('pointercancel', stopDragging);
+      window.addEventListener('pointerup', stopDragging);
+      window.addEventListener('pointercancel', stopDragging);
 
       document.querySelectorAll('.cube-face').forEach(faceEl => {
         faceEl.addEventListener('click', (e) => {
-          if (totalDragMove > 6) return;
+          if (totalDragMove > 6) return; // Prevent triggering click during drag
           e.stopPropagation();
           const key = faceEl.getAttribute('data-section');
           const face = cubeFaces.find(f => f.key === key);
@@ -3235,18 +3221,18 @@
       // =========================================================================
       // PART A: REPEATABLE LEFT / RIGHT FLY-IN FOR EXPERIENCE, PROJECTS & BOXES
       // =========================================================================
-      const excludedContainers = '#page-1-splash, #neural-cube-portal, #laptop-scroll-track, nav, header';
+      const excludedContainers = '#page-1-splash, #page-2-hero, #hero, #neural-cube-portal, #laptop-scroll-track, nav, header, footer';
 
-      // Locate Experience, Leadership, Projects, Achievements, and Arena cards
+      // Locate Experience, Leadership, Projects, Achievements, and Arena cards strictly outside Hero & Cube
       const candidateCards = Array.from(document.querySelectorAll(
-        '#work .project-card, #projects .project-card, [id*="exp"] [class*="card"], [id*="lead"] [class*="card"], [id*="achiev"] [class*="card"], #arena [class*="card"], section:not(#page-1-splash):not(#laptop-scroll-track) .bento-card, section:not(#page-1-splash):not(#laptop-scroll-track) .stat-card, section:not(#page-1-splash):not(#laptop-scroll-track) .glass-card, section:not(#page-1-splash):not(#laptop-scroll-track) article'
-      )).filter(el => !el.closest(excludedContainers));
+        '#work .project-card, #projects .project-card, #experience [class*="card"], #leadership [class*="card"], #achievements [class*="card"], #arena [class*="card"], #certifications .tilt-card'
+      )).filter(el => !el.closest(excludedContainers) && !el.querySelector('#neural-cube-portal'));
 
-      // Also grab direct child cards inside Experience / Leadership / Work sections if custom classes are used
-      document.querySelectorAll('section, [id*="experience"], [id*="leadership"], [id*="work"], [id*="arena"]').forEach(sec => {
+      // Also grab direct child cards inside lower sections (Experience, Leadership, Work, Arena, Certifications)
+      document.querySelectorAll('#work, #experience, #leadership, #arena, #certifications').forEach(sec => {
         if (sec.matches(excludedContainers) || sec.id.toLowerCase().includes('skill')) return;
         sec.querySelectorAll(':scope > div > div, :scope > div > article').forEach(box => {
-          if (!box.closest(excludedContainers) && box.offsetHeight > 70 && box.offsetHeight < 750) {
+          if (!box.closest(excludedContainers) && !box.querySelector('#neural-cube-portal') && box.offsetHeight > 70 && box.offsetHeight < 750) {
             if (!candidateCards.includes(box)) candidateCards.push(box);
           }
         });
@@ -3344,10 +3330,8 @@
           item.classList.remove('rocket-assembling', 'rocket-thruster-active', 'rocket-docked');
           item.classList.add('skill-rocket-item');
 
-          const isPrimary = item.getAttribute('data-priority') === 'primary' || item.classList.contains('skill-card-primary');
-
-          // Primary badges launch first (0 to 0.1s), secondary badges launch after (0.24s to 0.5s)
-          const delay = isPrimary ? (index % 6) * 0.02 : 0.24 + (index % 6) * 0.05;
+          // Clean stagger delay for rocket propulsion
+          const delay = (index % 8) * 0.05;
 
           // Generate chaotic shuffled offsets from both sides & vertical scatter
           const angle = (index * 137.5) * (Math.PI / 180);

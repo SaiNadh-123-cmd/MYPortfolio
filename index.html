@@ -3103,11 +3103,13 @@
 
       let currentRx = -18;
       let currentRy = -28;
+      let targetRx = -18;
+      let targetRy = -28;
       let isDragging = false;
       let startX = 0, startY = 0;
       let totalDragMove = 0;
+      let animFrameId = null;
 
-      // Exact angles for the 6 faces
       const cubeFaces = [
         { key: 'profile',    label: 'PROFILE',    rx: 0,   ry: 0 },
         { key: 'skills',     label: 'SKILLS',     rx: 0,   ry: -90 },
@@ -3117,18 +3119,27 @@
         { key: 'arena',      label: 'SIMULATOR',  rx: 90,  ry: 0 }
       ];
 
-      function updateCubeTransform(rx, ry, animate = false) {
+      function applyTransform(animate = false) {
         if (animate) {
-          cube.style.transition = 'transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+          cube.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
         } else {
           cube.style.transition = 'none';
         }
-        cube.style.setProperty('--cube-rx', `${rx}deg`);
-        cube.style.setProperty('--cube-ry', `${ry}deg`);
+        cube.style.setProperty('--cube-rx', `${currentRx}deg`);
+        cube.style.setProperty('--cube-ry', `${currentRy}deg`);
       }
 
-      // Initial set
-      updateCubeTransform(currentRx, currentRy, false);
+      // Smooth 60 FPS lerp loop during drag to eliminate lag
+      function renderLoop() {
+        if (isDragging) {
+          currentRx += (targetRx - currentRx) * 0.25;
+          currentRy += (targetRy - currentRy) * 0.25;
+          applyTransform(false);
+          animFrameId = requestAnimationFrame(renderLoop);
+        }
+      }
+
+      applyTransform(false);
 
       function findSection(key) {
         const map = {
@@ -3143,12 +3154,15 @@
       }
 
       function jumpToFace(key, label) {
+        isDragging = false;
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        
         const face = cubeFaces.find(f => f.key === key);
         if (!face) return;
 
-        currentRx = face.rx;
-        currentRy = face.ry;
-        updateCubeTransform(currentRx, currentRy, true);
+        currentRx = targetRx = face.rx;
+        currentRy = targetRy = face.ry;
+        applyTransform(true);
 
         if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${label}</strong>`;
         if (statusText) statusText.textContent = `⚡ JUMPING TO ${label}...`;
@@ -3158,18 +3172,21 @@
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           setTimeout(() => {
             if (statusText) statusText.textContent = 'DRAG TO ROTATE • CLICK FACE OR ROLL';
-          }, 1000);
-        }, 450);
+          }, 900);
+        }, 400);
       }
 
-      // Smooth Drag Controls
       scene.addEventListener('pointerdown', (e) => {
         isDragging = true;
         totalDragMove = 0;
         startX = e.clientX;
         startY = e.clientY;
+        targetRx = currentRx;
+        targetRy = currentRy;
         cube.classList.add('is-dragging');
         scene.setPointerCapture(e.pointerId);
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        animFrameId = requestAnimationFrame(renderLoop);
       });
 
       scene.addEventListener('pointermove', (e) => {
@@ -3178,9 +3195,8 @@
         const dy = e.clientY - startY;
         totalDragMove += Math.hypot(dx, dy);
 
-        currentRy += dx * 0.5;
-        currentRx -= dy * 0.5;
-        updateCubeTransform(currentRx, currentRy, false);
+        targetRy += dx * 0.45;
+        targetRx -= dy * 0.45;
 
         startX = e.clientX;
         startY = e.clientY;
@@ -3190,13 +3206,13 @@
         if (!isDragging) return;
         isDragging = false;
         cube.classList.remove('is-dragging');
+        if (animFrameId) cancelAnimationFrame(animFrameId);
         try { scene.releasePointerCapture(e.pointerId); } catch(err) {}
       });
 
-      // Face Click Handlers
       document.querySelectorAll('.cube-face').forEach(faceEl => {
         faceEl.addEventListener('click', (e) => {
-          if (totalDragMove > 8) return; // Prevent triggering click during drag
+          if (totalDragMove > 6) return;
           e.stopPropagation();
           const key = faceEl.getAttribute('data-section');
           const face = cubeFaces.find(f => f.key === key);
@@ -3204,7 +3220,6 @@
         });
       });
 
-      // 🎲 Roll Cube Button (Clean randomized picker without broken math)
       if (rollBtn) {
         rollBtn.addEventListener('click', () => {
           const randomFace = cubeFaces[Math.floor(Math.random() * cubeFaces.length)];

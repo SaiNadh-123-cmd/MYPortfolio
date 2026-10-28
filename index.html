@@ -705,6 +705,189 @@
       opacity: 1;
       transform: translateX(0);
     }
+
+    /* 3D Navigation Cube Portal */
+    .neural-cube-card {
+      position: relative;
+      width: 100%;
+      min-height: 430px;
+      border-radius: 22px;
+      background: radial-gradient(circle at 50% 45%, rgba(30, 18, 60, 0.85) 0%, rgba(8, 6, 18, 0.95) 80%);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 0 30px rgba(168, 85, 247, 0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .cube-hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #c4b5fd;
+      border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+      padding-bottom: 0.65rem;
+      z-index: 5;
+    }
+
+    .cube-hud-status {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .cube-scene {
+      position: relative;
+      width: 100%;
+      height: 290px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .cube-scene:active {
+      cursor: grabbing;
+    }
+
+    .cube-ambient-glow {
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.38) 0%, rgba(34, 211, 238, 0.15) 50%, transparent 75%);
+      filter: blur(22px);
+      pointer-events: none;
+    }
+
+    .nav-cube {
+      width: 190px;
+      height: 190px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-18deg) rotateY(-28deg);
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .nav-cube.is-dragging {
+      transition: none !important;
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 190px;
+      height: 190px;
+      border-radius: 18px;
+      background: rgba(16, 12, 34, 0.88);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(168, 85, 247, 0.65);
+      box-shadow:
+        0 0 20px rgba(168, 85, 247, 0.25),
+        inset 0 0 22px rgba(168, 85, 247, 0.22);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      backface-visibility: visible;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    }
+
+    .cube-face:hover {
+      border-color: #22d3ee;
+      background: rgba(28, 20, 58, 0.95);
+      box-shadow:
+        0 0 28px rgba(34, 211, 238, 0.65),
+        inset 0 0 25px rgba(168, 85, 247, 0.45);
+    }
+
+    /* 3D Cube Face Transforms (half of 190px = 95px) */
+    .face-front  { transform: rotateY(0deg) translateZ(95px); }
+    .face-right  { transform: rotateY(90deg) translateZ(95px); }
+    .face-back   { transform: rotateY(180deg) translateZ(95px); }
+    .face-left   { transform: rotateY(-90deg) translateZ(95px); }
+    .face-top    { transform: rotateX(90deg) translateZ(95px); }
+    .face-bottom { transform: rotateX(-90deg) translateZ(95px); }
+
+    .face-icon {
+      font-size: 2rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.8));
+    }
+
+    .face-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(168, 85, 247, 0.9);
+    }
+
+    .face-sub {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+    }
+
+    .face-cta {
+      margin-top: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #22d3ee;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+    }
+
+    .cube-controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(168, 85, 247, 0.2);
+      z-index: 5;
+    }
+
+    .roll-cube-btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 1.5px solid #a855f7;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(56, 189, 248, 0.25));
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.88rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .roll-cube-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 26px rgba(34, 211, 238, 0.8);
+      border-color: #22d3ee;
+    }
+
+    .cube-active-readout {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+    }
+
+    .cube-active-readout strong {
+      color: #22d3ee;
+    }
+
   </style>
 </head>
 <body class="antialiased selection:bg-emerald-400 selection:text-slate-950">
@@ -1002,30 +1185,74 @@
 
       <!-- Right Column: Interactive 3D WebGL Neural Core Canvas -->
       <div class="lg:col-span-5 relative">
-        <div class="tilt-card rounded-3xl p-4 sm:p-5 border relative overflow-hidden" style="min-height: 470px;">
-          
-          <!-- Top HUD Overlay -->
-          <div class="relative z-10 flex items-center justify-between border-b pb-3 mb-2" style="border-color: var(--border-subtle);">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span class="text-xs font-mono-tech ml-2" style="color: var(--text-secondary);">NEURAL_CORE_3D.webgl</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button onclick="set3DShape('icosahedron')" id="shape-btn-icosahedron" class="px-2 py-0.5 rounded text-[10px] font-mono-tech pill-badge">Core</button>
-              <button onclick="set3DShape('torus')" id="shape-btn-torus" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">Torus</button>
-              <button onclick="set3DShape('helix')" id="shape-btn-helix" class="px-2 py-0.5 rounded text-[10px] font-mono-tech border" style="border-color: var(--border-subtle); color: var(--text-secondary);">DNA/RAG</button>
+        <div class="neural-cube-card" id="neural-cube-portal">
+          <div class="cube-hud-header">
+            <span class="cube-hud-title">NEURAL_CUBE_3D.nav</span>
+            <span class="cube-hud-status" id="cube-status-text">DRAG TO ROTATE • CLICK FACE OR ROLL</span>
+          </div>
+
+          <!-- 3D Cube Viewport -->
+          <div class="cube-scene" id="cube-scene">
+            <div class="cube-ambient-glow"></div>
+            <div class="nav-cube" id="nav-cube">
+              <!-- 1. FRONT: PROFILE -->
+              <div class="cube-face face-front" data-section="profile" data-label="Profile">
+                <div class="face-icon">👤</div>
+                <div class="face-title">PROFILE</div>
+                <div class="face-sub">Intro & Identity</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
+
+              <!-- 2. RIGHT: SKILLS -->
+              <div class="cube-face face-right" data-section="skills" data-label="Skills">
+                <div class="face-icon">⚡</div>
+                <div class="face-title">SKILLS</div>
+                <div class="face-sub">AI • Full-Stack • DSA</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
+
+              <!-- 3. BACK: PROJECTS -->
+              <div class="cube-face face-back" data-section="projects" data-label="Projects">
+                <div class="face-icon">🚀</div>
+                <div class="face-title">PROJECTS</div>
+                <div class="face-sub">Volt Intercept & MVPs</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
+
+              <!-- 4. LEFT: EXPERIENCE -->
+              <div class="cube-face face-left" data-section="experience" data-label="Experience">
+                <div class="face-icon">🏆</div>
+                <div class="face-title">EXPERIENCE</div>
+                <div class="face-sub">8x Hackathon Lead</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
+
+              <!-- 5. TOP: BACKGROUND -->
+              <div class="cube-face face-top" data-section="background" data-label="Background">
+                <div class="face-icon">🎓</div>
+                <div class="face-title">BACKGROUND</div>
+                <div class="face-sub">CS (Data Science) & Bio</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
+
+              <!-- 6. BOTTOM: ARENA / SIMULATOR -->
+              <div class="cube-face face-bottom" data-section="arena" data-label="Arena & Contact">
+                <div class="face-icon">🎮</div>
+                <div class="face-title">SIMULATOR</div>
+                <div class="face-sub">Live Interactive Arena</div>
+                <span class="face-cta">Click to Visit →</span>
+              </div>
             </div>
           </div>
 
-          <!-- Interactive Three.js Canvas Container -->
-          <div id="hero-3d-container" class="w-full h-[340px] sm:h-[370px] cursor-grab active:cursor-grabbing relative"></div>
-
-          <!-- Bottom Telemetry Overlay inside 3D Card -->
-          <div class="relative z-10 flex flex-wrap items-center justify-between gap-2 pt-3 border-t text-[11px] font-mono-tech" style="border-color: var(--border-subtle); color: var(--text-secondary);">
-            <span><i class="fa-solid fa-hand-pointer text-accent mr-1"></i>Drag to rotate 3D mesh</span>
-            <span id="hud-coords" class="text-accent">ROT: 0.42 rad/s | SYNCED</span>
+          <!-- Controls Bar: Roll Button + Active Face Readout -->
+          <div class="cube-controls-bar">
+            <button type="button" class="roll-cube-btn" id="roll-cube-btn">
+              🎲 ROLL CUBE
+            </button>
+            <div class="cube-active-readout" id="cube-active-readout">
+              TOP / ACTIVE: <strong>PROFILE</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -2674,4 +2901,140 @@
       animateBg();
     });
   </script>
+  <!-- 3D Navigation Cube Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cube = document.getElementById('nav-cube');
+      const scene = document.getElementById('cube-scene');
+      const rollBtn = document.getElementById('roll-cube-btn');
+      const readout = document.getElementById('cube-active-readout');
+      const statusText = document.getElementById('cube-status-text');
+      if (!cube || !scene) return;
+
+      let rotX = -18;
+      let rotY = -28;
+      let isDragging = false;
+      let startX = 0, startY = 0;
+      let dragDistance = 0;
+      let lastRolledIndex = -1;
+
+      // Map each cube face to its target rotation and page section
+      const faces = [
+        { key: 'profile',    label: 'PROFILE',    rx: 0,   ry: 0 },
+        { key: 'skills',     label: 'SKILLS',     rx: 0,   ry: -90 },
+        { key: 'projects',   label: 'PROJECTS',   rx: 0,   ry: -180 },
+        { key: 'experience', label: 'EXPERIENCE', rx: 0,   ry: 90 },
+        { key: 'background', label: 'BACKGROUND', rx: -90, ry: 0 },
+        { key: 'arena',      label: 'SIMULATOR',  rx: 90,  ry: 0 }
+      ];
+
+      // Smart resolver to locate the exact section in index.html
+      function findSectionElement(key) {
+        const selectors = {
+          profile:    ['#page-1-splash', '#top', 'header', 'body'],
+          background: ['#page-2-hero', '#hero', '#about', '#page-2'],
+          projects:   ['#work', '#projects', '#laptop-scroll-track'],
+          skills:     ['#skills', '#tech-stack', '[id*="skill"]'],
+          experience: ['#leadership', '#experience', '#achievements', '[id*="hack"]', '[id*="lead"]'],
+          arena:      ['#arena', '#simulator', '#contact', 'footer']
+        };
+        const list = selectors[key] || [];
+        for (const sel of list) {
+          const el = document.querySelector(sel);
+          if (el) return el;
+        }
+        // Fallback: search headings by keyword
+        const headings = Array.from(document.querySelectorAll('h1, h2, h3, section'));
+        return headings.find(h => h.textContent.toLowerCase().includes(key)) || document.body;
+      }
+
+      function navigateToSection(key, label) {
+        if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${label}</strong>`;
+        if (statusText) statusText.textContent = `⚡ REDIRECTING TO ${label}...`;
+
+        const targetEl = findSectionElement(key);
+        setTimeout(() => {
+          if (key === 'profile') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          setTimeout(() => {
+            if (statusText) statusText.textContent = 'DRAG TO ROTATE • CLICK FACE OR ROLL';
+          }, 1200);
+        }, 650);
+      }
+
+      // Pointer / Mouse Drag Rotation
+      scene.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        dragDistance = 0;
+        startX = e.clientX;
+        startY = e.clientY;
+        cube.classList.add('is-dragging');
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        dragDistance += Math.hypot(dx, dy);
+        rotY += dx * 0.65;
+        rotX -= dy * 0.65;
+        cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        startX = e.clientX;
+        startY = e.clientY;
+      });
+
+      window.addEventListener('pointerup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        cube.classList.remove('is-dragging');
+      });
+
+      // Click on any Cube Face -> Snap face forward & redirect to that section
+      document.querySelectorAll('.cube-face').forEach((faceEl) => {
+        faceEl.addEventListener('click', (e) => {
+          // Ignore if the user was dragging to rotate instead of clicking
+          if (dragDistance > 10) return;
+          e.stopPropagation();
+          const key = faceEl.getAttribute('data-section');
+          const faceData = faces.find(f => f.key === key);
+          if (!faceData) return;
+
+          // Snap cube smoothly to show the clicked face
+          rotX = faceData.rx - 10;
+          rotY = faceData.ry - 15;
+          cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+          navigateToSection(faceData.key, faceData.label);
+        });
+      });
+
+      // 🎲 ROLL CUBE Button -> Spins cube in 3D, lands on a face, and redirects
+      if (rollBtn) {
+        rollBtn.addEventListener('click', () => {
+          let nextIndex;
+          do {
+            nextIndex = Math.floor(Math.random() * faces.length);
+          } while (nextIndex === lastRolledIndex);
+          lastRolledIndex = nextIndex;
+
+          const chosen = faces[nextIndex];
+          if (statusText) statusText.textContent = '🎲 ROLLING CUBE...';
+
+          // Add multiple full 360-degree spins so it tumbles like a real 3D die
+          const extraSpinsX = (Math.floor(Math.random() * 2) + 2) * 360;
+          const extraSpinsY = (Math.floor(Math.random() * 2) + 2) * 360;
+
+          rotX = chosen.rx + extraSpinsX - 12;
+          rotY = chosen.ry + extraSpinsY - 16;
+          cube.classList.remove('is-dragging');
+          cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+          navigateToSection(chosen.key, chosen.label);
+        });
+      }
+    });
+  </script>
+
 </body>

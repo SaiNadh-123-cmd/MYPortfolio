@@ -1106,6 +1106,218 @@
       }
     }
 
+    /* Bottom-Center Synchronized LED Light Indicator */
+    .skill-card-led {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #38bdf8;
+      box-shadow: 0 0 0px rgba(56, 189, 248, 0);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 0.35s ease,
+        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.35s ease,
+        background-color 0.25s ease;
+      z-index: 6;
+    }
+
+    /* Active & synchronized pulse during inward convergence */
+    .skill-card-led.is-active {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      animation: ledPulseSync 0.65s infinite alternate ease-in-out;
+    }
+
+    @keyframes ledPulseSync {
+      0% {
+        background-color: #38bdf8;
+        box-shadow: 0 0 6px 2px rgba(56, 189, 248, 0.8), 0 0 12px 3px rgba(168, 85, 247, 0.4);
+      }
+      100% {
+        background-color: #a855f7;
+        box-shadow: 0 0 12px 3px rgba(168, 85, 247, 0.9), 0 0 18px 5px rgba(56, 189, 248, 0.6);
+      }
+    }
+
+    /* Intensified at convergence focal impact */
+    .skill-card-led.is-intensified {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: translateX(-50%) scale(1.8) !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 14px 4px #38bdf8, 0 0 24px 7px #a855f7 !important;
+    }
+
+    .skill-card:hover .skill-card-led:not(.is-active):not(.is-intensified) {
+      opacity: 0.85;
+      transform: translateX(-50%) scale(0.9);
+      box-shadow: 0 0 8px 1px rgba(56, 189, 248, 0.7);
+    }
+
+    /* =========================================================================
+       CINEMATIC BEYOND THE CODE GALLERY & INFINITE MARQUEE TRACK
+       ========================================================================= */
+    #gallery {
+      position: relative;
+    }
+
+    .gallery-viewport {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding: 20px 0 35px 0;
+      mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    }
+
+    .gallery-track {
+      display: flex;
+      width: max-content;
+      align-items: center;
+      gap: 24px;
+      animation: galleryMarquee 38s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes galleryMarquee {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+      100% {
+        transform: translate3d(-50%, 0, 0);
+      }
+    }
+
+    .gallery-track:hover,
+    .gallery-track.is-paused {
+      animation-play-state: paused !important;
+    }
+
+    /* Standard Cinematic Photo Card */
+    .gallery-card {
+      position: relative;
+      width: 320px;
+      height: 440px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      transition:
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.4s ease,
+        box-shadow 0.4s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+      .gallery-card {
+        width: 340px;
+        height: 450px;
+      }
+    }
+
+    .gallery-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(56, 189, 248, 0.6);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8), 0 0 24px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Primary Award / Certificate Highlight Card */
+    .gallery-card.gallery-award-card {
+      width: 370px;
+      height: 470px;
+      border: 2px solid rgba(56, 189, 248, 0.85);
+      background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.9));
+      box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.85),
+        0 0 32px rgba(56, 189, 248, 0.35),
+        inset 0 0 20px rgba(56, 189, 248, 0.12);
+    }
+
+    @media (min-width: 640px) {
+      .gallery-card.gallery-award-card {
+        width: 410px;
+        height: 490px;
+      }
+    }
+
+    .gallery-card.gallery-award-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      border-color: #38bdf8;
+      box-shadow:
+        0 28px 56px rgba(0, 0, 0, 0.9),
+        0 0 45px rgba(56, 189, 248, 0.5),
+        inset 0 0 30px rgba(56, 189, 248, 0.22);
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .gallery-card.gallery-award-card img {
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    .gallery-card:hover img {
+      transform: scale(1.06);
+    }
+
+    /* Cinematic Gradient Overlay & Info Pill */
+    .gallery-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(3, 7, 18, 0.95) 0%, rgba(3, 7, 18, 0.45) 45%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 22px;
+      pointer-events: none;
+    }
+
+    .gallery-hover-indicator {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(3, 7, 18, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 10;
+    }
+
+    .gallery-card:hover .gallery-hover-indicator {
+      opacity: 1;
+      transform: scale(1);
+      border-color: #38bdf8;
+    }
+
+    #gallery-preview-modal {
+      transition: opacity 0.3s ease;
+    }
+
     /* Motion Sensitivity Fallback */
     @media (prefers-reduced-motion: reduce) {
       .skill-card,
@@ -1116,7 +1328,17 @@
         transition: none !important;
       }
       #skills-collision-emitter,
-      #skills-glow-halo {
+      #skills-glow-halo,
+      .skill-card-led {
+        display: none !important;
+      }
+      .gallery-track {
+        animation: none !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 16px;
+      }
+      #gallery-group-duplicate {
         display: none !important;
       }
     }
@@ -1176,6 +1398,7 @@
         <a href="#skills" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Architecture & Stack</a>
         <a href="#arena" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">1000+ DSA & Hackathons</a>
         <a href="#certifications" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Vault</a>
+        <a href="#gallery" class="px-3.5 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition">Memories</a>
       </nav>
 
       <!-- Right Controls: Colorido Chroma Trigger + Resume + Contact -->
@@ -2139,6 +2362,406 @@
   </section>
 
   <!-- =====================================================================
+       BEYOND THE CODE: ACHIEVEMENTS & TEAM MEMORIES (CINEMATIC GALLERY)
+  ====================================================================== -->
+  <section id="gallery" data-section-theme="emerald" class="py-24 relative overflow-hidden">
+    <!-- Ambient Depth Lighting Layers -->
+    <div class="absolute inset-0 pointer-events-none opacity-40">
+      <div class="absolute -top-32 left-1/4 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl"></div>
+      <div class="absolute -bottom-32 right-1/4 w-96 h-96 rounded-full bg-purple-500/10 blur-3xl"></div>
+    </div>
+
+    <!-- Section Header (Editorial & Understated) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-12 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full pill-badge text-xs font-mono-tech mb-3">
+          <i class="fa-solid fa-camera-retro text-accent"></i>
+          <span>06 // LIFE &amp; IMPACT BEYOND THE SCREEN</span>
+        </div>
+        <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+          Beyond the Code — <span class="text-gradient-accent">Achievements &amp; Team Memories.</span>
+        </h2>
+        <p class="text-sm sm:text-base mt-2 max-w-2xl" style="color: var(--text-secondary);">
+          Achievements, teamwork, and experiences that shaped my journey.
+        </p>
+      </div>
+
+      <!-- Controls: Pause/Play Marquee Toggle -->
+      <div class="flex items-center gap-3">
+        <button id="gallery-play-toggle" aria-label="Toggle continuous gallery animation" class="px-3.5 py-1.5 rounded-xl text-xs font-mono-tech glass-surface hover:border-accent-glow transition flex items-center gap-2">
+          <i class="fa-solid fa-pause text-accent" id="gallery-play-icon"></i>
+          <span id="gallery-play-text">Pause Motion</span>
+        </button>
+        <span class="text-xs font-mono-tech hidden sm:inline" style="color: var(--text-secondary);">
+          <i class="fa-regular fa-hand-pointer mr-1"></i>Hover to inspect • Click to expand
+        </span>
+      </div>
+    </div>
+
+    <!-- Continuous Infinite-Loop Gallery Track -->
+    <div class="gallery-viewport relative w-full overflow-hidden select-none" id="gallery-viewport">
+      <div class="gallery-track will-change-transform" id="gallery-track">
+        <!-- Group 1: Original Items -->
+        <div class="gallery-group flex items-center gap-6 shrink-0" id="gallery-group-original">
+          <!-- Award Recognition Highlight -->
+          <div class="gallery-card gallery-award-card group" data-img="./assets/images/gallery/award-recognition.jpg" data-badge="Recognition & Achievement" data-title="13th Anniversary Milestone" data-caption="Honored on stage with Certificate of Appreciation for dedicated service & impact." role="button" tabindex="0" aria-label="View 13th Anniversary Milestone photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/award-recognition.jpg" alt="Sai Nadh receiving certificate of appreciation on stage" loading="lazy" />
+              <div class="absolute top-4 left-4 z-10">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono-tech font-bold uppercase tracking-wider bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 flex items-center gap-1.5 shadow-xl backdrop-blur-md">
+                  <i class="fa-solid fa-award text-yellow-400"></i> Recognition &amp; Achievement
+                </span>
+              </div>
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <h4 class="font-display font-bold text-base sm:text-lg text-white group-hover:text-cyan-300 transition-colors">13th Anniversary Milestone</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Honored on stage with Certificate of Appreciation for dedicated service & impact.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-hackathon-lab.jpg" data-badge="Engineering Lab Squad" data-title="Hackathon Lab Squad" data-caption="Late-night architecture brainstorms, algorithm optimization, and mutual growth." role="button" tabindex="0" aria-label="View Hackathon Lab Squad photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-hackathon-lab.jpg" alt="Sai Nadh and peers working together in computer lab" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Collaboration</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Hackathon Lab Squad</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Late-night architecture brainstorms, algorithm optimization, and mutual growth.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-anniversary-celebration.jpg" data-badge="Team Fellowship" data-title="Celebration & Fellowship" data-caption="Celebrating years of organizational impact alongside peer leaders and organizers." role="button" tabindex="0" aria-label="View Celebration & Fellowship photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-anniversary-celebration.jpg" alt="Sai Nadh and colleagues at the 13th Anniversary celebration" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Milestone</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Celebration & Fellowship</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Celebrating years of organizational impact alongside peer leaders and organizers.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-conference-symposium.jpg" data-badge="AI Club Symposium" data-title="Symposium Roundtable" data-caption="Cross-team discussions planning campus events, workshops, and AI tracks." role="button" tabindex="0" aria-label="View Symposium Roundtable photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-conference-symposium.jpg" alt="Sai Nadh and department team seated around large conference table" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Ideation</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Symposium Roundtable</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Cross-team discussions planning campus events, workshops, and AI tracks.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-sun-community.jpg" data-badge="Grassroots Mentorship" data-title="Grassroots Education" data-caption="Field initiatives inspiring young learners and cultivating foundational skills." role="button" tabindex="0" aria-label="View Grassroots Education photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-sun-community.jpg" alt="Sai Nadh interacting with school students during outreach event" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Outreach</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Grassroots Education</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Field initiatives inspiring young learners and cultivating foundational skills.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/campus-hitech-fountain.jpg" data-badge="Campus Life" data-title="Campus Origins" data-caption="Where daily lectures, lab assignments, and competitive coding routines take place." role="button" tabindex="0" aria-label="View Campus Origins photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/campus-hitech-fountain.jpg" alt="Sai Nadh at RVR and JC Hi-Tech campus fountain" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Foundations</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Campus Origins</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Where daily lectures, lab assignments, and competitive coding routines take place.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/formal-executive-portrait.jpg" data-badge="Professional Mindset" data-title="Executive Mindset" data-caption="Committed to engineering rigour, clear communication, and end-to-end delivery." role="button" tabindex="0" aria-label="View Executive Mindset photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/formal-executive-portrait.jpg" alt="Sai Nadh formal professional portrait in blazer" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Profile</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Executive Mindset</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Committed to engineering rigour, clear communication, and end-to-end delivery.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/creative-track-portrait.jpg" data-badge="Creative Lens" data-title="Curiosity & Lens" data-caption="Bringing artistic appreciation and balanced perspective into technical creation." role="button" tabindex="0" aria-label="View Curiosity & Lens photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/creative-track-portrait.jpg" alt="Sai Nadh outdoor portrait with flowers against railway track" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Perspective</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Curiosity & Lens</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Bringing artistic appreciation and balanced perspective into technical creation.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0→1 Builder" data-title="0→1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0→1 Builder Persona photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/studio-blue-jacket.jpg" alt="Sai Nadh in studio blue jacket" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Persona</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0→1 Builder Persona</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Driven by curiosity, grit, and the passion to turn wild ideas into working products.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/cert-deploy-it-hackathon.jpg" data-badge="Hackathon Qualification" data-title="Deploy It 2026 Hackathon" data-caption="Qualified for the Mains Round in an intensive 8-hour competitive sprint." role="button" tabindex="0" aria-label="View Deploy It 2026 Hackathon photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/cert-deploy-it-hackathon.jpg" alt="Deploy It 2026 Hackathon Certificate of Appreciation" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Verified Credential</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Deploy It 2026 Hackathon</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Qualified for the Mains Round in an intensive 8-hour competitive sprint.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/cert-sun-appreciation.jpg" data-badge="Service Honor" data-title="Dedicated Service Award" data-caption="Recognized for grassroots educational work and helping underprivileged students." role="button" tabindex="0" aria-label="View Dedicated Service Award photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/cert-sun-appreciation.jpg" alt="Student Union for Nation Certificate of Appreciation and Dedicated Service" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Community Impact</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Dedicated Service Award</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Recognized for grassroots educational work and helping underprivileged students.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 2: Seamless Duplicate for Infinite Loop -->
+        <div class="gallery-group flex items-center gap-6 shrink-0" id="gallery-group-duplicate" aria-hidden="true">
+          <!-- Award Recognition Highlight -->
+          <div class="gallery-card gallery-award-card group" data-img="./assets/images/gallery/award-recognition.jpg" data-badge="Recognition & Achievement" data-title="13th Anniversary Milestone" data-caption="Honored on stage with Certificate of Appreciation for dedicated service & impact." role="button" tabindex="0" aria-label="View 13th Anniversary Milestone photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/award-recognition.jpg" alt="Sai Nadh receiving certificate of appreciation on stage" loading="lazy" />
+              <div class="absolute top-4 left-4 z-10">
+                <span class="px-3 py-1 rounded-full text-[10px] font-mono-tech font-bold uppercase tracking-wider bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 flex items-center gap-1.5 shadow-xl backdrop-blur-md">
+                  <i class="fa-solid fa-award text-yellow-400"></i> Recognition &amp; Achievement
+                </span>
+              </div>
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <h4 class="font-display font-bold text-base sm:text-lg text-white group-hover:text-cyan-300 transition-colors">13th Anniversary Milestone</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Honored on stage with Certificate of Appreciation for dedicated service & impact.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-hackathon-lab.jpg" data-badge="Engineering Lab Squad" data-title="Hackathon Lab Squad" data-caption="Late-night architecture brainstorms, algorithm optimization, and mutual growth." role="button" tabindex="0" aria-label="View Hackathon Lab Squad photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-hackathon-lab.jpg" alt="Sai Nadh and peers working together in computer lab" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Collaboration</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Hackathon Lab Squad</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Late-night architecture brainstorms, algorithm optimization, and mutual growth.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-anniversary-celebration.jpg" data-badge="Team Fellowship" data-title="Celebration & Fellowship" data-caption="Celebrating years of organizational impact alongside peer leaders and organizers." role="button" tabindex="0" aria-label="View Celebration & Fellowship photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-anniversary-celebration.jpg" alt="Sai Nadh and colleagues at the 13th Anniversary celebration" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Milestone</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Celebration & Fellowship</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Celebrating years of organizational impact alongside peer leaders and organizers.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-conference-symposium.jpg" data-badge="AI Club Symposium" data-title="Symposium Roundtable" data-caption="Cross-team discussions planning campus events, workshops, and AI tracks." role="button" tabindex="0" aria-label="View Symposium Roundtable photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-conference-symposium.jpg" alt="Sai Nadh and department team seated around large conference table" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Ideation</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Symposium Roundtable</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Cross-team discussions planning campus events, workshops, and AI tracks.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/team-sun-community.jpg" data-badge="Grassroots Mentorship" data-title="Grassroots Education" data-caption="Field initiatives inspiring young learners and cultivating foundational skills." role="button" tabindex="0" aria-label="View Grassroots Education photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/team-sun-community.jpg" alt="Sai Nadh interacting with school students during outreach event" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Outreach</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Grassroots Education</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Field initiatives inspiring young learners and cultivating foundational skills.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/campus-hitech-fountain.jpg" data-badge="Campus Life" data-title="Campus Origins" data-caption="Where daily lectures, lab assignments, and competitive coding routines take place." role="button" tabindex="0" aria-label="View Campus Origins photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/campus-hitech-fountain.jpg" alt="Sai Nadh at RVR and JC Hi-Tech campus fountain" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Foundations</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Campus Origins</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Where daily lectures, lab assignments, and competitive coding routines take place.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/formal-executive-portrait.jpg" data-badge="Professional Mindset" data-title="Executive Mindset" data-caption="Committed to engineering rigour, clear communication, and end-to-end delivery." role="button" tabindex="0" aria-label="View Executive Mindset photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/formal-executive-portrait.jpg" alt="Sai Nadh formal professional portrait in blazer" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Profile</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Executive Mindset</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Committed to engineering rigour, clear communication, and end-to-end delivery.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/creative-track-portrait.jpg" data-badge="Creative Lens" data-title="Curiosity & Lens" data-caption="Bringing artistic appreciation and balanced perspective into technical creation." role="button" tabindex="0" aria-label="View Curiosity & Lens photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/creative-track-portrait.jpg" alt="Sai Nadh outdoor portrait with flowers against railway track" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Perspective</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Curiosity & Lens</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Bringing artistic appreciation and balanced perspective into technical creation.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0→1 Builder" data-title="0→1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0→1 Builder Persona photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/studio-blue-jacket.jpg" alt="Sai Nadh in studio blue jacket" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Persona</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0→1 Builder Persona</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Driven by curiosity, grit, and the passion to turn wild ideas into working products.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/cert-deploy-it-hackathon.jpg" data-badge="Hackathon Qualification" data-title="Deploy It 2026 Hackathon" data-caption="Qualified for the Mains Round in an intensive 8-hour competitive sprint." role="button" tabindex="0" aria-label="View Deploy It 2026 Hackathon photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/cert-deploy-it-hackathon.jpg" alt="Deploy It 2026 Hackathon Certificate of Appreciation" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Verified Credential</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Deploy It 2026 Hackathon</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Qualified for the Mains Round in an intensive 8-hour competitive sprint.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Team & Event Card -->
+          <div class="gallery-card group" data-img="./assets/images/gallery/cert-sun-appreciation.jpg" data-badge="Service Honor" data-title="Dedicated Service Award" data-caption="Recognized for grassroots educational work and helping underprivileged students." role="button" tabindex="0" aria-label="View Dedicated Service Award photograph">
+            <div class="relative w-full h-full overflow-hidden">
+              <img src="./assets/images/gallery/cert-sun-appreciation.jpg" alt="Student Union for Nation Certificate of Appreciation and Dedicated Service" loading="lazy" />
+              <div class="gallery-hover-indicator" aria-hidden="true">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <div class="gallery-card-overlay">
+                <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Community Impact</span>
+                <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">Dedicated Service Award</h4>
+                <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Recognized for grassroots educational work and helping underprivileged students.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       CINEMATIC GALLERY FULL-SCREEN PREVIEW MODAL
+  ====================================================================== -->
+  <div id="gallery-preview-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6 md:p-8 bg-black/90 backdrop-blur-xl opacity-0" role="dialog" aria-modal="true" aria-label="Image Preview">
+    <!-- Close Button Top Right -->
+    <button id="gallery-modal-close" aria-label="Close preview" class="absolute top-5 right-5 sm:top-6 sm:right-8 z-20 w-11 h-11 rounded-full glass-surface flex items-center justify-center text-white/80 hover:text-white hover:border-cyan-400 hover:scale-110 transition shadow-2xl">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+
+    <!-- Modal Content Box -->
+    <div id="gallery-modal-dialog" class="relative max-w-5xl max-h-[92vh] w-full flex flex-col items-center justify-center rounded-3xl overflow-hidden glass-surface border border-white/10 shadow-2xl p-3 sm:p-5">
+      <!-- Full-Resolution Image -->
+      <div class="relative w-full flex items-center justify-center overflow-hidden rounded-2xl bg-black/40">
+        <img id="gallery-modal-img" src="" alt="" class="max-h-[74vh] max-w-full w-auto h-auto object-contain select-none transition-transform duration-300" />
+      </div>
+
+      <!-- Caption & Details Bar -->
+      <div class="w-full mt-3 px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-left">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="gallery-modal-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono-tech font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 hidden"></span>
+            <h3 id="gallery-modal-title" class="font-display font-bold text-base sm:text-lg text-white"></h3>
+          </div>
+          <p id="gallery-modal-caption" class="text-xs sm:text-sm font-mono-tech mt-0.5" style="color: var(--text-secondary);"></p>
+        </div>
+
+        <div class="text-[11px] font-mono-tech text-slate-400 shrink-0">
+          Press <kbd class="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-white">ESC</kbd> or click outside to close
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- =====================================================================
        CONTACT & EXECUTIVE FOOTER (Akshay Mehta Signature Style)
   ====================================================================== -->
   <footer id="contact" class="pt-20 pb-28 px-4 sm:px-6 lg:px-10 border-t mt-16" style="border-color: var(--border-subtle);">
@@ -2562,7 +3185,7 @@
       `;
 
       const cardsHtml = filtered.map(s => `
-        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group skill-card" data-cat="${s.cat}">
+        <div class="tilt-card rounded-2xl p-4 flex flex-col justify-between group skill-card relative" data-cat="${s.cat}">
           <div class="tilt-content">
             <div class="w-9 h-9 rounded-xl pill-badge flex items-center justify-center text-base mb-3 group-hover:scale-110 transition-transform">
               <i class="${s.icon}"></i>
@@ -2570,6 +3193,8 @@
             <h4 class="font-display font-bold text-sm" style="color: var(--text-primary);">${s.name}</h4>
             <p class="text-[11px] font-mono-tech mt-1" style="color: var(--text-secondary);">${s.level}</p>
           </div>
+          <!-- Synchronized Bottom-Center LED Light Indicator -->
+          <div class="skill-card-led" aria-hidden="true"></div>
         </div>
       `).join('');
 
@@ -3541,6 +4166,15 @@
 
         isCollisionRunning = true;
 
+        // Collect all LEDs on cards for synchronized pulsing
+        const leds = cards.map(c => c.querySelector('.skill-card-led')).filter(Boolean);
+
+        // 1. Activate small glowing light on every skill card and start synchronized pulse
+        leds.forEach(led => {
+          led.classList.remove('is-intensified');
+          led.classList.add('is-active');
+        });
+
         // Calculate dynamic geometric center of #skills-grid and relative vectors for every card
         const gridRect = grid.getBoundingClientRect();
         const gridCenterX = gridRect.left + gridRect.width / 2;
@@ -3575,8 +4209,10 @@
 
         await Promise.all(convergenceAnimations.map(awaitAnimation));
 
-        // STEP 2: SMALL COLLISION EFFECT (~260ms)
-        // Trigger subtle center energy ring, glow pulse, and radial sparks
+        // STEP 2 & 3: COLLISION IMPACT & INTENSIFY LEDS (~260ms)
+        // Briefly intensify the lights when all cards converge at the common center
+        leds.forEach(led => led.classList.add('is-intensified'));
+
         if (emitter) {
           emitter.classList.add('active');
         }
@@ -3590,13 +4226,16 @@
           }, 1000);
         }
 
-        // Brief impact pause (80ms) for high-impact visual feedback while sparks radiate
-        await new Promise(resolve => setTimeout(resolve, 80));
+        // Brief impact pause (100ms) for high-impact visual feedback while sparks radiate
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Transition LEDs smoothly back to pulsing during return
+        leds.forEach(led => led.classList.remove('is-intensified'));
 
         if (emitter) {
           setTimeout(() => {
             emitter.classList.remove('active');
-          }, 200);
+          }, 180);
         }
 
         // STEP 4: RESTORE / RETURN TO NORMAL GRID POSITIONS (Duration: 650ms)
@@ -3613,6 +4252,11 @@
         });
 
         await Promise.all(returnAnimations.map(awaitAnimation));
+
+        // STEP 5: TURN LIGHTS OFF SMOOTHLY ONCE RETURN COMPLETED
+        leds.forEach(led => {
+          led.classList.remove('is-active', 'is-intensified');
+        });
 
         // CLEANUP: Cancel fills and remove collision classes so native hover & 3D tilt are 100% active
         cards.forEach(card => {
@@ -3680,6 +4324,135 @@
           box.style.removeProperty('transform');
         });
       });
+    });
+  </script>
+
+  <!-- =====================================================================
+       CINEMATIC GALLERY & PREVIEW MODAL INTERACTION CONTROLLER
+  ====================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const track = document.getElementById('gallery-track');
+      const modal = document.getElementById('gallery-preview-modal');
+      const modalImg = document.getElementById('gallery-modal-img');
+      const modalTitle = document.getElementById('gallery-modal-title');
+      const modalCaption = document.getElementById('gallery-modal-caption');
+      const modalBadge = document.getElementById('gallery-modal-badge');
+      const closeBtn = document.getElementById('gallery-modal-close');
+      const modalDialog = document.getElementById('gallery-modal-dialog');
+      const playToggle = document.getElementById('gallery-play-toggle');
+      const playIcon = document.getElementById('gallery-play-icon');
+      const playText = document.getElementById('gallery-play-text');
+      const gallerySection = document.getElementById('gallery');
+
+      if (!track || !modal) return;
+
+      let isPausedByButton = false;
+
+      // 1. Play / Pause Manual Toggle Button
+      if (playToggle) {
+        playToggle.addEventListener('click', () => {
+          isPausedByButton = !isPausedByButton;
+          if (isPausedByButton) {
+            track.classList.add('is-paused');
+            if (playIcon) playIcon.className = 'fa-solid fa-play text-accent';
+            if (playText) playText.textContent = 'Resume Motion';
+          } else {
+            track.classList.remove('is-paused');
+            if (playIcon) playIcon.className = 'fa-solid fa-pause text-accent';
+            if (playText) playText.textContent = 'Pause Motion';
+          }
+        });
+      }
+
+      // 2. Open Full-Screen Image Preview
+      function openPreview(card) {
+        const imgSrc = card.getAttribute('data-img');
+        const title = card.getAttribute('data-title') || '';
+        const caption = card.getAttribute('data-caption') || '';
+        const badge = card.getAttribute('data-badge') || '';
+
+        if (!imgSrc) return;
+
+        // Smoothly pause track while viewing
+        track.classList.add('is-paused');
+
+        modalImg.src = imgSrc;
+        modalImg.alt = title;
+        modalTitle.textContent = title;
+        modalCaption.textContent = caption;
+
+        if (badge) {
+          modalBadge.textContent = badge;
+          modalBadge.classList.remove('hidden');
+        } else {
+          modalBadge.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          modal.classList.add('opacity-100');
+          modal.classList.remove('opacity-0');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+
+      // 3. Close Full-Screen Image Preview
+      function closePreview() {
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modalImg.src = '';
+          document.body.style.overflow = '';
+          if (!isPausedByButton) {
+            track.classList.remove('is-paused');
+          }
+        }, 280);
+      }
+
+      // Attach click and accessibility keyboard triggers to cards
+      document.querySelectorAll('.gallery-card').forEach(card => {
+        card.addEventListener('click', () => openPreview(card));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPreview(card);
+          }
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closePreview);
+
+      // Close when clicking modal backdrop outside dialog
+      modal.addEventListener('click', (e) => {
+        if (modalDialog && !modalDialog.contains(e.target)) {
+          closePreview();
+        }
+      });
+
+      // Close when pressing Escape key
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closePreview();
+        }
+      });
+
+      // 4. Viewport IntersectionObserver: Pause marquee when off-screen to conserve GPU/CPU
+      if (gallerySection) {
+        const galleryObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              if (!isPausedByButton && modal.classList.contains('hidden')) {
+                track.classList.remove('is-paused');
+              }
+            } else {
+              track.classList.add('is-paused');
+            }
+          });
+        }, { threshold: 0.05 });
+        galleryObserver.observe(gallerySection);
+      }
     });
   </script>
 

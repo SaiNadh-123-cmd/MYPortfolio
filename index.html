@@ -345,6 +345,32 @@
       white-space: nowrap;
     }
 
+    .welcome-typing-container {
+      margin-bottom: 16px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(15, 12, 30, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e9d5ff;
+      text-align: center;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+    }
+
+    .typing-cursor {
+      animation: blink 1s step-end infinite;
+      color: #a855f7;
+      font-weight: bold;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
     @media (min-width: 969px) {
       .profile-card {
         margin-left: auto !important;
@@ -510,9 +536,13 @@
                 <i class="fa-brands fa-github"></i>
                 <span>GitHub</span>
               </a>
-              <a href="https://voltintercept.pages.dev/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl font-medium border hover:border-accent-glow transition flex items-center gap-2" style="border-color: var(--border-subtle); color: var(--text-primary);">
-                <i class="fa-solid fa-cube"></i>
-                <span>Volt Intercept Live</span>
+              <a href="https://www.codechef.com/users/cc_y24cd144" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl font-medium border hover:border-accent-glow transition flex items-center gap-2" style="border-color: var(--border-subtle); color: var(--text-primary);">
+                <i class="fa-solid fa-code"></i>
+                <span>CodeChef</span>
+              </a>
+              <a href="https://leetcode.com/u/SaiNadh_47/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl font-medium border hover:border-accent-glow transition flex items-center gap-2" style="border-color: var(--border-subtle); color: var(--text-primary);">
+                <i class="fa-solid fa-laptop-code"></i>
+                <span>LeetCode</span>
               </a>
             </div>
           </div>
@@ -521,7 +551,10 @@
 
       <!-- RIGHT SIDE: Profile Photo Card -->
       <div class="lg:col-span-6 relative z-10" style="pointer-events: auto;">
-        <div class="profile-card" style="pointer-events: auto; perspective: 1000px; height: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="profile-card" style="pointer-events: auto; perspective: 1000px; height: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 2.5rem;">
+          <div class="welcome-typing-container">
+            <span id="typing-text"></span><span class="typing-cursor">|</span>
+          </div>
           <img src="./profile-pic.jpg" alt="Pothumanchi Thri Sai Nadh Raju" class="profile-img" style="width: 320px; height: 380px; object-fit: cover; border-radius: 22px; border: 1px solid rgba(168, 85, 247, 0.5); box-shadow: 0 0 28px rgba(139, 92, 246, 0.25); transform-style: preserve-3d; transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease; display: block;">
           <div class="photo-name-pill">P.T. Sai Nadh. R</div>
         </div>
@@ -2114,5 +2147,25 @@
       if (btn) btn.addEventListener('click', togglePersonalWindow);
     };
   </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const words = ["Welcome to my Portfolio!", "Explore My Projects", "Let's Build the Future"];
+      let i = 0, j = 0, isDeleting = false;
+      function typeEffect() {
+        const currentWord = words[i];
+        const textEl = document.getElementById("typing-text");
+        if (!textEl) return;
+        if (isDeleting) {
+          textEl.textContent = currentWord.substring(0, j--);
+          if (j < 0) { isDeleting = false; i = (i + 1) % words.length; setTimeout(typeEffect, 400); return; }
+        } else {
+          textEl.textContent = currentWord.substring(0, j++);
+          if (j > currentWord.length) { isDeleting = true; setTimeout(typeEffect, 2000); return; }
+        }
+        setTimeout(typeEffect, isDeleting ? 40 : 100);
+      }
+      typeEffect();
+    });
+  </script>
 </body>
-</html>

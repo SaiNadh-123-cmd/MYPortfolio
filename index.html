@@ -906,42 +906,17 @@
       opacity: 0;
       will-change: transform, opacity;
       transition:
-        transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.75s ease-out,
-        box-shadow 0.6s ease,
-        border-color 0.6s ease;
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.65s ease-out;
     }
 
-    .side-fly-left {
-      transform: translate3d(-160px, 35px, 0) scale(0.92) rotate(-2deg);
-    }
+    .side-fly-left  { transform: translate3d(-85px, 20px, 0); }
+    .side-fly-right { transform: translate3d(85px, 20px, 0); }
 
-    .side-fly-right {
-      transform: translate3d(160px, 35px, 0) scale(0.92) rotate(2deg);
-    }
-
-    /* Snappy hover lift & tilt for Experience, Projects, Leadership & Arena boxes */
     .side-fly-left.card-in-view,
     .side-fly-right.card-in-view {
       opacity: 1;
-      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-      transition:
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.35s ease,
-        border-color 0.35s ease,
-        opacity 0.6s ease-out !important;
-      transition-delay: 0s !important;
-    }
-
-    .side-fly-left.card-in-view:hover,
-    .side-fly-right.card-in-view:hover {
-      transform: translate3d(0, -10px, 0) scale(1.025) !important;
-      border-color: #38bdf8 !important;
-      box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.75),
-        0 0 28px rgba(56, 189, 248, 0.45),
-        0 0 15px rgba(168, 85, 247, 0.35) !important;
-      z-index: 15;
+      transform: translate3d(0, 0, 0);
     }
 
     /* =========================================================================
@@ -3477,7 +3452,10 @@
     // 5. 3D PERSPECTIVE TILT PHYSICS & CURSOR SPOTLIGHT
     function initTiltCards() {
       const cards = Array.from(document.querySelectorAll('.tilt-card')).filter(card =>
-        !card.classList.contains('skill-card') && !card.classList.contains('project-card')
+        !card.classList.contains('skill-card') &&
+        !card.classList.contains('project-card') &&
+        !card.classList.contains('side-fly-left') &&
+        !card.classList.contains('side-fly-right')
       );
       cards.forEach(card => {
         card.onmousemove = (e) => {
@@ -4096,19 +4074,43 @@
       // =========================================================================
       const excludedContainers = '#page-1-splash, #page-2-hero, #hero, #neural-cube-portal, #laptop-scroll-track, nav, header, footer';
 
-      // Locate Experience, Leadership, Projects, Achievements, and Arena cards strictly outside Hero & Cube
-      const candidateCards = Array.from(document.querySelectorAll(
-        '#work .project-card, #projects .project-card, #experience [class*="card"], #leadership [class*="card"], #achievements [class*="card"], #arena [class*="card"], #certifications .tilt-card'
-      )).filter(el => !el.closest(excludedContainers) && !el.querySelector('#neural-cube-portal'));
+      // Clean any leftover classes/transforms from headings and grid wrappers first
+      document.querySelectorAll('.side-fly-left, .side-fly-right, .card-in-view, .individual-anim-box, .from-left, .from-right, .box-visible').forEach(el => {
+        el.classList.remove('side-fly-left', 'side-fly-right', 'card-in-view', 'individual-anim-box', 'from-left', 'from-right', 'box-visible');
+        el.style.transform = '';
+        el.style.transitionDelay = '';
+      });
 
-      // Also grab direct child cards inside lower sections (Experience, Leadership, Work, Arena, Certifications)
-      document.querySelectorAll('#work, #experience, #leadership, #arena, #certifications').forEach(sec => {
-        if (sec.matches(excludedContainers) || sec.id.toLowerCase().includes('skill')) return;
-        sec.querySelectorAll(':scope > div > div, :scope > div > article').forEach(box => {
-          if (!box.closest(excludedContainers) && !box.querySelector('#neural-cube-portal') && box.offsetHeight > 70 && box.offsetHeight < 750) {
-            if (!candidateCards.includes(box)) candidateCards.push(box);
-          }
-        });
+      const ignoreZones = '#page-1-splash, #neural-cube-portal, .neural-cube-card, #laptop-scroll-track, #skills, [id*="skill"], nav, header, footer';
+
+      function isStyledCardBox(el) {
+        if (!el || el.nodeType !== 1) return false;
+        if (el.closest(ignoreZones)) return false;
+        const tag = el.tagName.toLowerCase();
+        if (['h1','h2','h3','h4','p','span','a','button','ul','nav','header','section'].includes(tag)) return false;
+
+        const rect = el.getBoundingClientRect();
+        // Must be a real card size (not a tiny pill/button and not a massive full-page wrapper)
+        if (rect.width < 180 || rect.height < 95 || rect.height > 680) return false;
+
+        const cs = window.getComputedStyle(el);
+        const radius = parseFloat(cs.borderRadius) || 0;
+        const borderW = parseFloat(cs.borderTopWidth) || 0;
+        const bg = cs.backgroundColor;
+        const bgImg = cs.backgroundImage;
+        const hasVisibleBg = (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') || (bgImg && bgImg !== 'none');
+
+        // A real card MUST already have rounded corners AND a visible border or background in the original CSS
+        return radius >= 8 && (borderW > 0 || hasVisibleBg);
+      }
+
+      // First find all elements that look like styled cards
+      const allStyledBoxes = Array.from(document.querySelectorAll('section div, section article')).filter(isStyledCardBox);
+
+      // CRITICAL: Keep ONLY leaf cards — if a box contains other styled card boxes inside it, it is a wrapper/grid and MUST be excluded!
+      const candidateCards = allStyledBoxes.filter(box => {
+        const hasChildCards = allStyledBoxes.some(other => other !== box && box.contains(other));
+        return !hasChildCards;
       });
 
       // Assign alternating left/right fly-in classes
@@ -4119,6 +4121,65 @@
         card.style.transform = '';
         card.classList.add(idx % 2 === 0 ? 'side-fly-left' : 'side-fly-right');
         card.style.transitionDelay = `${(idx % 4) * 0.1}s`;
+      });
+
+      // Silky smooth card hover (lerp-based, replaces jerky raw mousemove)
+      function attachSilkyCardHover(card) {
+        let currentX = 0, currentY = 0, currentLift = 0;
+        let targetX = 0, targetY = 0, targetLift = 0;
+        let rafId = null;
+        let hovering = false;
+
+        function updateCard() {
+          // Smooth interpolation (lerp = 0.14) so motion is buttery-smooth, never jerky
+          currentX += (targetX - currentX) * 0.14;
+          currentY += (targetY - currentY) * 0.14;
+          currentLift += (targetLift - currentLift) * 0.14;
+
+          card.style.transform = `perspective(1000px) translate3d(0, ${currentLift.toFixed(2)}px, 0) rotateX(${currentX.toFixed(2)}deg) rotateY(${currentY.toFixed(2)}deg)`;
+
+          const settled =
+            !hovering &&
+            Math.abs(currentX) < 0.05 &&
+            Math.abs(currentY) < 0.05 &&
+            Math.abs(currentLift) < 0.1;
+
+          if (!settled) {
+            rafId = requestAnimationFrame(updateCard);
+          } else {
+            card.style.transform = '';
+            rafId = null;
+          }
+        }
+
+        card.addEventListener('mouseenter', () => {
+          if (card.classList.contains('rocket-thruster-active')) return;
+          hovering = true;
+          targetLift = -8;
+          card.style.transition = 'box-shadow 0.4s ease, border-color 0.4s ease';
+          if (!rafId) rafId = requestAnimationFrame(updateCard);
+        });
+
+        card.addEventListener('mousemove', (e) => {
+          if (!hovering || card.classList.contains('rocket-thruster-active')) return;
+          const r = card.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width - 0.5;
+          const ny = (e.clientY - r.top) / r.height - 0.5;
+          targetY = nx * 8;   // Gentle, smooth horizontal tilt
+          targetX = -ny * 8;  // Gentle, smooth vertical tilt
+        });
+
+        card.addEventListener('mouseleave', () => {
+          hovering = false;
+          targetX = 0;
+          targetY = 0;
+          targetLift = 0;
+          if (!rafId) rafId = requestAnimationFrame(updateCard);
+        });
+      }
+
+      candidateCards.forEach(card => {
+        attachSilkyCardHover(card);
       });
 
       // Repeatable IntersectionObserver (triggers EVERY time user scrolls in/out)

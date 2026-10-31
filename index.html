@@ -1465,6 +1465,53 @@
     [class*="track"]::after {
       pointer-events: none !important;
     }
+
+    /* Ensure all images across the entire site never distort or warp */
+    img {
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Fix any card hover rules that were stretching images inside them */
+    .project-card img,
+    .bento-card img,
+    .stat-card img,
+    .exp-card img,
+    .skill-card img,
+    [class*="cinematic"] img,
+    [class*="marquee"] img,
+    [class*="gallery"] img,
+    [class*="track"] img {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease !important;
+      transform: translateZ(0);
+    }
+
+    /* Clean, non-distorting image zoom on card hover */
+    .project-card:hover img,
+    .bento-card:hover img,
+    .stat-card:hover img,
+    .exp-card:hover img,
+    .skill-card:hover img {
+      transform: scale(1.03) translateZ(0) !important;
+      filter: brightness(1.05);
+    }
+
+    /* Ensure bottom cinematic movement strip images stay 100% stable without breaking */
+    [class*="cinematic"] img,
+    [class*="marquee"] img,
+    [class*="track"] img {
+      transform: none !important;
+    }
+
+    [class*="cinematic"] img:hover,
+    [class*="marquee"] img:hover,
+    [class*="track"] img:hover {
+      transform: scale(1.02) translateZ(0) !important;
+      filter: brightness(1.08) !important;
+    }
 </style>
 </head>
 <body class="antialiased selection:bg-emerald-400 selection:text-slate-950">

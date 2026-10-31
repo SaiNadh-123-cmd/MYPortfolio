@@ -1512,7 +1512,7 @@
       filter: brightness(1.08) !important;
     }
 
-    /* Gallery-specific overrides: preserve carousel 3D transforms */
+    /* Gallery-specific: preserve carousel 3D transforms, no image movement */
     .gallery-card img {
       height: 100% !important;
       transform: none !important;
@@ -1522,14 +1522,20 @@
       transform: none !important;
     }
 
-    /* Gallery hover: elevate card, show expand icon, subtle glow */
+    /* Gallery hover: subtle border/glow only, no transform on card */
     .gallery-card:hover {
-      transform: translateY(-6px) scale(1.02) !important;
       border-color: rgba(56, 189, 248, 0.75) !important;
       box-shadow:
         0 24px 48px rgba(0, 0, 0, 0.8),
         0 0 25px rgba(56, 189, 248, 0.35) !important;
       z-index: 20 !important;
+    }
+
+    /* Expand icon button — clickable, appears on hover */
+    .gallery-hover-indicator {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .gallery-card:hover .gallery-hover-indicator {
@@ -4804,13 +4810,15 @@
       }
 
       cards.forEach(card => {
-        card.addEventListener('click', (e) => {
-          if (totalDragDelta > 6) {
+        const expandBtn = card.querySelector('.gallery-hover-indicator');
+        if (expandBtn) {
+          expandBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             e.preventDefault();
-            return;
-          }
-          openPreview(card);
-        });
+            if (totalDragDelta > 6) return;
+            openPreview(card);
+          });
+        }
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

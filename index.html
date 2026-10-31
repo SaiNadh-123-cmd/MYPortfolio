@@ -975,18 +975,40 @@
     .skill-card {
       opacity: 1;
       transform: translate3d(0, 0, 0);
-      transition:
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
-      will-change: transform, opacity;
       position: relative;
-      z-index: 2;
+      z-index: 5;
     }
 
     .skill-card:hover {
-      border-color: #38bdf8 !important;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65), 0 0 20px rgba(56, 189, 248, 0.35) !important;
-      transform: translateY(-4px) !important;
+      transform: translateY(-8px) scale(1.015) !important;
+      border-color: rgba(56, 189, 248, 0.75) !important;
+      box-shadow:
+        0 20px 40px -10px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(56, 189, 248, 0.35),
+        0 0 12px rgba(168, 85, 247, 0.25) !important;
+      transition:
+        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.45s ease !important;
+    }
+
+    .project-card {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      position: relative;
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px) scale(1.015) !important;
+      border-color: rgba(56, 189, 248, 0.75) !important;
+      box-shadow:
+        0 20px 40px -10px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(56, 189, 248, 0.35),
+        0 0 12px rgba(168, 85, 247, 0.25) !important;
+      transition:
+        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.45s ease !important;
     }
 
     /* Step 1 & Step 4: Active collision state (coordinated via Web Animations API) */
@@ -3140,7 +3162,7 @@
       { name: 'OOP & System Design', cat: 'core', icon: 'fa-solid fa-sitemap', level: 'Scalable Architecture' },
       { name: 'Scikit-Learn & ML', cat: 'ai', icon: 'fa-solid fa-robot', level: 'Predictive Modeling' },
       { name: 'Prompt Engineering', cat: 'ai', icon: 'fa-solid fa-wand-magic-sparkles', level: 'Google Prompt Wars' },
-      { name: 'Java', cat: 'core', icon: 'fa-brands fa-java', level: 'OOP & Systems Development' },
+      { name: 'Java', cat: 'core', icon: 'fa-brands fa-java', level: 'Secondary • OOP & Systems Development' },
       { name: 'C / C++', cat: 'core', icon: 'fa-solid fa-microchip', level: 'Systems & Low-Level Foundations' },
       { name: 'Git & Version Control', cat: 'core', icon: 'fa-brands fa-git-alt', level: 'CI/CD & Collaboration' },
       { name: 'Cloud (Netlify & Cloudflare)', cat: 'fullstack', icon: 'fa-solid fa-cloud', level: 'Edge Hosting & Serverless' },
@@ -3454,7 +3476,9 @@
 
     // 5. 3D PERSPECTIVE TILT PHYSICS & CURSOR SPOTLIGHT
     function initTiltCards() {
-      const cards = document.querySelectorAll('.tilt-card');
+      const cards = Array.from(document.querySelectorAll('.tilt-card')).filter(card =>
+        !card.classList.contains('skill-card') && !card.classList.contains('project-card')
+      );
       cards.forEach(card => {
         card.onmousemove = (e) => {
           const rect = card.getBoundingClientRect();
@@ -4003,14 +4027,13 @@
         if (e.button !== undefined && e.button !== 0) return;
         isDragging = true;
         activePointerId = e.pointerId;
-        totalDragMove = 0;
+        dragMoved = 0;
         startX = e.clientX;
         startY = e.clientY;
         targetRx = currentRx;
         targetRy = currentRy;
         cube.classList.add('is-dragging');
         scene.classList.add('is-grabbing');
-        try { scene.setPointerCapture(e.pointerId); } catch(err) {}
         if (animFrameId) cancelAnimationFrame(animFrameId);
         animFrameId = requestAnimationFrame(renderLoop);
       });
@@ -4019,7 +4042,7 @@
         if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-        totalDragMove += Math.hypot(dx, dy);
+        dragMoved += Math.hypot(dx, dy);
 
         targetRy += dx * 0.45;
         targetRx -= dy * 0.45;
@@ -4038,10 +4061,7 @@
         currentRy = targetRy;
         applyTransform(false);
         const pid = (e && e.pointerId) ? e.pointerId : activePointerId;
-        if (pid !== null) {
-          try { scene.releasePointerCapture(pid); } catch(err) {}
-          activePointerId = null;
-        }
+        activePointerId = null;
       }
 
       scene.addEventListener('pointerup', stopDragging);
@@ -4051,7 +4071,7 @@
 
       document.querySelectorAll('.cube-face').forEach(faceEl => {
         faceEl.addEventListener('click', (e) => {
-          if (totalDragMove > 6) return; // Prevent triggering click during drag
+          if (dragMoved >= 8) return; // Prevent triggering click during drag
           e.stopPropagation();
           const key = faceEl.getAttribute('data-section');
           const face = cubeFaces.find(f => f.key === key);

@@ -1544,6 +1544,20 @@
       border-color: #38bdf8 !important;
       box-shadow: 0 0 15px rgba(56, 189, 248, 0.5) !important;
     }
+
+    /* Gallery card GPU stability: prevent subpixel distortion */
+    .gallery-card {
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+
+    /* Reduce perspective to prevent edge card warping */
+    .gallery-viewport {
+      perspective: 800px;
+      padding: 20px 0;
+    }
 </style>
 </head>
 <body class="antialiased selection:bg-emerald-400 selection:text-slate-950">

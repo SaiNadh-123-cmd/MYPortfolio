@@ -1483,7 +1483,6 @@
     .skill-card img,
     [class*="cinematic"] img,
     [class*="marquee"] img,
-    [class*="gallery"] img,
     [class*="track"] img {
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease !important;
       transform: translateZ(0);
@@ -1511,6 +1510,33 @@
     [class*="track"] img:hover {
       transform: scale(1.02) translateZ(0) !important;
       filter: brightness(1.08) !important;
+    }
+
+    /* Gallery-specific overrides: preserve carousel 3D transforms */
+    .gallery-card img {
+      height: 100% !important;
+      transform: none !important;
+    }
+
+    .gallery-card:hover img {
+      transform: none !important;
+    }
+
+    /* Gallery hover: elevate card, show expand icon, subtle glow */
+    .gallery-card:hover {
+      transform: translateY(-6px) scale(1.02) !important;
+      border-color: rgba(56, 189, 248, 0.75) !important;
+      box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(56, 189, 248, 0.35) !important;
+      z-index: 20 !important;
+    }
+
+    .gallery-card:hover .gallery-hover-indicator {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5) !important;
     }
 </style>
 </head>

@@ -1339,6 +1339,163 @@
         display: none !important;
       }
     }
+
+    /* Make bottom cinematic images clickable & pause track on hover */
+    [class*="cinematic"] img,
+    [class*="marquee"] img,
+    [class*="gallery"] img,
+    [class*="slider"] img,
+    [class*="track"] img {
+      pointer-events: auto !important;
+      cursor: zoom-in !important;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease, box-shadow 0.35s ease !important;
+    }
+
+    [class*="cinematic"] img:hover,
+    [class*="marquee"] img:hover,
+    [class*="gallery"] img:hover,
+    [class*="track"] img:hover {
+      transform: scale(1.04) !important;
+      filter: brightness(1.12) !important;
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.45) !important;
+      z-index: 20 !important;
+    }
+
+    /* Pause continuous movement while aiming the mouse at an image */
+    [class*="cinematic"]:hover,
+    [class*="marquee"]:hover,
+    [class*="track"]:hover {
+      animation-play-state: paused !important;
+    }
+
+    /* Full-Screen Cinematic Lightbox Modal */
+    #cinematic-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(5, 4, 12, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease;
+      padding: 24px;
+      user-select: none;
+    }
+
+    #cinematic-lightbox.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .lightbox-img-wrapper {
+      position: relative;
+      max-width: 92vw;
+      max-height: 84vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0.9) translateY(16px);
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #cinematic-lightbox.active .lightbox-img-wrapper {
+      transform: scale(1) translateY(0);
+    }
+
+    #cinematic-lightbox-img {
+      max-width: 92vw;
+      max-height: 82vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1.5px solid rgba(56, 189, 248, 0.55);
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.95),
+        0 0 40px rgba(168, 85, 247, 0.35);
+    }
+
+    .lightbox-caption {
+      margin-top: 14px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      text-align: center;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .lightbox-close-btn {
+      position: fixed;
+      top: 24px;
+      right: 28px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(168, 85, 247, 0.6);
+      background: rgba(15, 10, 30, 0.85);
+      color: #ffffff;
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      z-index: 1000001;
+    }
+
+    .lightbox-close-btn:hover {
+      transform: scale(1.1) rotate(90deg);
+      border-color: #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+    }
+
+    .lightbox-nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(168, 85, 247, 0.5);
+      background: rgba(15, 10, 30, 0.8);
+      color: #ffffff;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+      z-index: 1000001;
+    }
+
+    .lightbox-nav-btn:hover {
+      border-color: #38bdf8;
+      background: rgba(30, 20, 60, 0.95);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev { left: 24px; }
+    .lightbox-next { right: 24px; }
+
+    /* Ensure overlays on cinematic track don't block clicks */
+    [class*="cinematic"]::before,
+    [class*="cinematic"]::after,
+    [class*="marquee"]::before,
+    [class*="marquee"]::after,
+    [class*="gallery"]::before,
+    [class*="gallery"]::after,
+    [class*="track"]::before,
+    [class*="track"]::after {
+      pointer-events: none !important;
+    }
 </style>
 </head>
 <body class="antialiased selection:bg-emerald-400 selection:text-slate-950">
@@ -4643,6 +4800,122 @@
         }, { threshold: 0.05 });
         galleryObserver.observe(gallerySection);
       }
+    });
+  </script>
+
+  <!-- Full-Screen Lightbox Modal for Bottom Cinematic Images -->
+  <div id="cinematic-lightbox" aria-hidden="true">
+    <button type="button" class="lightbox-close-btn" id="lightbox-close" aria-label="Close full screen">✕</button>
+    <button type="button" class="lightbox-nav-btn lightbox-prev" id="lightbox-prev" aria-label="Previous image">❮</button>
+    <div class="lightbox-img-wrapper">
+      <img id="cinematic-lightbox-img" src="" alt="Full screen preview" />
+    </div>
+    <div class="lightbox-caption" id="cinematic-lightbox-caption"></div>
+    <button type="button" class="lightbox-nav-btn lightbox-next" id="lightbox-next" aria-label="Next image">❯</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const lightbox = document.getElementById('cinematic-lightbox');
+      const lightboxImg = document.getElementById('cinematic-lightbox-img');
+      const lightboxCaption = document.getElementById('cinematic-lightbox-caption');
+      const closeBtn = document.getElementById('lightbox-close');
+      const prevBtn = document.getElementById('lightbox-prev');
+      const nextBtn = document.getElementById('lightbox-next');
+
+      if (!lightbox || !lightboxImg) return;
+
+      function getCinematicImages() {
+        return Array.from(document.querySelectorAll('img')).filter(img => {
+          if (img.id === 'cinematic-lightbox-img') return false;
+          if (img.closest('#page-1-splash, nav, header')) return false;
+          const w = img.naturalWidth || img.clientWidth || 0;
+          const h = img.naturalHeight || img.clientHeight || 0;
+          return w >= 80 && h >= 60;
+        });
+      }
+
+      let galleryList = [];
+      let currentIndex = 0;
+
+      function openLightbox(imgEl) {
+        galleryList = getCinematicImages();
+        currentIndex = galleryList.indexOf(imgEl);
+        if (currentIndex === -1) {
+          galleryList.push(imgEl);
+          currentIndex = galleryList.length - 1;
+        }
+        updateLightboxSlide();
+        lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function updateLightboxSlide() {
+        const targetImg = galleryList[currentIndex];
+        if (!targetImg) return;
+        const fullSrc = targetImg.getAttribute('data-full') || targetImg.currentSrc || targetImg.src;
+        lightboxImg.src = fullSrc;
+        const captionText =
+          targetImg.getAttribute('data-caption') ||
+          targetImg.getAttribute('alt') ||
+          targetImg.closest('figure, [class*="card"], [class*="item"]')?.querySelector('figcaption, h3, h4, p')?.textContent ||
+          '';
+        lightboxCaption.textContent = captionText.trim();
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        setTimeout(() => {
+          if (!lightbox.classList.contains('active')) lightboxImg.src = '';
+        }, 300);
+      }
+
+      function showNext(delta) {
+        if (!galleryList.length) return;
+        currentIndex = (currentIndex + delta + galleryList.length) % galleryList.length;
+        updateLightboxSlide();
+      }
+
+      document.addEventListener('click', (e) => {
+        if (lightbox.classList.contains('active')) return;
+
+        let clickedImg = e.target.closest('img');
+
+        if (!clickedImg) {
+          const cinematicItem = e.target.closest('[class*="cinematic"] > *, [class*="marquee"] > *, [class*="gallery-item"], [class*="slide"]');
+          if (cinematicItem) {
+            clickedImg = cinematicItem.querySelector('img');
+          }
+        }
+
+        if (!clickedImg) return;
+        if (clickedImg.id === 'cinematic-lightbox-img') return;
+        if (clickedImg.closest('#page-1-splash, nav, header, a[href]')) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        openLightbox(clickedImg);
+      }, true);
+
+      closeBtn.addEventListener('click', closeLightbox);
+      prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(-1); });
+      nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(1); });
+
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target.classList.contains('lightbox-img-wrapper')) {
+          closeLightbox();
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') showNext(1);
+        if (e.key === 'ArrowLeft') showNext(-1);
+      });
     });
   </script>
 </body>

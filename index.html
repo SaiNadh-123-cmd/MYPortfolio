@@ -5884,4 +5884,232 @@
     })();
   </script>
 
+
+  
+  <!-- =====================================================================
+       CUSTOM ANIMATED DESKTOP SPRITE CURSOR (SN-CURSOR)
+  ====================================================================== -->
+  <style>
+    #sn-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 2147483647;
+      background: url('./assets/cursor/cursor-strip.png') 0 0 / 320px 32px no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      will-change: transform;
+      transform-origin: 0 0;
+      scale: 1;
+      transition: scale 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s ease, opacity 0.08s ease;
+      animation: snCursorPlay 0.5s steps(10) infinite;
+      display: none;
+    }
+
+    @keyframes snCursorPlay {
+      to {
+        background-position: -320px 0;
+      }
+    }
+
+    #sn-cursor.is-hover {
+      scale: 1.2;
+      filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.8));
+    }
+
+    #sn-cursor.is-down {
+      scale: 0.85;
+    }
+
+    #sn-cursor.is-hover.is-down {
+      scale: 0.85;
+      filter: drop-shadow(0 0 8px rgba(255, 122, 0, 0.8));
+    }
+
+    #sn-cursor.is-typing {
+      opacity: 0 !important;
+      visibility: hidden;
+    }
+
+    /* Hide native cursor only when custom cursor is ready on desktop */
+    html.sn-cursor-on,
+    html.sn-cursor-on * {
+      cursor: none !important;
+    }
+
+    /* Preserve native text carets on inputs, textareas, selects, and contenteditables */
+    html.sn-cursor-on input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
+    html.sn-cursor-on textarea,
+    html.sn-cursor-on [contenteditable],
+    html.sn-cursor-on [contenteditable] *,
+    html.sn-cursor-on iframe,
+    html.sn-cursor-on #resume-modal,
+    html.sn-cursor-on #resume-modal * {
+      cursor: text !important;
+    }
+
+    html.sn-cursor-on #resume-modal button,
+    html.sn-cursor-on #resume-modal a,
+    html.sn-cursor-on #resume-modal [role="button"] {
+      cursor: pointer !important;
+    }
+
+    html.sn-cursor-on select {
+      cursor: default !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #sn-cursor {
+        animation: none !important;
+        background-position: 0 0 !important;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      function initCustomCursor() {
+        // 4. Only enable on desktop fine-pointer devices. On touch devices: no element, no cursor:none
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+          return;
+        }
+
+        if (!document.body) {
+          document.addEventListener('DOMContentLoaded', initCustomCursor);
+          return;
+        }
+
+        // 1. Create cursor DOM element
+        let cursorEl = document.getElementById('sn-cursor');
+        if (!cursorEl) {
+          cursorEl = document.createElement('div');
+          cursorEl.id = 'sn-cursor';
+          cursorEl.setAttribute('aria-hidden', 'true');
+          document.body.appendChild(cursorEl);
+        }
+
+        let mouseX = -100;
+        let mouseY = -100;
+        let hasMoved = false;
+        let rafPending = false;
+        let isWindowActive = true;
+
+        const TEXT_INPUT_SELECTOR = 'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"], [contenteditable=""], iframe, #resume-modal, #resume-modal *';
+        const HOVER_SELECTOR = 'a, button, [role="button"], .gallery-card, .tilt-card, input[type="button"], input[type="submit"], input[type="reset"], [onclick]';
+
+        function updateHoverState(target) {
+          if (!target || !cursorEl) return;
+          if (target.closest && target.closest(TEXT_INPUT_SELECTOR)) {
+            cursorEl.classList.add('is-typing');
+          } else {
+            cursorEl.classList.remove('is-typing');
+          }
+
+          if (target.closest && target.closest(HOVER_SELECTOR)) {
+            cursorEl.classList.add('is-hover');
+          } else {
+            cursorEl.classList.remove('is-hover');
+          }
+        }
+
+        function updatePosition() {
+          cursorEl.style.transform = 'translate3d(' + mouseX + 'px, ' + mouseY + 'px, 0)';
+          rafPending = false;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+
+          // 5. Add class sn-cursor-on only after first mousemove
+          if (!hasMoved) {
+            hasMoved = true;
+            document.documentElement.classList.add('sn-cursor-on');
+            cursorEl.style.display = 'block';
+          } else if (!isWindowActive) {
+            isWindowActive = true;
+            cursorEl.style.display = 'block';
+            document.documentElement.classList.add('sn-cursor-on');
+          }
+
+          // 3. Exact pointer position (hotspot 0,0) via requestAnimationFrame
+          if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(updatePosition);
+          }
+
+          updateHoverState(e.target);
+        }, { passive: true });
+
+        // 5. Hide and restore native cursor when mouse leaves window
+        document.addEventListener('mouseleave', () => {
+          isWindowActive = false;
+          cursorEl.style.display = 'none';
+          document.documentElement.classList.remove('sn-cursor-on');
+        });
+
+        document.addEventListener('mouseenter', () => {
+          if (hasMoved) {
+            isWindowActive = true;
+            cursorEl.style.display = 'block';
+            document.documentElement.classList.add('sn-cursor-on');
+          }
+        });
+
+        // 6 & 7. Event delegation for typing carets and hover states
+        document.addEventListener('mouseover', (e) => {
+          if (!hasMoved) return;
+          updateHoverState(e.target);
+        }, { passive: true });
+
+        document.addEventListener('mouseout', (e) => {
+          if (!e.relatedTarget) {
+            cursorEl.classList.remove('is-hover', 'is-typing');
+            return;
+          }
+          if (e.relatedTarget.closest) {
+            if (!e.relatedTarget.closest(HOVER_SELECTOR)) {
+              cursorEl.classList.remove('is-hover');
+            }
+            if (!e.relatedTarget.closest(TEXT_INPUT_SELECTOR)) {
+              cursorEl.classList.remove('is-typing');
+            }
+          }
+        }, { passive: true });
+
+        // 7. Mousedown / Mouseup scale state
+        window.addEventListener('mousedown', () => {
+          cursorEl.classList.add('is-down');
+        }, { passive: true });
+
+        window.addEventListener('mouseup', () => {
+          cursorEl.classList.remove('is-down');
+        }, { passive: true });
+
+        // Dragging in #gallery-viewport (pointerdown)
+        const galleryVp = document.getElementById('gallery-viewport');
+        if (galleryVp) {
+          galleryVp.addEventListener('pointerdown', () => {
+            cursorEl.classList.add('is-down');
+          }, { passive: true });
+          window.addEventListener('pointerup', () => {
+            cursorEl.classList.remove('is-down');
+          }, { passive: true });
+          window.addEventListener('pointercancel', () => {
+            cursorEl.classList.remove('is-down');
+          }, { passive: true });
+        }
+      }
+
+      if (document.body) {
+        initCustomCursor();
+      } else {
+        document.addEventListener('DOMContentLoaded', initCustomCursor);
+      }
+    })();
+  </script>
+
 </body>

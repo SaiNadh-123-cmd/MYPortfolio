@@ -5016,4 +5016,872 @@
       });
     });
   </script>
+
+  
+  
+  
+  <!-- =====================================================================
+       UNIQUE SCROLL-REVEAL ANIMATIONS FOR ALL CARDS
+       Scenes: #work (01), #experience (02), #arena (04), #certifications (05)
+  ====================================================================== -->
+  <style>
+    /* -------------------------------------------------------------------------
+       COMMON SCROLL-REVEAL BASE STYLES
+       ------------------------------------------------------------------------- */
+    .rv-target-card {
+      will-change: transform, opacity;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease !important;
+    }
+
+    /* -------------------------------------------------------------------------
+       SCENE 1: #work "Blueprint Build"
+       ------------------------------------------------------------------------- */
+    #work:not(.rv-in) .work-head-line {
+      opacity: 0;
+    }
+    #work.rv-in .work-head-line-0 {
+      animation: blueprintLineReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 0ms;
+    }
+    #work.rv-in .work-head-line-1 {
+      animation: blueprintLineReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 80ms;
+    }
+    #work.rv-in .work-head-line-2 {
+      animation: blueprintLineReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 160ms;
+    }
+
+    @keyframes blueprintLineReveal {
+      0% {
+        clip-path: inset(0 100% 0 0);
+        opacity: 0;
+        transform: translate3d(-15px, 0, 0);
+      }
+      100% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    /* Flagship Volt Intercept: Curtain unroll from bottom (1.2s) */
+    #work:not(.rv-in) .work-flagship {
+      opacity: 0;
+    }
+    #work.rv-in .work-flagship {
+      animation: curtainUnrollBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+
+    @keyframes curtainUnrollBottom {
+      0% {
+        clip-path: inset(100% 0 0 0);
+        opacity: 0;
+        transform: translate3d(0, 45px, 0);
+      }
+      100% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    /* Inner feature boxes and tech chips pop in staggered 70ms */
+    #work:not(.rv-in) .volt-inner-pop {
+      opacity: 0;
+    }
+    #work.rv-in .volt-inner-pop {
+      animation: chipPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      animation-delay: calc(420ms + var(--pop-idx, 0) * 70ms);
+    }
+
+    @keyframes chipPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.65) translate3d(0, 14px, 0);
+      }
+      70% {
+        transform: scale(1.06) translate3d(0, -2px, 0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translate3d(0, 0, 0);
+      }
+    }
+
+    /* Other 3 cards: alternate 3D flips (perspective 900px, rotateY +-55deg) */
+    #work:not(.rv-in) .work-flip-card {
+      opacity: 0;
+    }
+    #work.rv-in .work-card-1 {
+      animation: card3DFlipLeft 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 110ms;
+    }
+    #work.rv-in .work-card-2 {
+      animation: card3DFlipRight 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 220ms;
+    }
+    #work.rv-in .work-card-3 {
+      animation: card3DFlipLeft 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes card3DFlipLeft {
+      0% {
+        opacity: 0;
+        transform: perspective(900px) rotateY(-55deg) translate3d(-35px, 15px, -60px);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(900px) rotateY(0deg) translate3d(0, 0, 0);
+      }
+    }
+
+    @keyframes card3DFlipRight {
+      0% {
+        opacity: 0;
+        transform: perspective(900px) rotateY(55deg) translate3d(35px, 15px, -60px);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(900px) rotateY(0deg) translate3d(0, 0, 0);
+      }
+    }
+
+    /* 2px cyan line draws across top of each card (scaleX 0 -> 1, 0.8s) */
+    .work-cyan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #38bdf8 50%, transparent 100%);
+      transform-origin: left center;
+      transform: scaleX(0);
+      pointer-events: none;
+      border-radius: 9999px;
+      z-index: 15;
+    }
+    #work.rv-in .work-card-0 .work-cyan-line {
+      animation: drawCyanLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 100ms;
+    }
+    #work.rv-in .work-card-1 .work-cyan-line {
+      animation: drawCyanLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 210ms;
+    }
+    #work.rv-in .work-card-2 .work-cyan-line {
+      animation: drawCyanLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 320ms;
+    }
+    #work.rv-in .work-card-3 .work-cyan-line {
+      animation: drawCyanLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 430ms;
+    }
+
+    @keyframes drawCyanLine {
+      0% {
+        transform: scaleX(0);
+        opacity: 0;
+      }
+      40% {
+        opacity: 1;
+      }
+      100% {
+        transform: scaleX(1);
+        opacity: 0.95;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       SCENE 2: #experience "Timeline"
+       ------------------------------------------------------------------------- */
+    .exp-timeline-track {
+      position: absolute;
+      top: 15px;
+      bottom: 15px;
+      left: -14px;
+      width: 3px;
+      background: linear-gradient(to bottom, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      border-radius: 9999px;
+      transform-origin: top center;
+      transform: scaleY(0);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+      transition: transform 0.08s ease-out;
+    }
+    @media (max-width: 767px) {
+      .exp-timeline-track {
+        left: 4px;
+      }
+    }
+
+    #experience:not(.rv-in) .exp-card {
+      opacity: 0;
+    }
+    #experience.rv-in .exp-card-0 {
+      animation: expSlideLeftSkew 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 0ms;
+    }
+    #experience.rv-in .exp-card-1 {
+      animation: expSlideRightSkew 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 110ms;
+    }
+    #experience.rv-in .exp-card-2 {
+      animation: expSlideLeftSkew 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 220ms;
+    }
+    #experience.rv-in .exp-card-3 {
+      animation: expSlideRightSkew 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes expSlideLeftSkew {
+      0% {
+        opacity: 0;
+        transform: translate3d(-60px, 15px, 0) skewX(-9deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) skewX(0deg);
+      }
+    }
+
+    @keyframes expSlideRightSkew {
+      0% {
+        opacity: 0;
+        transform: translate3d(60px, 15px, 0) skewX(9deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) skewX(0deg);
+      }
+    }
+
+    .exp-timeline-node {
+      position: absolute;
+      left: -21px;
+      top: 34px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 2px solid #0f172a;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+      pointer-events: none;
+      z-index: 12;
+      opacity: 0;
+    }
+    @media (max-width: 767px) {
+      .exp-timeline-node {
+        left: -3px;
+      }
+    }
+
+    #experience.rv-in .exp-card-0 .exp-timeline-node {
+      animation: expNodePulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 0ms;
+    }
+    #experience.rv-in .exp-card-1 .exp-timeline-node {
+      animation: expNodePulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 110ms;
+    }
+    #experience.rv-in .exp-card-2 .exp-timeline-node {
+      animation: expNodePulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 220ms;
+    }
+    #experience.rv-in .exp-card-3 .exp-timeline-node {
+      animation: expNodePulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes expNodePulse {
+      0% {
+        opacity: 0;
+        transform: scale(0);
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.4);
+        box-shadow: 0 0 16px 5px rgba(56, 189, 248, 0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow: 0 0 6px 1px rgba(56, 189, 248, 0.4);
+      }
+    }
+
+    #experience:not(.rv-in) .exp-bullet {
+      opacity: 0;
+    }
+    #experience.rv-in .exp-bullet {
+      animation: expBulletFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: calc(var(--card-delay, 0ms) + 180ms + var(--b-idx, 0) * 60ms);
+    }
+
+    @keyframes expBulletFadeUp {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       SCENE 3: #arena "Level Up Scoreboard"
+       ------------------------------------------------------------------------- */
+    #arena:not(.rv-in) .arena-left-bento {
+      opacity: 0;
+    }
+    #arena.rv-in .arena-left-bento {
+      animation: arenaBentoPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+
+    @keyframes arenaBentoPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.92) translate3d(-25px, 15px, 0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translate3d(0, 0, 0);
+      }
+    }
+
+    #arena.rv-in .arena-diamond {
+      display: inline-block;
+      animation: arenaDiamondSpin 1.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 150ms;
+    }
+
+    @keyframes arenaDiamondSpin {
+      0% {
+        transform: perspective(600px) rotateY(0deg) scale(0.7);
+        opacity: 0.3;
+      }
+      50% {
+        transform: perspective(600px) rotateY(180deg) scale(1.3);
+        filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.85));
+      }
+      100% {
+        transform: perspective(600px) rotateY(360deg) scale(1);
+        opacity: 1;
+        filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.2));
+      }
+    }
+
+    #arena:not(.rv-in) .arena-hack-card {
+      opacity: 0;
+    }
+    #arena.rv-in .arena-hack-0 {
+      animation: hackBadgePop 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: 0ms;
+    }
+    #arena.rv-in .arena-hack-1 {
+      animation: hackBadgePop 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: 110ms;
+    }
+    #arena.rv-in .arena-hack-2 {
+      animation: hackBadgePop 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: 220ms;
+    }
+    #arena.rv-in .arena-hack-3 {
+      animation: hackBadgePop 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes hackBadgePop {
+      0% {
+        opacity: 0;
+        transform: scale(0.55) rotate(-8deg);
+      }
+      65% {
+        opacity: 1;
+        transform: scale(1.07) rotate(1.5deg);
+      }
+      85% {
+        transform: scale(0.98) rotate(-0.5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    #arena.rv-in .arena-hack-0 .arena-hack-num {
+      animation: numFlickerSteps 400ms steps(8, end) backwards;
+      animation-delay: 0ms;
+    }
+    #arena.rv-in .arena-hack-1 .arena-hack-num {
+      animation: numFlickerSteps 400ms steps(8, end) backwards;
+      animation-delay: 110ms;
+    }
+    #arena.rv-in .arena-hack-2 .arena-hack-num {
+      animation: numFlickerSteps 400ms steps(8, end) backwards;
+      animation-delay: 220ms;
+    }
+    #arena.rv-in .arena-hack-3 .arena-hack-num {
+      animation: numFlickerSteps 400ms steps(8, end) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes numFlickerSteps {
+      0%   { opacity: 0; }
+      15%  { opacity: 0.85; }
+      30%  { opacity: 0.1; }
+      45%  { opacity: 1; }
+      60%  { opacity: 0.25; }
+      75%  { opacity: 0.95; }
+      90%  { opacity: 0.35; }
+      100% { opacity: 1; }
+    }
+
+    /* -------------------------------------------------------------------------
+       SCENE 4: #certifications "Vault Unlock"
+       ------------------------------------------------------------------------- */
+    #certifications:not(.rv-in) .cert-card {
+      opacity: 0;
+    }
+    #certifications.rv-in .cert-card-0 {
+      animation: certPendulumDrop 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 0ms;
+    }
+    #certifications.rv-in .cert-card-1 {
+      animation: certPendulumDrop 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 110ms;
+    }
+    #certifications.rv-in .cert-card-2 {
+      animation: certPendulumDrop 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 220ms;
+    }
+    #certifications.rv-in .cert-card-3 {
+      animation: certPendulumDrop 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+      animation-delay: 330ms;
+    }
+
+    @keyframes certPendulumDrop {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -65px, 0) rotate(7deg);
+      }
+      48% {
+        opacity: 1;
+        transform: translate3d(0, 8px, 0) rotate(-2deg);
+      }
+      72% {
+        transform: translate3d(0, -4px, 0) rotate(1deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+    }
+
+    .cert-shine {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 8;
+    }
+    .cert-shine::after {
+      content: "";
+      position: absolute;
+      top: -30%;
+      bottom: -30%;
+      left: 0;
+      width: 60%;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.04) 25%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.04) 75%,
+        transparent 100%
+      );
+      transform: translateX(-150%) skewX(-25deg);
+      opacity: 0;
+    }
+
+    #certifications.rv-in .cert-card-0 .cert-shine::after {
+      animation: certShineSweep 0.9s ease-out backwards;
+      animation-delay: 750ms;
+    }
+    #certifications.rv-in .cert-card-1 .cert-shine::after {
+      animation: certShineSweep 0.9s ease-out backwards;
+      animation-delay: 860ms;
+    }
+    #certifications.rv-in .cert-card-2 .cert-shine::after {
+      animation: certShineSweep 0.9s ease-out backwards;
+      animation-delay: 970ms;
+    }
+    #certifications.rv-in .cert-card-3 .cert-shine::after {
+      animation: certShineSweep 0.9s ease-out backwards;
+      animation-delay: 1080ms;
+    }
+
+    @keyframes certShineSweep {
+      0% {
+        transform: translateX(-150%) skewX(-25deg);
+        opacity: 0;
+      }
+      25% {
+        opacity: 1;
+      }
+      75% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(250%) skewX(-25deg);
+        opacity: 0;
+      }
+    }
+
+    /* -------------------------------------------------------------------------
+       REDUCED MOTION ACCESSIBILITY
+       ------------------------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce) {
+      #work:not(.rv-in) .work-head-line,
+      #work:not(.rv-in) .work-flagship,
+      #work:not(.rv-in) .volt-inner-pop,
+      #work:not(.rv-in) .work-flip-card,
+      #experience:not(.rv-in) .exp-card,
+      #experience:not(.rv-in) .exp-bullet,
+      #arena:not(.rv-in) .arena-left-bento,
+      #arena:not(.rv-in) .arena-hack-card,
+      #certifications:not(.rv-in) .cert-card {
+        opacity: 1 !important;
+        transform: none !important;
+        clip-path: none !important;
+      }
+      #work.rv-in *,
+      #experience.rv-in *,
+      #arena.rv-in *,
+      #certifications.rv-in * {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        clip-path: none !important;
+      }
+      .work-cyan-line,
+      .cert-shine,
+      .exp-timeline-track,
+      .exp-timeline-node {
+        display: none !important;
+      }
+    }
+  </style>
+
+  <script>
+    (function() {
+      // Runs on window load + 150ms per specification
+      window.addEventListener('load', () => {
+        setTimeout(initUniqueScrollScenes, 150);
+      });
+
+      function initUniqueScrollScenes() {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // SCENE MAP: keyed by section id
+        const SCENE_MAP = {
+          work: {
+            section: document.getElementById('work'),
+            setup() {
+              try {
+                const sec = this.section;
+                if (!sec) return;
+                sec.classList.add('rv');
+
+                // 1. Header lines
+                const label = sec.querySelector('.pill-badge');
+                if (label) {
+                  const labelWrap = label.parentElement || label;
+                  labelWrap.classList.add('work-head-line', 'work-head-line-0');
+                }
+                const h2 = sec.querySelector('h2');
+                if (h2) h2.classList.add('work-head-line', 'work-head-line-1');
+                const sub = sec.querySelector('p.max-w-md');
+                if (sub) sub.classList.add('work-head-line', 'work-head-line-2');
+
+                // 2. Project Cards
+                const cards = Array.from(sec.querySelectorAll('.project-card, .tilt-card'));
+                cards.forEach((card, idx) => {
+                  card.classList.remove('side-fly-left', 'side-fly-right', 'slide-left', 'slide-right');
+                  card.style.transitionDelay = '';
+                  card.style.transform = '';
+                  card.classList.add('rv-target-card', 'work-card-' + idx);
+
+                  // Cyan line across top
+                  if (!card.querySelector('.work-cyan-line')) {
+                    const line = document.createElement('div');
+                    line.className = 'work-cyan-line';
+                    card.appendChild(line);
+                  }
+
+                  if (idx === 0) {
+                    // Flagship Volt Intercept card
+                    card.classList.add('work-flagship');
+
+                    // Inner feature boxes & tech chips
+                    const featureBoxes = card.querySelectorAll('[class*="rounded-2xl"][class*="border"], [class*="p-3.5"]');
+                    const techChips = card.querySelectorAll('span[class*="rounded-lg"][class*="border"], span.pill-badge');
+                    let popIdx = 0;
+                    featureBoxes.forEach(fb => {
+                      fb.classList.add('volt-inner-pop');
+                      fb.style.setProperty('--pop-idx', popIdx++);
+                    });
+                    techChips.forEach(chip => {
+                      chip.classList.add('volt-inner-pop');
+                      chip.style.setProperty('--pop-idx', popIdx++);
+                    });
+                  } else {
+                    // Other 3 cards
+                    card.classList.add('work-flip-card');
+                  }
+                });
+              } catch(e) {
+                console.error('Error in work.setup:', e);
+              }
+            },
+            enter(sec) {},
+            leave(sec) {}
+          },
+
+          experience: {
+            section: document.getElementById('experience'),
+            scrollHandler: null,
+            setup() {
+              try {
+                const sec = this.section;
+                if (!sec) return;
+                sec.classList.add('rv');
+
+                const grid = sec.querySelector('.grid');
+                if (grid) {
+                  grid.style.position = 'relative';
+
+                  // Vertical gradient line down left of card column
+                  if (!grid.querySelector('.exp-timeline-track')) {
+                    const trackLine = document.createElement('div');
+                    trackLine.className = 'exp-timeline-track';
+                    grid.appendChild(trackLine);
+                  }
+                }
+
+                // Cards
+                const cards = Array.from(sec.querySelectorAll('.tilt-card'));
+                cards.forEach((card, idx) => {
+                  card.classList.remove('side-fly-left', 'side-fly-right', 'slide-left', 'slide-right');
+                  card.style.transitionDelay = '';
+                  card.style.transform = '';
+                  card.classList.add('rv-target-card', 'exp-card', 'exp-card-' + idx);
+                  card.style.position = 'relative';
+
+                  // Small pulsing node
+                  if (!card.querySelector('.exp-timeline-node')) {
+                    const node = document.createElement('div');
+                    node.className = 'exp-timeline-node';
+                    card.appendChild(node);
+                  }
+
+                  // Bullets
+                  const bullets = card.querySelectorAll('ul > li');
+                  const cardDelay = idx * 110;
+                  card.style.setProperty('--card-delay', cardDelay + 'ms');
+                  bullets.forEach((b, bIdx) => {
+                    b.classList.add('exp-bullet');
+                    b.style.setProperty('--b-idx', bIdx);
+                  });
+                });
+
+                // Scroll progress linked to scaleY
+                const line = grid ? grid.querySelector('.exp-timeline-track') : null;
+                this.scrollHandler = () => {
+                  if (!line || !sec) return;
+                  const rect = sec.getBoundingClientRect();
+                  const vh = window.innerHeight;
+                  const total = rect.height;
+                  // Starts as section enters, completes when scrolled through
+                  const current = (vh * 0.85) - rect.top;
+                  const progress = Math.max(0, Math.min(1, current / total));
+                  line.style.transform = 'scaleY(' + progress.toFixed(3) + ')';
+                };
+                window.addEventListener('scroll', this.scrollHandler, { passive: true });
+              } catch(e) {
+                console.error('Error in experience.setup:', e);
+              }
+            },
+            enter(sec) {
+              if (this.scrollHandler) this.scrollHandler();
+            },
+            leave(sec) {
+              const line = sec.querySelector('.exp-timeline-track');
+              if (line) line.style.transform = 'scaleY(0)';
+            }
+          },
+
+          arena: {
+            section: document.getElementById('arena'),
+            rafId: null,
+            setup() {
+              try {
+                const sec = this.section;
+                if (!sec) return;
+                sec.classList.add('rv');
+
+                // Left Bento
+                const leftBento = sec.querySelector('[class*="col-span-5"]');
+                if (leftBento) {
+                  leftBento.classList.remove('side-fly-left', 'side-fly-right', 'slide-left', 'slide-right');
+                  leftBento.style.transform = '';
+                  leftBento.classList.add('rv-target-card', 'arena-left-bento');
+                }
+
+                // Diamond emoji
+                const diamond = sec.querySelector('.text-2xl');
+                if (diamond && diamond.textContent.includes('💎')) {
+                  diamond.classList.add('arena-diamond');
+                }
+
+                // 4 Hackathon cards
+                const hackContainer = sec.querySelector('[class*="col-span-7"]');
+                if (hackContainer) {
+                  const hackCards = Array.from(hackContainer.querySelectorAll('.tilt-card'));
+                  hackCards.forEach((card, idx) => {
+                    card.classList.remove('side-fly-left', 'side-fly-right', 'slide-left', 'slide-right');
+                    card.style.transitionDelay = '';
+                    card.style.transform = '';
+                    card.classList.add('rv-target-card', 'arena-hack-card', 'arena-hack-' + idx);
+
+                    // The "01 //" number
+                    const numSpan = card.querySelector('.font-mono-tech.text-accent');
+                    if (numSpan) numSpan.classList.add('arena-hack-num');
+                  });
+                }
+              } catch(e) {
+                console.error('Error in arena.setup:', e);
+              }
+            },
+            enter(sec) {
+              if (prefersReduced) return;
+              // 1,000+ DSA count up (1.6s easeOutCubic)
+              const countEl = sec.querySelector('.font-display.font-bold.text-gradient-accent');
+              if (!countEl) return;
+
+              if (this.rafId) cancelAnimationFrame(this.rafId);
+
+              const duration = 1600;
+              let startTime = null;
+              const startVal = 0;
+              const targetVal = 1000;
+
+              const step = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(1, elapsed / duration);
+                // easeOutCubic
+                const ease = 1 - Math.pow(1 - progress, 3);
+                const current = Math.floor(startVal + (targetVal - startVal) * ease);
+                countEl.textContent = current.toLocaleString() + '+';
+
+                if (progress < 1) {
+                  this.rafId = requestAnimationFrame(step);
+                } else {
+                  countEl.textContent = '1,000+';
+                }
+              };
+              this.rafId = requestAnimationFrame(step);
+            },
+            leave(sec) {
+              if (this.rafId) cancelAnimationFrame(this.rafId);
+              const countEl = sec.querySelector('.font-display.font-bold.text-gradient-accent');
+              if (countEl) countEl.textContent = '0+';
+            }
+          },
+
+          certifications: {
+            section: document.getElementById('certifications'),
+            setup() {
+              try {
+                const sec = this.section;
+                if (!sec) return;
+                sec.classList.add('rv');
+
+                const cards = Array.from(sec.querySelectorAll('.tilt-card'));
+                cards.forEach((card, idx) => {
+                  card.classList.remove('side-fly-left', 'side-fly-right', 'slide-left', 'slide-right');
+                  card.style.transitionDelay = '';
+                  card.style.transform = '';
+                  card.classList.add('rv-target-card', 'cert-card', 'cert-card-' + idx);
+                  card.style.position = 'relative';
+
+                  // Diagonal shine element
+                  if (!card.querySelector('.cert-shine')) {
+                    const shine = document.createElement('div');
+                    shine.className = 'cert-shine';
+                    card.appendChild(shine);
+                  }
+                });
+              } catch(e) {
+                console.error('Error in certifications.setup:', e);
+              }
+            },
+            enter(sec) {},
+            leave(sec) {}
+          }
+        };
+
+        // Initialize all scenes in MAP
+        Object.keys(SCENE_MAP).forEach(id => {
+          const scene = SCENE_MAP[id];
+          if (scene && scene.setup) scene.setup();
+        });
+
+        // IntersectionObserver (threshold 0.12)
+        const sceneObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const secId = entry.target.id;
+            const scene = SCENE_MAP[secId];
+            if (!scene) return;
+
+            if (entry.isIntersecting) {
+              entry.target.classList.add('rv-in');
+
+              // Clear any legacy inline transforms so hover tilt is pristine
+              entry.target.querySelectorAll('.rv-target-card').forEach(card => {
+                if (card.style.transform === 'translateX(0px)' || card.style.transform === 'translateX(0)') {
+                  card.style.transform = '';
+                }
+              });
+              setTimeout(() => {
+                entry.target.querySelectorAll('.rv-target-card').forEach(card => {
+                  if (card.style.transform === 'translateX(0px)' || card.style.transform === 'translateX(0)') {
+                    card.style.transform = '';
+                  }
+                });
+              }, 60);
+
+              if (scene.enter) scene.enter(entry.target);
+            } else {
+              entry.target.classList.remove('rv-in');
+              if (scene.leave) scene.leave(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+
+        Object.keys(SCENE_MAP).forEach(id => {
+          const scene = SCENE_MAP[id];
+          if (scene && scene.section) sceneObserver.observe(scene.section);
+        });
+      }
+    })();
+  </script>
+
 </body>

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pothumanchi Thri Sai Nadh Raju â€” AI, Data Science & Full-Stack Portfolio</title>
+  <title>Pothumanchi Thri Sai Nadh Raju — AI, Data Science & Full-Stack Portfolio</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js r128 for Real-Time Interactive 3D Neural/Data Sculpture -->
@@ -740,38 +740,24 @@
       font-weight: 600;
     }
 
-    /* =========================================================
-       1. LAG-FREE, UNBREAKABLE 3D NAVIGATION CUBE (PAGE 2)
-       ========================================================= */
-    .neural-cube-card {
-      position: relative;
-      width: 100%;
-      min-height: 420px;
-      border-radius: 22px;
-      background: radial-gradient(circle at 50% 45%, rgba(30, 18, 60, 0.85) 0%, rgba(8, 6, 18, 0.96) 80%);
-      border: 1px solid rgba(168, 85, 247, 0.35);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 1.25rem 1.5rem;
-      overflow: hidden;
-      user-select: none;
-    }
-
     .cube-scene {
       position: relative;
       width: 100%;
-      height: 280px;
+      height: 290px;
       display: flex;
       align-items: center;
       justify-content: center;
-      perspective: 950px;
+      perspective: 1000px;
       cursor: grab;
-      touch-action: none;
+      touch-action: none; /* Prevents mobile/scroll lag */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .cube-scene:active { cursor: grabbing; }
+    .cube-scene:active,
+    .cube-scene.is-grabbing {
+      cursor: grabbing;
+    }
 
     .cube-ambient-glow {
       position: absolute;
@@ -784,51 +770,61 @@
     }
 
     .nav-cube {
-      width: 184px;
-      height: 184px;
+      width: 190px;
+      height: 190px;
       position: relative;
       transform-style: preserve-3d;
-      transform: rotateX(-18deg) rotateY(-28deg);
+      will-change: transform;
+      /* Clean absolute rotation state, no compounding offsets */
+      transform: rotateX(var(--cube-rx, -18deg)) rotateY(var(--cube-ry, -28deg));
       transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: auto;
     }
 
     .nav-cube.is-dragging {
       transition: none !important;
     }
 
-    /* CRITICAL: Never apply transform/scale on .cube-face:hover or the 3D cube breaks apart! */
     .cube-face {
       position: absolute;
-      width: 184px;
-      height: 184px;
-      border-radius: 16px;
+      width: 190px;
+      height: 190px;
+      border-radius: 18px;
       background: rgba(16, 12, 34, 0.92);
       border: 2px solid rgba(168, 85, 247, 0.65);
-      box-shadow: inset 0 0 18px rgba(168, 85, 247, 0.25);
+      box-shadow:
+        0 0 20px rgba(168, 85, 247, 0.25),
+        inset 0 0 22px rgba(168, 85, 247, 0.22);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 12px;
+      padding: 14px;
       text-align: center;
       cursor: pointer;
-      backface-visibility: visible;
-      transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .cube-face:hover {
-      border-color: #38bdf8;
-      background: rgba(28, 22, 58, 0.96);
-      box-shadow: 0 0 22px rgba(56, 189, 248, 0.55), inset 0 0 18px rgba(56, 189, 248, 0.3);
+      border-color: #22d3ee;
+      background: rgba(28, 20, 58, 0.98);
+      box-shadow:
+        0 0 28px rgba(34, 211, 238, 0.65),
+        inset 0 0 25px rgba(168, 85, 247, 0.45);
     }
 
-    .face-front  { transform: rotateY(0deg) translateZ(92px); }
-    .face-right  { transform: rotateY(90deg) translateZ(92px); }
-    .face-back   { transform: rotateY(180deg) translateZ(92px); }
-    .face-left   { transform: rotateY(-90deg) translateZ(92px); }
-    .face-top    { transform: rotateX(90deg) translateZ(92px); }
-    .face-bottom { transform: rotateX(-90deg) translateZ(92px); }
+    /* 3D Cube Face Transforms (half of 190px = 95px) */
+    .face-front  { transform: rotateY(0deg) translateZ(95px); }
+    .face-right  { transform: rotateY(90deg) translateZ(95px); }
+    .face-back   { transform: rotateY(180deg) translateZ(95px); }
+    .face-left   { transform: rotateY(-90deg) translateZ(95px); }
+    .face-top    { transform: rotateX(90deg) translateZ(95px); }
+    .face-bottom { transform: rotateX(-90deg) translateZ(95px); }
 
     .face-icon {
       font-size: 2rem;
@@ -900,108 +896,51 @@
       color: #22d3ee;
     }
 
-    /* =========================================================
-       2. INDIVIDUAL BOX ENTRANCE & ULTRA-SMOOTH HOVER (ALL PAGES)
-       ========================================================= */
-    .individual-anim-box {
+
+    /* =========================================================================
+       REPEATABLE LEFT/RIGHT FLY-IN ANIMATIONS
+       ========================================================================= */
+    /* Base state when out of viewport */
+    .side-fly-left,
+    .side-fly-right {
       opacity: 0;
       will-change: transform, opacity;
       transition:
-        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-        opacity 0.6s ease-out,
-        box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-        border-color 0.45s ease !important;
+        transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.75s ease-out,
+        box-shadow 0.6s ease,
+        border-color 0.6s ease;
     }
 
-    .individual-anim-box.from-left {
-      transform: translate3d(-90px, 20px, 0);
+    .side-fly-left {
+      transform: translate3d(-160px, 35px, 0) scale(0.92) rotate(-2deg);
     }
 
-    .individual-anim-box.from-right {
-      transform: translate3d(90px, 20px, 0);
+    .side-fly-right {
+      transform: translate3d(160px, 35px, 0) scale(0.92) rotate(2deg);
     }
 
-    .individual-anim-box.box-visible {
-      opacity: 1 !important;
-      transform: translate3d(0, 0, 0) scale(1) !important;
-    }
-
-    /* Exact Smooth Hover Like the Last Box on the Site */
-    .individual-anim-box.box-visible:hover {
-      transform: translate3d(0, -8px, 0) scale(1.018) !important;
-      border-color: rgba(56, 189, 248, 0.75) !important;
-      box-shadow:
-        0 18px 38px -8px rgba(0, 0, 0, 0.78),
-        0 0 24px rgba(56, 189, 248, 0.32),
-        0 0 12px rgba(168, 85, 247, 0.25) !important;
-      z-index: 10;
-    }
-
-    /* =========================================================
-       3. SKILLS 4.5s SPACE SHUTTLE BLUE FIRE ASSEMBLY
-       ========================================================= */
-    .skills-rocket-stage { position: relative !important; }
-
-    #skills-spark-canvas {
-      position: absolute;
-      inset: -30px;
-      width: calc(100% + 60px);
-      height: calc(100% + 60px);
-      pointer-events: none;
-      z-index: 1 !important;
-      opacity: 0.6;
-    }
-
-    .skill-rocket-item {
-      position: relative;
-      z-index: 5 !important;
-      opacity: 0.3;
-      transform: translate3d(var(--sx, 0px), var(--sy, 0px), 0) rotate(var(--srot, 0deg)) scale(0.88);
-      transition: none;
-    }
-
-    .skill-rocket-item.rocket-assembling {
+    /* Snappy hover lift & tilt for Experience, Projects, Leadership & Arena boxes */
+    .side-fly-left.card-in-view,
+    .side-fly-right.card-in-view {
       opacity: 1;
-      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
       transition:
-        transform 4.4s cubic-bezier(0.16, 0.86, 0.24, 1) var(--sdelay, 0s),
-        opacity 0.7s ease-out var(--sdelay, 0s),
-        box-shadow 0.4s ease,
-        border-color 0.4s ease !important;
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.35s ease,
+        border-color 0.35s ease,
+        opacity 0.6s ease-out !important;
+      transition-delay: 0s !important;
     }
 
-    .skill-rocket-item.rocket-thruster-active {
-      border-color: rgba(56, 189, 248, 0.7) !important;
-      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3) !important;
-    }
-
-    .skill-rocket-item.rocket-thruster-active::after {
-      content: "";
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 22px;
-      height: 14px;
-      clip-path: polygon(22% 0%, 78% 0%, 50% 100%);
-      background: linear-gradient(to bottom, #ffffff 0%, #7dd3fc 35%, #0284c7 75%, transparent 100%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .skill-rocket-item.rocket-docked {
-      opacity: 1 !important;
-      transform: translate3d(0, 0, 0) rotate(0deg) scale(1) !important;
-      transition:
-        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0s,
-        box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0s,
-        border-color 0.4s ease 0s !important;
-    }
-
-    .skill-rocket-item.rocket-docked:hover {
-      transform: translate3d(0, -7px, 0) scale(1.04) !important;
+    .side-fly-left.card-in-view:hover,
+    .side-fly-right.card-in-view:hover {
+      transform: translate3d(0, -10px, 0) scale(1.025) !important;
       border-color: #38bdf8 !important;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.65), 0 0 20px rgba(56, 189, 248, 0.5) !important;
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.75),
+        0 0 28px rgba(56, 189, 248, 0.45),
+        0 0 15px rgba(168, 85, 247, 0.35) !important;
       z-index: 15;
     }
 
@@ -1447,7 +1386,7 @@
               Open to Internships &amp; AI Roles
             </span>
           </div>
-          <p class="text-[11px] font-mono-tech" style="color: var(--text-secondary);">CSE (Data Science) â€™28 â€¢ 0â†’1 Builder</p>
+          <p class="text-[11px] font-mono-tech" style="color: var(--text-secondary);">CSE (Data Science) ’28 • 0→1 Builder</p>
         </a>
       </div>
 
@@ -1539,7 +1478,7 @@
               <div class="window-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
               <div class="window-dot" style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></div>
             </div>
-            <button id="window-toggle" style="margin-left: auto; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer;">â€”</button>
+            <button id="window-toggle" style="margin-left: auto; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer;">—</button>
           </div>
 
           <!-- Window Body (collapsible) -->
@@ -1547,7 +1486,7 @@
             <!-- Status Badge -->
             <div class="mb-6 px-4 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-3" style="pointer-events: auto;">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" style="pointer-events: auto;"></span>
-              <span class="text-sm font-semibold text-emerald-300" style="pointer-events: auto;">Currently Open to Work â€” Present Working as Intern in O&amp;G Corporation &amp; Infosys</span>
+              <span class="text-sm font-semibold text-emerald-300" style="pointer-events: auto;">Currently Open to Work — Present Working as Intern in O&amp;G Corporation &amp; Infosys</span>
             </div>
 
             <!-- Name -->
@@ -1558,9 +1497,9 @@
 
             <!-- Contact Details -->
             <div class="space-y-2 mb-6" style="pointer-events: auto;">
-              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">ðŸ“§ nadh8076@gmail.com</p>
-              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">ðŸ“ž +91 8919242206</p>
-              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">ðŸ“ Guntur, Andhra Pradesh, India</p>
+              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📧 nadh8076@gmail.com</p>
+              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📞 +91 8919242206</p>
+              <p class="text-sm font-mono-tech" style="color: var(--text-secondary);">📍 Guntur, Andhra Pradesh, India</p>
             </div>
 
             <!-- External Links -->
@@ -1636,21 +1575,21 @@
         
         <!-- Location & Role Breadcrumb -->
         <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full glass-surface text-xs font-mono-tech">
-          <span class="text-accent font-semibold">â— POTHUMANCHI THRI SAI NADH RAJU</span>
+          <span class="text-accent font-semibold">● POTHUMANCHI THRI SAI NADH RAJU</span>
           <span style="color: var(--text-muted);">/</span>
           <span style="color: var(--text-secondary);"><i class="fa-solid fa-location-dot mr-1 text-accent"></i>Guntur, AP, India</span>
           <span style="color: var(--text-muted);">/</span>
-          <span class="text-accent">RVR & JC â€™28</span>
+          <span class="text-accent">RVR & JC ’28</span>
         </div>
 
         <!-- Main Hero Headline -->
         <h1 class="font-display text-4xl sm:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.06]">
-          Engineering <span class="text-gradient-accent">intelligent AI vision</span>, data pipelines &amp; 0â†’1 products that <span class="underline decoration-2 underline-offset-8" style="text-decoration-color: var(--accent-primary);">ship fast.</span>
+          Engineering <span class="text-gradient-accent">intelligent AI vision</span>, data pipelines &amp; 0→1 products that <span class="underline decoration-2 underline-offset-8" style="text-decoration-color: var(--accent-primary);">ship fast.</span>
         </h1>
 
         <!-- Executive Bio Summary -->
         <p class="text-base sm:text-lg leading-relaxed max-w-2xl" style="color: var(--text-secondary);">
-          Computer Science (<strong style="color: var(--text-primary);">Data Science</strong>) undergraduate with an entrepreneurial, hands-on approach to software engineering. From autonomous <strong style="color: var(--text-primary);">3D edge-vision safety systems</strong> and <strong style="color: var(--text-primary);">RAG legal workflows</strong> to enterprise <strong style="color: var(--text-primary);">Power BI-style analytics platforms</strong>â€”I architect, lead, and ship end-to-end MVPs.
+          Computer Science (<strong style="color: var(--text-primary);">Data Science</strong>) undergraduate with an entrepreneurial, hands-on approach to software engineering. From autonomous <strong style="color: var(--text-primary);">3D edge-vision safety systems</strong> and <strong style="color: var(--text-primary);">RAG legal workflows</strong> to enterprise <strong style="color: var(--text-primary);">Power BI-style analytics platforms</strong>—I architect, lead, and ship end-to-end MVPs.
         </p>
 
         <!-- Action CTA Row -->
@@ -1684,7 +1623,7 @@
             <div class="tilt-content">
               <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">1000+</div>
               <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">DSA Problems Solved</div>
-              <div class="text-[11px] font-mono-tech mt-0.5 text-accent">CodeChef Diamond ðŸ’Ž</div>
+              <div class="text-[11px] font-mono-tech mt-0.5 text-accent">CodeChef Diamond 💎</div>
             </div>
           </div>
 
@@ -1692,7 +1631,7 @@
             <div class="tilt-content">
               <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">8x</div>
               <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Hackathon Team Lead</div>
-              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">AWS â€¢ OpenAI â€¢ Police AI</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">AWS • OpenAI • Police AI</div>
             </div>
           </div>
 
@@ -1700,7 +1639,7 @@
             <div class="tilt-content">
               <div class="text-2xl sm:text-3xl font-display font-bold text-gradient-accent">4x</div>
               <div class="text-xs font-medium mt-0.5" style="color: var(--text-primary);">Virtual Experience &amp; Internships</div>
-              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">Google Cloud â€¢ Alteryx</div>
+              <div class="text-[11px] font-mono-tech mt-0.5" style="color: var(--text-secondary);">Google Cloud • Alteryx</div>
             </div>
           </div>
 
@@ -1719,7 +1658,7 @@
         <div class="neural-cube-card" id="neural-cube-portal">
           <div class="cube-hud-header">
             <span class="cube-hud-title">NEURAL_CUBE_3D.nav</span>
-            <span class="cube-hud-status" id="cube-status-text">DRAG TO ROTATE â€¢ CLICK FACE OR ROLL</span>
+            <span class="cube-hud-status" id="cube-status-text">DRAG TO ROTATE • CLICK FACE OR ROLL</span>
           </div>
 
           <!-- 3D Cube Viewport -->
@@ -1728,50 +1667,50 @@
             <div class="nav-cube" id="nav-cube">
               <!-- 1. FRONT: PROFILE -->
               <div class="cube-face face-front" data-section="profile" data-label="Profile">
-                <div class="face-icon">ðŸ‘¤</div>
+                <div class="face-icon">👤</div>
                 <div class="face-title">PROFILE</div>
                 <div class="face-sub">Intro & Identity</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <span class="face-cta">Click to Visit →</span>
               </div>
 
               <!-- 2. RIGHT: SKILLS -->
               <div class="cube-face face-right" data-section="skills" data-label="Skills">
-                <div class="face-icon">âš¡</div>
+                <div class="face-icon">⚡</div>
                 <div class="face-title">SKILLS</div>
-                <div class="face-sub">AI â€¢ Full-Stack â€¢ DSA</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <div class="face-sub">AI • Full-Stack • DSA</div>
+                <span class="face-cta">Click to Visit →</span>
               </div>
 
               <!-- 3. BACK: PROJECTS -->
               <div class="cube-face face-back" data-section="projects" data-label="Projects">
-                <div class="face-icon">ðŸš€</div>
+                <div class="face-icon">🚀</div>
                 <div class="face-title">PROJECTS</div>
                 <div class="face-sub">Volt Intercept & MVPs</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <span class="face-cta">Click to Visit →</span>
               </div>
 
               <!-- 4. LEFT: EXPERIENCE -->
               <div class="cube-face face-left" data-section="experience" data-label="Experience">
-                <div class="face-icon">ðŸ†</div>
+                <div class="face-icon">🏆</div>
                 <div class="face-title">EXPERIENCE</div>
                 <div class="face-sub">8x Hackathon Lead</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <span class="face-cta">Click to Visit →</span>
               </div>
 
               <!-- 5. TOP: BACKGROUND -->
               <div class="cube-face face-top" data-section="background" data-label="Background">
-                <div class="face-icon">ðŸŽ“</div>
+                <div class="face-icon">🎓</div>
                 <div class="face-title">BACKGROUND</div>
                 <div class="face-sub">CS (Data Science) & Bio</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <span class="face-cta">Click to Visit →</span>
               </div>
 
               <!-- 6. BOTTOM: ARENA / SIMULATOR -->
               <div class="cube-face face-bottom" data-section="arena" data-label="Arena & Contact">
-                <div class="face-icon">ðŸŽ®</div>
+                <div class="face-icon">🎮</div>
                 <div class="face-title">SIMULATOR</div>
                 <div class="face-sub">Live Interactive Arena</div>
-                <span class="face-cta">Click to Visit â†’</span>
+                <span class="face-cta">Click to Visit →</span>
               </div>
             </div>
           </div>
@@ -1779,7 +1718,7 @@
           <!-- Controls Bar: Roll Button + Active Face Readout -->
           <div class="cube-controls-bar">
             <button type="button" class="roll-cube-btn" id="roll-cube-btn">
-              ðŸŽ² ROLL CUBE
+              🎲 ROLL CUBE
             </button>
             <div class="cube-active-readout" id="cube-active-readout">
               TOP / ACTIVE: <strong>PROFILE</strong>
@@ -1808,14 +1747,14 @@
             <div class="mac-notch"><div class="mac-camera"></div></div>
             <div class="mac-topbar">
               <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-              <span class="mac-filename">sainadh_projects.tsx â€” bash</span>
+              <span class="mac-filename">sainadh_projects.tsx — bash</span>
             </div>
             <div class="screen-code-bg">
               <span>const portfolio = await loadProjects({ lead: "Sai Nadh", hackathons: 8 });</span>
               <span>pipeline.deploy("VoltIntercept", "NyayaSetu", "GNN_AST_Engine");</span>
             </div>
             <h2 class="laptop-title">EXPLORE PROJECTS</h2>
-            <div class="click-indicator">âš¡ Click or Scroll to Launch</div>
+            <div class="click-indicator">⚡ Click or Scroll to Launch</div>
           </div>
         </div>
 
@@ -1850,7 +1789,7 @@
           <span>01 // SELECTED PRODUCT CASE STUDIES</span>
         </div>
         <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
-          Built from <span class="text-gradient-accent">0â†’1 under pressure.</span>
+          Built from <span class="text-gradient-accent">0→1 under pressure.</span>
         </h2>
       </div>
       <p class="max-w-md text-sm sm:text-base" style="color: var(--text-secondary);">
@@ -1874,7 +1813,7 @@
             </div>
 
             <h3 class="font-display text-2xl sm:text-4xl font-bold">
-              Volt Intercept â€” AI-Powered Smart Manufacturing Safety System
+              Volt Intercept — AI-Powered Smart Manufacturing Safety System
             </h3>
 
             <p class="text-sm sm:text-base leading-relaxed" style="color: var(--text-secondary);">
@@ -1934,7 +1873,7 @@
                 <div id="volt-bbox" class="w-48 h-28 border-2 border-rose-500 rounded-lg relative flex flex-col items-center justify-center bg-rose-500/10 transition-all duration-300">
                   <span class="absolute -top-2.5 left-2 px-1.5 bg-rose-600 text-[9px] font-mono-tech font-bold rounded text-white" id="volt-cell-label">LI-ION SWOLLEN CELL (98.4%)</span>
                   <i id="volt-cell-icon" class="fa-solid fa-car-battery text-3xl text-rose-400 mb-1 animate-bounce"></i>
-                  <span id="volt-temp-readout" class="text-[11px] font-mono-tech text-rose-300">THERMAL: 142.8Â°C â€¢ CRITICAL</span>
+                  <span id="volt-temp-readout" class="text-[11px] font-mono-tech text-rose-300">THERMAL: 142.8°C • CRITICAL</span>
                 </div>
               </div>
 
@@ -1966,7 +1905,7 @@
             </div>
 
             <h3 class="font-display text-2xl font-bold">
-              Nyaya-Setu â€” AI Legal Enforcement Platform
+              Nyaya-Setu — AI Legal Enforcement Platform
             </h3>
 
             <p class="text-xs sm:text-sm leading-relaxed" style="color: var(--text-secondary);">
@@ -2251,7 +2190,7 @@
         </h2>
       </div>
       <p class="max-w-md text-sm sm:text-base" style="color: var(--text-secondary);">
-        Sustained algorithmic discipline paired with high-velocity hackathon executionâ€”leading teams under tight deadlines to ship working prototypes.
+        Sustained algorithmic discipline paired with high-velocity hackathon execution—leading teams under tight deadlines to ship working prototypes.
       </p>
     </div>
 
@@ -2262,7 +2201,7 @@
         <div class="tilt-content space-y-6">
           <div class="flex items-center justify-between">
             <span class="px-3 py-1 rounded-full text-xs font-mono-tech pill-badge">ALGORITHMIC MASTERY</span>
-            <span class="text-2xl">ðŸ’Ž</span>
+            <span class="text-2xl">💎</span>
           </div>
 
           <div>
@@ -2275,7 +2214,7 @@
             <div>
               <div class="flex justify-between text-xs font-mono-tech mb-1">
                 <a href="https://www.codechef.com/users/cc_y24cd144" target="_blank" rel="noopener noreferrer" class="font-bold text-accent hover:underline" style="color: var(--text-primary);">
-                  CodeChef (Diamond Badge ðŸ’Ž)
+                  CodeChef (Diamond Badge 💎)
                 </a>
                 <span class="text-accent">Top Tier Milestone</span>
               </div>
@@ -2309,7 +2248,7 @@
         </div>
 
         <div class="tilt-content pt-6 mt-6 border-t text-xs font-mono-tech flex items-center justify-between" style="border-color: var(--border-subtle); color: var(--text-secondary);">
-          <span>B.Tech CSE (Data Science) â€¢ RVR &amp; JC College</span>
+          <span>B.Tech CSE (Data Science) • RVR &amp; JC College</span>
           <span class="text-accent">Class of 2028</span>
         </div>
       </div>
@@ -2439,7 +2378,7 @@
           <span>06 // LIFE &amp; IMPACT BEYOND THE SCREEN</span>
         </div>
         <h2 class="font-display text-3xl sm:text-5xl font-bold tracking-tight">
-          Beyond the Code â€” <span class="text-gradient-accent">Achievements &amp; Team Memories.</span>
+          Beyond the Code — <span class="text-gradient-accent">Achievements &amp; Team Memories.</span>
         </h2>
         <p class="text-sm sm:text-base mt-2 max-w-2xl" style="color: var(--text-secondary);">
           Achievements, teamwork, and experiences that shaped my journey.
@@ -2453,7 +2392,7 @@
           <span id="gallery-play-text">Pause Motion</span>
         </button>
         <span class="text-xs font-mono-tech hidden sm:inline" style="color: var(--text-secondary);">
-          <i class="fa-regular fa-hand-pointer mr-1"></i>Hover to inspect â€¢ Click to expand
+          <i class="fa-regular fa-hand-pointer mr-1"></i>Hover to inspect • Click to expand
         </span>
       </div>
     </div>
@@ -2577,7 +2516,7 @@
             </div>
           </div>
         </div>
-        <div class="gallery-card group" data-index="8" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0â†’1 Builder" data-title="0â†’1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0â†’1 Builder Persona photograph">
+        <div class="gallery-card group" data-index="8" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0→1 Builder" data-title="0→1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0→1 Builder Persona photograph">
           <div class="relative w-full h-full overflow-hidden">
             <img src="./assets/images/gallery/studio-blue-jacket.jpg" alt="Sai Nadh in studio blue jacket" loading="lazy" />
 
@@ -2586,7 +2525,7 @@
             </div>
             <div class="gallery-card-overlay">
               <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Persona</span>
-              <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0â†’1 Builder Persona</h4>
+              <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0→1 Builder Persona</h4>
               <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Driven by curiosity, grit, and the passion to turn wild ideas into working products.</p>
             </div>
           </div>
@@ -2735,7 +2674,7 @@
             </div>
           </div>
         </div>
-        <div class="gallery-card group" data-index="19" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0â†’1 Builder" data-title="0â†’1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0â†’1 Builder Persona photograph">
+        <div class="gallery-card group" data-index="19" data-img="./assets/images/gallery/studio-blue-jacket.jpg" data-badge="0→1 Builder" data-title="0→1 Builder Persona" data-caption="Driven by curiosity, grit, and the passion to turn wild ideas into working products." role="button" tabindex="0" aria-label="View 0→1 Builder Persona photograph">
           <div class="relative w-full h-full overflow-hidden">
             <img src="./assets/images/gallery/studio-blue-jacket.jpg" alt="Sai Nadh in studio blue jacket" loading="lazy" />
 
@@ -2744,7 +2683,7 @@
             </div>
             <div class="gallery-card-overlay">
               <span class="text-[10px] font-mono-tech text-cyan-400 uppercase tracking-wider mb-1">Persona</span>
-              <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0â†’1 Builder Persona</h4>
+              <h4 class="font-display font-bold text-sm sm:text-base text-white group-hover:text-cyan-300 transition-colors">0→1 Builder Persona</h4>
               <p class="text-xs font-mono-tech text-slate-300 mt-1 line-clamp-2">Driven by curiosity, grit, and the passion to turn wild ideas into working products.</p>
             </div>
           </div>
@@ -2822,11 +2761,11 @@
       <div class="tilt-card rounded-3xl p-8 sm:p-12 lg:p-14 border text-center relative overflow-hidden">
         <div class="tilt-content max-w-3xl mx-auto space-y-6">
           <span class="px-3.5 py-1.5 rounded-full text-xs font-mono-tech pill-badge">
-            â— READY TO SHIP YOUR NEXT AI OR DATA MVP
+            ● READY TO SHIP YOUR NEXT AI OR DATA MVP
           </span>
 
           <h2 class="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-            Letâ€™s build something <span class="text-gradient-accent">extraordinary together.</span>
+            Let’s build something <span class="text-gradient-accent">extraordinary together.</span>
           </h2>
 
           <p class="text-sm sm:text-base max-w-xl mx-auto" style="color: var(--text-secondary);">
@@ -2856,10 +2795,10 @@
       <!-- Bottom Credits Bar -->
       <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono-tech" style="color: var(--text-secondary);">
         <div>
-          Â© 2026 Pothumanchi Thri Sai Nadh Raju â— Guntur, Andhra Pradesh, India
+          © 2026 Pothumanchi Thri Sai Nadh Raju ● Guntur, Andhra Pradesh, India
         </div>
         <div class="flex items-center gap-2">
-          <span>Engineered with 0â†’1 Hustle ðŸš€, Clean Data ðŸ“Š &amp; Colorido 3D Shaders âœ¨</span>
+          <span>Engineered with 0→1 Hustle 🚀, Clean Data 📊 &amp; Colorido 3D Shaders ✨</span>
         </div>
       </div>
     </div>
@@ -2943,7 +2882,7 @@
         <div>
           <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Education</h4>
           <div class="flex justify-between font-semibold" style="color: var(--text-primary);">
-            <span>RVR &amp; JC College of Engineering â€” B.Tech in CSE (Data Science)</span>
+            <span>RVR &amp; JC College of Engineering — B.Tech in CSE (Data Science)</span>
             <span>Expected 2028 | Guntur, AP</span>
           </div>
           <p class="mt-1">Relevant Coursework: Data Structures &amp; Algorithms, Object-Oriented Programming, Database Systems (SQL/DBMS), Artificial Intelligence, Machine Learning, Generative AI &amp; RAG, Frontend Development, Data Analytics, Power BI.</p>
@@ -2961,10 +2900,10 @@
         <div>
           <h4 class="font-mono-tech uppercase text-accent font-bold mb-1">Experience &amp; Virtual Internships</h4>
           <ul class="list-disc pl-5 space-y-2">
-            <li><strong style="color: var(--text-primary);">Google Cloud (AICTE &amp; Forage, 6 Months):</strong> Generative AI &amp; Data Analytics Virtual Experience â€” Applied GenAI to enhance analytics workflows and evaluated outputs for accuracy &amp; relevance.</li>
-            <li><strong style="color: var(--text-primary);">Alteryx (AICTE EduSkills, 10 Weeks):</strong> Data Analytics Virtual Experience â€” Cleaned and structured business datasets in Python to surface KPIs and visual summaries.</li>
-            <li><strong style="color: var(--text-primary);">EduSkills (AICTE, 10 Weeks):</strong> Python Fullstack Development &amp; Startup Entrepreneurship â€” Built Django + React.js BI dashboard capstones and completed startup GTM validation track.</li>
-            <li><strong style="color: var(--text-primary);">EduSkills Academy (8 Weeks):</strong> SQL &amp; DBMS Internship â€” Engineered SQL/MongoDB schemas, ETL pipelines, REST APIs (Node.js/FastAPI), and a Library Management System.</li>
+            <li><strong style="color: var(--text-primary);">Google Cloud (AICTE &amp; Forage, 6 Months):</strong> Generative AI &amp; Data Analytics Virtual Experience — Applied GenAI to enhance analytics workflows and evaluated outputs for accuracy &amp; relevance.</li>
+            <li><strong style="color: var(--text-primary);">Alteryx (AICTE EduSkills, 10 Weeks):</strong> Data Analytics Virtual Experience — Cleaned and structured business datasets in Python to surface KPIs and visual summaries.</li>
+            <li><strong style="color: var(--text-primary);">EduSkills (AICTE, 10 Weeks):</strong> Python Fullstack Development &amp; Startup Entrepreneurship — Built Django + React.js BI dashboard capstones and completed startup GTM validation track.</li>
+            <li><strong style="color: var(--text-primary);">EduSkills Academy (8 Weeks):</strong> SQL &amp; DBMS Internship — Engineered SQL/MongoDB schemas, ETL pipelines, REST APIs (Node.js/FastAPI), and a Library Management System.</li>
           </ul>
         </div>
 
@@ -3185,8 +3124,8 @@
 
     // 2. SKILLS MATRIX DATA & INTERACTIVE FILTERING
     const SKILLS_DATA = [
-      { name: 'Python', cat: 'core', icon: 'fa-brands fa-python', level: 'Core Language â€¢ 0â†’1 Builder' },
-      { name: 'Data Structures & Algorithms', cat: 'core', icon: 'fa-solid fa-code-branch', level: '1000+ Solved â€¢ CodeChef Diamond ðŸ’Ž' },
+      { name: 'Python', cat: 'core', icon: 'fa-brands fa-python', level: 'Core Language • 0→1 Builder' },
+      { name: 'Data Structures & Algorithms', cat: 'core', icon: 'fa-solid fa-code-branch', level: '1000+ Solved • CodeChef Diamond 💎' },
       { name: 'Django', cat: 'fullstack', icon: 'fa-solid fa-server', level: 'Backend & REST Architecture' },
       { name: 'FastAPI', cat: 'fullstack', icon: 'fa-solid fa-bolt', level: 'High-Speed Python AI APIs' },
       { name: 'Node.js & Express', cat: 'fullstack', icon: 'fa-brands fa-node-js', level: 'Backend Microservices' },
@@ -3278,7 +3217,7 @@
         boxClass: 'border-rose-500 bg-rose-500/10',
         tagClass: 'bg-rose-600',
         icon: 'fa-solid fa-car-battery text-rose-400 animate-bounce',
-        temp: 'THERMAL: 142.8Â°C â€¢ PNEUMATIC EJECT'
+        temp: 'THERMAL: 142.8°C • PNEUMATIC EJECT'
       },
       {
         label: 'SAFE ALKALINE PACK (99.1%)',
@@ -3287,7 +3226,7 @@
         boxClass: 'border-emerald-500 bg-emerald-500/10',
         tagClass: 'bg-emerald-600',
         icon: 'fa-solid fa-battery-full text-emerald-400',
-        temp: 'THERMAL: 26.4Â°C â€¢ PASS TO SORTING'
+        temp: 'THERMAL: 26.4°C • PASS TO SORTING'
       },
       {
         label: 'PUNCTURED POUCH CELL (96.7%)',
@@ -3296,7 +3235,7 @@
         boxClass: 'border-amber-500 bg-amber-500/10',
         tagClass: 'bg-amber-600',
         icon: 'fa-solid fa-fire-flame-curved text-amber-400 animate-pulse',
-        temp: 'THERMAL: 178.2Â°C â€¢ AUTO-REPORT SENT'
+        temp: 'THERMAL: 178.2°C • AUTO-REPORT SENT'
       }
     ];
     let voltIdx = 0;
@@ -3316,12 +3255,12 @@
     // 4. DEEP-DIVE CASE STUDY MODAL DATA (Akshay Mehta Structure)
     const CASE_STUDIES = {
       volt: {
-        tag: 'HACKATHON FLAGSHIP PROJECT â€¢ EDGE VISION & 3D HUD',
-        title: 'Volt Intercept â€” AI-Powered Smart Manufacturing Safety System',
+        tag: 'HACKATHON FLAGSHIP PROJECT • EDGE VISION & 3D HUD',
+        title: 'Volt Intercept — AI-Powered Smart Manufacturing Safety System',
         problem: 'Industrial battery recycling facilities face frequent, catastrophic fires caused by damaged or swollen lithium-ion cells entering shredders undetected on high-speed conveyor belts.',
         approach: 'Engineered an autonomous edge-vision system deployed on Cloudflare Pages that pairs Gemini API real-time computer vision with a custom React Three Fiber 3D Holographic HUD for plant operators.',
         architecture: [
-          'Edge Camera Feed Ingestion â†’ Frame Pre-processing',
+          'Edge Camera Feed Ingestion → Frame Pre-processing',
           'Gemini Vision API Multi-Modal Classification (Swollen / Punctured / Safe)',
           'React Three Fiber 3D Spatial HUD + Glassmorphism Operator Console',
           'Automated PDF Incident Report Generator for Compliance & Safety Audits'
@@ -3329,8 +3268,8 @@
         outcome: 'Delivers sub-second hazard triage with an intuitive 3D command interface and instant PDF compliance documentation.'
       },
       nyaya: {
-        tag: 'COLLEGE PRE-INCUBATION â€¢ SHORTLISTED FOR AWS "AI FOR BHARAT"',
-        title: 'Nyaya-Setu â€” AI-Based Legal Enforcement Workflow Platform',
+        tag: 'COLLEGE PRE-INCUBATION • SHORTLISTED FOR AWS "AI FOR BHARAT"',
+        title: 'Nyaya-Setu — AI-Based Legal Enforcement Workflow Platform',
         problem: 'Legal enforcement officers and citizens often struggle to rapidly cross-reference complex statutory provisions and precedent workflows during time-sensitive case documentation.',
         approach: 'Built a self-directed Generative AI and Retrieval-Augmented Generation (RAG) application grounded in verified Indian statutory corpora to assist legal enforcement workflows.',
         architecture: [
@@ -3341,7 +3280,7 @@
         outcome: 'Shortlisted for the prestigious AWS "AI for Bharat" Global Hackathon for practical social and governance impact.'
       },
       disaster: {
-        tag: 'STATE-LEVEL HACKATHON SELECTED â€¢ NEXTWAVE x OPENAI ACADEMY',
+        tag: 'STATE-LEVEL HACKATHON SELECTED • NEXTWAVE x OPENAI ACADEMY',
         title: 'AI-Based Disaster Alert & Crisis Communication Application',
         problem: 'During natural disasters, misinformation and cluttered interfaces delay evacuation and emergency response triage.',
         approach: 'Designed an AI-powered alert verification and broadcast platform prioritizing information reliability, zero-hallucination guardrails, and high-contrast crisis UX.',
@@ -3353,7 +3292,7 @@
         outcome: 'Selected for the State-Level Hackathon by NextWave x OpenAI Academy for innovation and responsible AI execution.'
       },
       bi: {
-        tag: 'FULL-STACK & ANALYTICS CAPSTONE â€¢ AICTE EDUSKILLS',
+        tag: 'FULL-STACK & ANALYTICS CAPSTONE • AICTE EDUSKILLS',
         title: 'Enterprise BI Dashboard & GenAI Evaluation Suite',
         problem: 'Growing startups and mid-market teams need unified ingestion of fragmented CSV/SQL/NoSQL operational data into actionable executive KPIs without expensive enterprise licenses.',
         approach: 'Built a full-stack Django + React.js data ingestion platform with Pandas/NumPy ETL pipelines and Power BI-style interactive visual dashboards, alongside GenAI prompt evaluation workflows.',
@@ -3727,7 +3666,7 @@
     }
 
     // =====================================================================
-    // COLORIDO 2026 MOUSE-MOVE SQUARE GRID â€” Page 1 Only
+    // COLORIDO 2026 MOUSE-MOVE SQUARE GRID — Page 1 Only
     // =====================================================================
     const PALETTE = ['#ff0055', '#00f5d4', '#fee440', '#9b5de5', '#00bbf9', '#ff5400', '#00e676', '#ff007f'];
     let colorIdx = 0;
@@ -3758,7 +3697,7 @@
 
       buildGrid();
 
-      // Mouse move directly on page1 â€” calculates exact tile under cursor
+      // Mouse move directly on page1 — calculates exact tile under cursor
       page1.addEventListener('mousemove', (e) => {
         const rect = grid.getBoundingClientRect();
         const col = Math.floor((e.clientX - rect.left) / 48);
@@ -3800,7 +3739,7 @@
         btn.textContent = '+';
       } else {
         document.querySelector('.personal-window').classList.remove('collapsed');
-        btn.textContent = 'â€”';
+        btn.textContent = '—';
       }
     }
 
@@ -3913,270 +3852,716 @@
 
       const codeSnippets = [
         "const AI = new NeuralCore();", "SELECT * FROM ast_nodes;", "async function deployMVP()",
-  <script id="unified-portfolio-controller">
+        "01101001 01000001", "GNN.forward(graph)", "React.useThree()", "git push origin main",
+        "λ => transform(3D)", "VoltIntercept.scan()", "CodeChef::Diamond"
+      ];
+      const streams = Array.from({ length: 28 }, (_, i) => ({
+        x: Math.random() * 2000,
+        y: Math.random() * 1200,
+        z: 0.3 + Math.random() * 0.9,
+        speed: 0.5 + Math.random() * 1.4,
+        text: codeSnippets[i % codeSnippets.length]
+      }));
+
+      function animateBg() {
+        ctx.clearRect(0, 0, w, h);
+        time += 0.025;
+
+        streams.forEach(s => {
+          s.y -= s.speed;
+          if (s.y < -30) { s.y = h + 30; s.x = Math.random() * w; }
+          ctx.font = `${Math.floor(11 * s.z)}px monospace`;
+          ctx.fillStyle = `rgba(168, 85, 247, ${0.18 * s.z})`;
+          ctx.fillText(s.text, s.x % w, s.y);
+        });
+
+        [w * 0.16, w * 0.84].forEach((centerX, idx) => {
+          const numPairs = 26;
+          const spacing = h / numPairs;
+          for (let i = 0; i < numPairs; i++) {
+            const y = i * spacing + ((time * 25) % spacing);
+            const angle = i * 0.38 + time * (idx === 0 ? 1 : -1);
+            const radius = Math.min(w * 0.07, 65);
+
+            const x1 = centerX + Math.sin(angle) * radius;
+            const z1 = Math.cos(angle);
+            const x2 = centerX + Math.sin(angle + Math.PI) * radius;
+            const z2 = Math.cos(angle + Math.PI);
+
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x1, y, 3.5 + (z1 + 1) * 1.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(168, 85, 247, ${0.45 + (z1 + 1) * 0.25})`;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x2, y, 3.5 + (z2 + 1) * 1.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(34, 211, 238, ${0.45 + (z2 + 1) * 0.25})`;
+            ctx.fill();
+          }
+        });
+
+        requestAnimationFrame(animateBg);
+      }
+      animateBg();
+    });
+  </script>
+  <!-- 3D Navigation Cube Script -->
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ===================================================================
-      // 1. 3D CUBE CONTROLLER (DRAG + CLICK ANY FACE + ROLL BUTTON)
-      // ===================================================================
       const cube = document.getElementById('nav-cube');
       const scene = document.getElementById('cube-scene');
       const rollBtn = document.getElementById('roll-cube-btn');
       const readout = document.getElementById('cube-active-readout');
       const statusText = document.getElementById('cube-status-text');
+      if (!cube || !scene) return;
 
-      if (cube && scene) {
-        let rx = -18, ry = -28;
-        let dragging = false, sx = 0, sy = 0, moved = 0, downFace = null;
+      let currentRx = -18;
+      let currentRy = -28;
+      let targetRx = -18;
+      let targetRy = -28;
+      let isDragging = false;
+      let activePointerId = null;
+      let startX = 0, startY = 0;
+      let totalDragMove = 0;
+      let animFrameId = null;
 
-        const faces = [
-          { key: 'profile',    label: 'PROFILE',    rx: 0,   ry: 0 },
-          { key: 'skills',     label: 'SKILLS',     rx: 0,   ry: -90 },
-          { key: 'projects',   label: 'PROJECTS',   rx: 0,   ry: -180 },
-          { key: 'experience', label: 'EXPERIENCE', rx: 0,   ry: 90 },
-          { key: 'background', label: 'BACKGROUND', rx: -90, ry: 0 },
-          { key: 'arena',      label: 'SIMULATOR',  rx: 90,  ry: 0 }
-        ];
+      const cubeFaces = [
+        { key: 'profile',    label: 'PROFILE',    rx: 0,   ry: 0 },
+        { key: 'skills',     label: 'SKILLS',     rx: 0,   ry: -90 },
+        { key: 'projects',   label: 'PROJECTS',   rx: 0,   ry: -180 },
+        { key: 'experience', label: 'EXPERIENCE', rx: 0,   ry: 90 },
+        { key: 'background', label: 'BACKGROUND', rx: -90, ry: 0 },
+        { key: 'arena',      label: 'SIMULATOR',  rx: 90,  ry: 0 }
+      ];
 
-        function setCube(x, y, smooth) {
-          cube.classList.toggle('is-dragging', !smooth);
-          cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+      function applyTransform(animate = false) {
+        if (animate) {
+          cube.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+        } else {
+          cube.style.transition = 'none';
         }
+        cube.style.setProperty('--cube-rx', `${currentRx.toFixed(2)}deg`);
+        cube.style.setProperty('--cube-ry', `${currentRy.toFixed(2)}deg`);
+      }
 
-        function resolveTarget(key) {
-          const map = {
-            profile:    ['#page-1-splash', 'header', 'body'],
-            background: ['#hero', '#about'],
-            projects:   ['#work', '#projects', '#laptop-scroll-track'],
-            skills:     ['#skills', '#tech-stack', '[id*="skill"]'],
-            experience: ['#leadership', '#experience', '#achievements', '#work'],
-            arena:      ['#arena', '#simulator', '#contact', 'footer']
-          };
-          for (const sel of (map[key] || [])) {
-            const el = document.querySelector(sel);
-            if (el) return el;
-          }
-          return document.body;
-        }
-
-        function activateFace(face) {
-          rx = face.rx - 10;
-          ry = face.ry - 14;
-          setCube(rx, ry, true);
-          if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${face.label}</strong>`;
-          if (statusText) statusText.textContent = `⚡ OPENING ${face.label}...`;
-
-          const targetEl = resolveTarget(face.key);
-          setTimeout(() => {
-            if (face.key === 'profile') {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else if (targetEl) {
-              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            setTimeout(() => {
-              if (statusText) statusText.textContent = 'DRAG TO ROTATE • CLICK FACE OR ROLL';
-            }, 900);
-          }, 420);
-        }
-
-        scene.addEventListener('pointerdown', (e) => {
-          if (e.target.closest('#roll-cube-btn')) return;
-          dragging = true;
-          moved = 0;
-          sx = e.clientX;
-          sy = e.clientY;
-          downFace = e.target.closest('.cube-face');
-          cube.classList.add('is-dragging');
-        });
-
-        window.addEventListener('pointermove', (e) => {
-          if (!dragging) return;
-          const dx = e.clientX - sx;
-          const dy = e.clientY - sy;
-          moved += Math.hypot(dx, dy);
-          if (moved > 4) {
-            ry += dx * 0.5;
-            rx -= dy * 0.5;
-            setCube(rx, ry, false);
-          }
-          sx = e.clientX;
-          sy = e.clientY;
-        });
-
-        window.addEventListener('pointerup', () => {
-          if (!dragging) return;
-          dragging = false;
-          cube.classList.remove('is-dragging');
-          if (moved <= 8 && downFace) {
-            const key = downFace.getAttribute('data-section');
-            const face = faces.find(f => f.key === key);
-            if (face) activateFace(face);
-          }
-          downFace = null;
-        });
-
-        if (rollBtn) {
-          rollBtn.addEventListener('click', () => {
-            const randomFace = faces[Math.floor(Math.random() * faces.length)];
-            rx = randomFace.rx + 360 - 10;
-            ry = randomFace.ry + 360 - 14;
-            setCube(rx, ry, true);
-            activateFace(randomFace);
-          });
+      // Smooth 60 FPS lerp loop during drag to eliminate jitter
+      function renderLoop() {
+        if (isDragging) {
+          currentRx += (targetRx - currentRx) * 0.3;
+          currentRy += (targetRy - currentRy) * 0.3;
+          applyTransform(false);
+          animFrameId = requestAnimationFrame(renderLoop);
         }
       }
 
-      // ===================================================================
-      // 2. INDIVIDUAL LEAF BOXES ONLY (NO GROUPED CONTAINERS, SMOOTH HOVER)
-      // ===================================================================
-      const skipZones = '#page-1-splash, #neural-cube-portal, .neural-cube-card, #laptop-scroll-track, nav, header';
-      const boxQuery = '.bento-card, .project-card, .stat-card, .glass-card, .achievement-card, .exp-card, .arena-card, article, [class*="-card"]';
+      applyTransform(false);
 
-      const allBoxes = Array.from(document.querySelectorAll(boxQuery)).filter(el => {
-        if (el.closest(skipZones)) return false;
-        if (el.closest('#skills, [id*="skill"]')) return false;
-        // CRITICAL: Never select a parent container that holds other cards inside it!
-        const childCards = Array.from(el.querySelectorAll(boxQuery)).filter(c => c !== el);
-        return childCards.length === 0;
+      function findSection(key) {
+        const map = {
+          profile: '#page-1-splash',
+          background: '#page-2-hero',
+          projects: '#laptop-scroll-track',
+          skills: '#skills',
+          experience: '#work',
+          arena: '#arena'
+        };
+        return document.querySelector(map[key]) || document.querySelector('#hero') || document.body;
+      }
+
+      function jumpToFace(key, label) {
+        if (isDragging) stopDragging();
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        
+        const face = cubeFaces.find(f => f.key === key);
+        if (!face) return;
+
+        currentRx = targetRx = face.rx;
+        currentRy = targetRy = face.ry;
+        applyTransform(true);
+
+        if (readout) readout.innerHTML = `ACTIVE PAGE: <strong>${label}</strong>`;
+        if (statusText) statusText.textContent = `⚡ JUMPING TO ${label}...`;
+
+        const target = findSection(key);
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(() => {
+            if (statusText) statusText.textContent = 'DRAG TO ROTATE • CLICK FACE OR ROLL';
+          }, 900);
+        }, 400);
+      }
+
+      scene.addEventListener('pointerdown', (e) => {
+        // Only react to primary mouse button or touch
+        if (e.button !== undefined && e.button !== 0) return;
+        isDragging = true;
+        activePointerId = e.pointerId;
+        totalDragMove = 0;
+        startX = e.clientX;
+        startY = e.clientY;
+        targetRx = currentRx;
+        targetRy = currentRy;
+        cube.classList.add('is-dragging');
+        scene.classList.add('is-grabbing');
+        try { scene.setPointerCapture(e.pointerId); } catch(err) {}
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        animFrameId = requestAnimationFrame(renderLoop);
       });
 
-      allBoxes.forEach((box, i) => {
-        box.classList.remove('side-fly-left', 'side-fly-right', 'card-in-view');
-        box.classList.add('individual-anim-box', i % 2 === 0 ? 'from-left' : 'from-right');
+      scene.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        totalDragMove += Math.hypot(dx, dy);
+
+        targetRy += dx * 0.45;
+        targetRx -= dy * 0.45;
+
+        startX = e.clientX;
+        startY = e.clientY;
       });
 
-      const boxObserver = new IntersectionObserver((entries) => {
+      function stopDragging(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        cube.classList.remove('is-dragging');
+        scene.classList.remove('is-grabbing');
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        currentRx = targetRx;
+        currentRy = targetRy;
+        applyTransform(false);
+        const pid = (e && e.pointerId) ? e.pointerId : activePointerId;
+        if (pid !== null) {
+          try { scene.releasePointerCapture(pid); } catch(err) {}
+          activePointerId = null;
+        }
+      }
+
+      scene.addEventListener('pointerup', stopDragging);
+      scene.addEventListener('pointercancel', stopDragging);
+      window.addEventListener('pointerup', stopDragging);
+      window.addEventListener('pointercancel', stopDragging);
+
+      document.querySelectorAll('.cube-face').forEach(faceEl => {
+        faceEl.addEventListener('click', (e) => {
+          if (totalDragMove > 6) return; // Prevent triggering click during drag
+          e.stopPropagation();
+          const key = faceEl.getAttribute('data-section');
+          const face = cubeFaces.find(f => f.key === key);
+          if (face) jumpToFace(face.key, face.label);
+        });
+      });
+
+      if (rollBtn) {
+        rollBtn.addEventListener('click', () => {
+          const randomFace = cubeFaces[Math.floor(Math.random() * cubeFaces.length)];
+          jumpToFace(randomFace.key, randomFace.label);
+        });
+      }
+    });
+  </script>
+
+  <!-- Repeatable Side Fly-Ins & 4.5s Rocket Spark Particle Engine -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // =========================================================================
+      // PART A: REPEATABLE LEFT / RIGHT FLY-IN FOR EXPERIENCE, PROJECTS & BOXES
+      // =========================================================================
+      const excludedContainers = '#page-1-splash, #page-2-hero, #hero, #neural-cube-portal, #laptop-scroll-track, nav, header, footer';
+
+      // Locate Experience, Leadership, Projects, Achievements, and Arena cards strictly outside Hero & Cube
+      const candidateCards = Array.from(document.querySelectorAll(
+        '#work .project-card, #projects .project-card, #experience [class*="card"], #leadership [class*="card"], #achievements [class*="card"], #arena [class*="card"], #certifications .tilt-card'
+      )).filter(el => !el.closest(excludedContainers) && !el.querySelector('#neural-cube-portal'));
+
+      // Also grab direct child cards inside lower sections (Experience, Leadership, Work, Arena, Certifications)
+      document.querySelectorAll('#work, #experience, #leadership, #arena, #certifications').forEach(sec => {
+        if (sec.matches(excludedContainers) || sec.id.toLowerCase().includes('skill')) return;
+        sec.querySelectorAll(':scope > div > div, :scope > div > article').forEach(box => {
+          if (!box.closest(excludedContainers) && !box.querySelector('#neural-cube-portal') && box.offsetHeight > 70 && box.offsetHeight < 750) {
+            if (!candidateCards.includes(box)) candidateCards.push(box);
+          }
+        });
+      });
+
+      // Assign alternating left/right fly-in classes
+      candidateCards.forEach((card, idx) => {
+        if (card.closest('[id*="skill"]')) return; // Skills gets the special rocket animation below
+        card.classList.remove('slide-left', 'slide-right');
+        card.style.opacity = '';
+        card.style.transform = '';
+        card.classList.add(idx % 2 === 0 ? 'side-fly-left' : 'side-fly-right');
+        card.style.transitionDelay = `${(idx % 4) * 0.1}s`;
+      });
+
+      // Repeatable IntersectionObserver (triggers EVERY time user scrolls in/out)
+      const repeatableCardObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
+          entry.target.style.opacity = '';
+          entry.target.style.transform = '';
           if (entry.isIntersecting) {
-            entry.target.classList.add('box-visible');
+            entry.target.classList.add('card-in-view');
           } else {
-            entry.target.classList.remove('box-visible');
+            // Reset when leaving section so it animates fresh on next visit
+            entry.target.classList.remove('card-in-view');
           }
         });
-      }, { threshold: 0.1 });
+      }, { threshold: 0.14, rootMargin: '0px 0px -40px 0px' });
 
-      allBoxes.forEach(box => boxObserver.observe(box));
+      candidateCards.forEach(card => repeatableCardObserver.observe(card));
 
-      // ===================================================================
-      // 3. SKILLS SECTION: 4.5s LOW-INTENSITY SPACE SHUTTLE BLUE FIRE
-      // ===================================================================
-      const skillsSec = document.querySelector('#skills, #tech-stack, [id*="skill"]');
-      if (skillsSec) {
-        skillsSec.classList.add('skills-rocket-stage');
-        let canvas = document.getElementById('skills-spark-canvas');
-        if (!canvas) {
-          canvas = document.createElement('canvas');
-          canvas.id = 'skills-spark-canvas';
-          skillsSec.appendChild(canvas);
+      // =========================================================================
+      // PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER (WAAPI)
+      // =========================================================================
+      const skillsSection = document.getElementById('skills');
+      let isCollisionRunning = false;
+      let hasCollisionPlayed = false;
+
+      // Cross-browser helper to await Web Animations API completion
+      function awaitAnimation(anim) {
+        if (!anim) return Promise.resolve();
+        if (anim.finished && typeof anim.finished.then === 'function') {
+          return anim.finished;
         }
-        const ctx = canvas.getContext('2d');
+        return new Promise(resolve => {
+          anim.onfinish = resolve;
+          anim.onerror = resolve;
+        });
+      }
 
-        function sizeCanvas() {
-          canvas.width = skillsSec.offsetWidth + 60;
-          canvas.height = skillsSec.offsetHeight + 60;
+      async function triggerSkillsCollision() {
+        if (isCollisionRunning) return;
+
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        const grid = document.getElementById('skills-grid');
+        const emitter = document.getElementById('skills-collision-emitter');
+        const glowHalo = document.getElementById('skills-glow-halo');
+        if (!grid || !skillsSection) return;
+
+        let cards = Array.from(grid.querySelectorAll('.skill-card'));
+        if (!cards.length) {
+          if (typeof renderSkills === 'function') {
+            renderSkills('all');
+            cards = Array.from(grid.querySelectorAll('.skill-card'));
+          }
+          if (!cards.length) return;
         }
-        sizeCanvas();
-        window.addEventListener('resize', sizeCanvas);
 
-        // Select ONLY individual leaf skill items (never parent wrapper rows)
-        let skillBoxes = Array.from(skillsSec.querySelectorAll(
-          '.skill-tag, .skill-pill, .skill-card, .tech-badge, .chip, .bento-card, .glass-card, [class*="skill-"]'
-        )).filter(el => {
-          const nested = Array.from(el.querySelectorAll('.skill-tag, .skill-pill, .skill-card, .tech-badge, .chip')).filter(c => c !== el);
-          return nested.length === 0 && el.offsetWidth > 28;
+        isCollisionRunning = true;
+
+        // Collect all LEDs on cards for synchronized pulsing
+        const leds = cards.map(c => c.querySelector('.skill-card-led')).filter(Boolean);
+
+        // 1. Activate small glowing light on every skill card and start synchronized pulse
+        leds.forEach(led => {
+          led.classList.remove('is-intensified');
+          led.classList.add('is-active');
         });
 
-        function shuffleSkills() {
-          skillBoxes.forEach((item, idx) => {
-            item.classList.remove('rocket-assembling', 'rocket-thruster-active', 'rocket-docked');
-            item.classList.add('skill-rocket-item');
-            const ang = (idx * 137.5) * (Math.PI / 180);
-            const sx = Math.round(Math.cos(ang) * 140 + (Math.random() - 0.5) * 80);
-            const sy = Math.round(Math.sin(ang) * 90 + (Math.random() - 0.5) * 60);
-            const srot = Math.round((Math.random() - 0.5) * 50);
-            item.style.setProperty('--sx', `${sx}px`);
-            item.style.setProperty('--sy', `${sy}px`);
-            item.style.setProperty('--srot', `${srot}deg`);
-            item.style.setProperty('--sdelay', `${(idx % 6) * 0.05}s`);
+        // Calculate dynamic geometric center of #skills-grid and relative vectors for every card
+        const gridRect = grid.getBoundingClientRect();
+        const gridCenterX = gridRect.left + gridRect.width / 2;
+        const gridCenterY = gridRect.top + gridRect.height / 2;
+
+        const cardVectors = cards.map(card => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenterX = cardRect.left + cardRect.width / 2;
+          const cardCenterY = cardRect.top + cardRect.height / 2;
+          return {
+            card,
+            dx: gridCenterX - cardCenterX,
+            dy: gridCenterY - cardCenterY
+          };
+        });
+
+        // Set card collision state (disables pointer events and CSS transitions during animation)
+        cards.forEach(card => card.classList.add('is-colliding'));
+
+        // STEP 1: SIMULTANEOUS INWARD CONVERGENCE (Duration: 700ms)
+        // All cards launch together and converge simultaneously toward the center focal point
+        const convergenceAnimations = cardVectors.map(({ card, dx, dy }) => {
+          return card.animate([
+            { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 },
+            { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(0.38)`, opacity: 0.95 }
+          ], {
+            duration: 700,
+            easing: 'cubic-bezier(0.32, 0, 0.2, 1)',
+            fill: 'forwards'
           });
-        }
-        shuffleSkills();
+        });
 
-        let sparks = [], raf = null, startT = 0, dockTimer = null;
-        const DURATION = 4500;
-        const bluePalette = ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7'];
+        await Promise.all(convergenceAnimations.map(awaitAnimation));
 
-        function drawBlueFire(ts) {
-          if (!startT) startT = ts;
-          const elapsed = ts - startT;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // STEP 2 & 3: COLLISION IMPACT & INTENSIFY LEDS (~260ms)
+        // Briefly intensify the lights when all cards converge at the common center
+        leds.forEach(led => led.classList.add('is-intensified'));
 
-          if (elapsed < DURATION - 300) {
-            const sRect = skillsSec.getBoundingClientRect();
-            skillBoxes.forEach(item => {
-              if (Math.random() > 0.3) return;
-              const r = item.getBoundingClientRect();
-              sparks.push({
-                x: (r.left - sRect.left) + r.width / 2 + 30 + (Math.random() - 0.5) * 6,
-                y: (r.bottom - sRect.top) + 32,
-                vx: (Math.random() - 0.5) * 0.9,
-                vy: 1.4 + Math.random() * 2.0,
-                r: 1.2 + Math.random() * 1.2,
-                a: 0.45,
-                c: bluePalette[Math.floor(Math.random() * bluePalette.length)]
-              });
-            });
-          }
-
-          for (let i = sparks.length - 1; i >= 0; i--) {
-            const p = sparks[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.a -= 0.032;
-            if (p.a <= 0) { sparks.splice(i, 1); continue; }
-            ctx.globalAlpha = p.a;
-            ctx.fillStyle = p.c;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-
-          if (elapsed < DURATION + 400 || sparks.length > 0) {
-            raf = requestAnimationFrame(drawBlueFire);
-          }
+        if (emitter) {
+          emitter.classList.add('active');
         }
 
-        const skillObs = new IntersectionObserver((entries) => {
+        // STEP 3: FULL SKILLS SECTION GLOW (~1000ms)
+        // Soft ambient illumination along section edges & background using cyan & violet
+        if (glowHalo) {
+          glowHalo.classList.add('active');
+          setTimeout(() => {
+            glowHalo.classList.remove('active');
+          }, 1000);
+        }
+
+        // Brief impact pause (100ms) for high-impact visual feedback while sparks radiate
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Transition LEDs smoothly back to pulsing during return
+        leds.forEach(led => led.classList.remove('is-intensified'));
+
+        if (emitter) {
+          setTimeout(() => {
+            emitter.classList.remove('active');
+          }, 180);
+        }
+
+        // STEP 4: RESTORE / RETURN TO NORMAL GRID POSITIONS (Duration: 650ms)
+        // Smooth elastic spring return back to original starting coordinates
+        const returnAnimations = cardVectors.map(({ card, dx, dy }) => {
+          return card.animate([
+            { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(0.38)`, opacity: 0.95 },
+            { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 }
+          ], {
+            duration: 650,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          });
+        });
+
+        await Promise.all(returnAnimations.map(awaitAnimation));
+
+        // STEP 5: TURN LIGHTS OFF SMOOTHLY ONCE RETURN COMPLETED
+        leds.forEach(led => {
+          led.classList.remove('is-active', 'is-intensified');
+        });
+
+        // CLEANUP: Cancel fills and remove collision classes so native hover & 3D tilt are 100% active
+        cards.forEach(card => {
+          card.getAnimations().forEach(anim => anim.cancel());
+          card.classList.remove('is-colliding');
+          card.style.transform = '';
+          card.style.opacity = '';
+        });
+
+        isCollisionRunning = false;
+        hasCollisionPlayed = true;
+      }
+
+      // Viewport IntersectionObserver
+      if (skillsSection) {
+        const skillsObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              sizeCanvas();
-              void skillsSec.offsetWidth;
-              startT = 0;
-              sparks = [];
-              skillBoxes.forEach(el => {
-                el.classList.add('rocket-assembling', 'rocket-thruster-active');
-                el.classList.remove('rocket-docked');
-              });
-              if (raf) cancelAnimationFrame(raf);
-              raf = requestAnimationFrame(drawBlueFire);
-              clearTimeout(dockTimer);
-              dockTimer = setTimeout(() => {
-                skillBoxes.forEach(el => {
-                  el.classList.remove('rocket-thruster-active');
-                  el.classList.add('rocket-docked');
+              if (!hasCollisionPlayed && !isCollisionRunning) {
+                requestAnimationFrame(() => {
+                  triggerSkillsCollision();
                 });
-              }, DURATION);
+              }
             } else {
-              clearTimeout(dockTimer);
-              if (raf) cancelAnimationFrame(raf);
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              shuffleSkills();
+              // Reset trigger when user scrolls away so animation can replay on revisit
+              if (!isCollisionRunning) {
+                hasCollisionPlayed = false;
+              }
             }
           });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.12, rootMargin: '30px 0px -30px 0px' });
 
-        skillObs.observe(skillsSec);
+        skillsObserver.observe(skillsSection);
+      }
+
+      // Smooth trigger when navigating via navbar or 3D cube
+      document.querySelectorAll('a[href="#skills"]').forEach(link => {
+        link.addEventListener('click', () => {
+          setTimeout(() => {
+            if (!isCollisionRunning) {
+              hasCollisionPlayed = false;
+              triggerSkillsCollision();
+            }
+          }, 450);
+        });
+      });
+
+      // =========================================================================
+      // PART C: SNAPPY 3D MOUSE TILT ON LOWER SECTION CARDS
+      // =========================================================================
+      candidateCards.forEach(box => {
+        box.addEventListener('mousemove', (e) => {
+          const rect = box.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const tiltY = ((x / rect.width) - 0.5) * 10;
+          const tiltX = ((y / rect.height) - 0.5) * -10;
+          const transformVal = `perspective(800px) translate3d(0, -8px, 0) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+          box.style.transform = transformVal;
+          box.style.setProperty('transform', transformVal, 'important');
+        });
+
+        box.addEventListener('mouseleave', () => {
+          box.style.transform = '';
+          box.style.removeProperty('transform');
+        });
+      });
+    });
+  </script>
+
+  <!-- =====================================================================
+       CINEMATIC 3D CAROUSEL GALLERY CONTROLLER (CAPCUT CURVED ANAMORPHIC MOTION)
+  ====================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const viewport = document.getElementById('gallery-viewport');
+      const track = document.getElementById('gallery-track');
+      const modal = document.getElementById('gallery-preview-modal');
+      const modalImg = document.getElementById('gallery-modal-img');
+      const modalTitle = document.getElementById('gallery-modal-title');
+      const modalCaption = document.getElementById('gallery-modal-caption');
+      const modalBadge = document.getElementById('gallery-modal-badge');
+      const closeBtn = document.getElementById('gallery-modal-close');
+      const modalDialog = document.getElementById('gallery-modal-dialog');
+      const playToggle = document.getElementById('gallery-play-toggle');
+      const playIcon = document.getElementById('gallery-play-icon');
+      const playText = document.getElementById('gallery-play-text');
+      const gallerySection = document.getElementById('gallery');
+
+      if (!viewport || !track || !modal) return;
+
+      const cards = Array.from(track.querySelectorAll('.gallery-card'));
+      const numCards = cards.length;
+      if (!numCards) return;
+
+      let isPausedByButton = false;
+      let isHovered = false;
+      let isModalOpen = false;
+      let isVisible = false;
+
+      // Base translation speed (pixels per second)
+      const baseSpeed = 75; // Cinematic, smooth glide
+      let offset = 0;
+      let lastTime = performance.now();
+      let animFrameId = null;
+
+      // Touch & Mouse Dragging / Swiping
+      let isDragging = false;
+      let lastDragX = 0;
+      let totalDragDelta = 0;
+      let dragVelocity = 0;
+
+      function getLayoutMetrics() {
+        const isMobile = window.innerWidth < 640;
+        const cardW = isMobile ? 260 : 330;
+        const gap = isMobile ? 20 : 28;
+        return { cardW, gap, step: cardW + gap };
+      }
+
+      function updateCarousel(dt) {
+        const { cardW, step } = getLayoutMetrics();
+        const P = numCards * step;
+        const viewportWidth = viewport.clientWidth;
+        const centerX = viewportWidth / 2;
+
+        // Auto-advance offset when active
+        if (!isPausedByButton && !isHovered && !isModalOpen && !isDragging) {
+          offset += baseSpeed * dt;
+        }
+
+        // Apply smooth inertia after user drag
+        if (!isDragging && Math.abs(dragVelocity) > 0.4) {
+          offset -= dragVelocity;
+          dragVelocity *= 0.92;
+        }
+
+        // Keep offset bounded to avoid large numbers
+        offset = ((offset % P) + P) % P;
+
+        // Apply dynamic 3D transform to each card according to distance from screen center
+        cards.forEach((card, i) => {
+          let d = (i * step - offset) % P;
+          if (d < -P / 2) d += P;
+          if (d > P / 2) d -= P;
+
+          const screenX = centerX + d;
+
+          // Cull cards far outside the viewport to save compositor work
+          if (screenX < -cardW * 1.6 || screenX > viewportWidth + cardW * 1.6) {
+            card.style.display = 'none';
+            return;
+          }
+
+          card.style.display = '';
+
+          // Normalized distance from center [-1.2, 1.2]
+          const distNorm = d / Math.max(280, centerX);
+          const u = Math.min(1.2, Math.abs(distNorm));
+
+          // EXACT REFERENCE MOTION:
+          // Smaller in middle (scale: 0.86), Bigger at screen corners (scale: 1.10 - 1.14)
+          const scale = 0.86 + 0.24 * Math.pow(u, 1.3);
+          const rotY = -distNorm * 18.0; // 3D perspective rotation facing inward
+          const transZ = (Math.pow(u, 1.3) - 0.5) * 140; // Recedes at center, comes forward at edges
+          const transY = -Math.pow(u, 2) * 12; // Anamorphic curved lens vertical rise
+
+          // Edge fade at the far extremes
+          const edgeFade = Math.max(0, 1 - Math.max(0, Math.abs(distNorm) - 1.0) * 3);
+
+          card.style.transform = `translate3d(${(screenX - cardW / 2).toFixed(1)}px, calc(-50% + ${transY.toFixed(1)}px), ${transZ.toFixed(1)}px) scale(${scale.toFixed(3)}) rotateY(${rotY.toFixed(2)}deg)`;
+          card.style.opacity = edgeFade.toFixed(3);
+          card.style.zIndex = Math.round(100 - u * 50);
+        });
+      }
+
+      function loop(currentTime) {
+        const dt = Math.min(0.1, (currentTime - lastTime) / 1000);
+        lastTime = currentTime;
+
+        if (isVisible) {
+          updateCarousel(dt);
+        }
+
+        animFrameId = requestAnimationFrame(loop);
+      }
+
+      // Start 60 FPS animation loop
+      animFrameId = requestAnimationFrame(loop);
+
+      // Play / Pause Toggle Button
+      if (playToggle) {
+        playToggle.addEventListener('click', () => {
+          isPausedByButton = !isPausedByButton;
+          if (isPausedByButton) {
+            if (playIcon) playIcon.className = 'fa-solid fa-play text-accent';
+            if (playText) playText.textContent = 'Resume Motion';
+          } else {
+            if (playIcon) playIcon.className = 'fa-solid fa-pause text-accent';
+            if (playText) playText.textContent = 'Pause Motion';
+          }
+        });
+      }
+
+      // Hover to pause movement
+      viewport.addEventListener('mouseenter', () => { isHovered = true; });
+      viewport.addEventListener('mouseleave', () => { isHovered = false; });
+
+      // Drag / Swipe handling with smooth pointer events
+      viewport.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        isDragging = true;
+        lastDragX = e.clientX;
+        totalDragDelta = 0;
+        dragVelocity = 0;
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - lastDragX;
+        lastDragX = e.clientX;
+        totalDragDelta += Math.abs(dx);
+        offset -= dx;
+        dragVelocity = dx;
+      });
+
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+      };
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+
+      // Full-Screen Image Preview Modal
+      function openPreview(card) {
+        const imgSrc = card.getAttribute('data-img');
+        const title = card.getAttribute('data-title') || '';
+        const caption = card.getAttribute('data-caption') || '';
+        const badge = card.getAttribute('data-badge') || '';
+
+        if (!imgSrc) return;
+
+        isModalOpen = true;
+
+        modalImg.src = imgSrc;
+        modalImg.alt = title;
+        modalTitle.textContent = title;
+        modalCaption.textContent = caption;
+
+        if (badge) {
+          modalBadge.textContent = badge;
+          modalBadge.classList.remove('hidden');
+        } else {
+          modalBadge.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          modal.classList.add('opacity-100');
+          modal.classList.remove('opacity-0');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closePreview() {
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modalImg.src = '';
+          document.body.style.overflow = '';
+          isModalOpen = false;
+        }, 280);
+      }
+
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (totalDragDelta > 6) {
+            e.preventDefault();
+            return;
+          }
+          openPreview(card);
+        });
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPreview(card);
+          }
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closePreview);
+
+      modal.addEventListener('click', (e) => {
+        if (modalDialog && !modalDialog.contains(e.target)) {
+          closePreview();
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closePreview();
+        }
+      });
+
+      // Viewport IntersectionObserver to conserve GPU/battery when off-screen
+      if (gallerySection) {
+        const galleryObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            isVisible = entry.isIntersecting;
+          });
+        }, { threshold: 0.05 });
+        galleryObserver.observe(gallerySection);
       }
     });
   </script>
 </body>
-</html>

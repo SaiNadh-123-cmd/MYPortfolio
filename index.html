@@ -904,44 +904,54 @@
     .side-fly-left,
     .side-fly-right {
       opacity: 0;
-      will-change: transform, opacity;
+      will-change: transform, opacity, box-shadow, border-color;
       transition:
-        transform 0.95s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.75s ease-out,
-        box-shadow 0.6s ease,
-        border-color 0.6s ease;
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--entrance-delay, 0s),
+        opacity 0.65s ease-out var(--entrance-delay, 0s),
+        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.45s ease;
     }
 
     .side-fly-left {
-      transform: translate3d(-160px, 35px, 0) scale(0.92) rotate(-2deg);
+      transform: translate3d(-110px, 24px, 0) scale(0.96);
     }
 
     .side-fly-right {
-      transform: translate3d(160px, 35px, 0) scale(0.92) rotate(2deg);
+      transform: translate3d(110px, 24px, 0) scale(0.96);
     }
 
-    /* Snappy hover lift & tilt for Experience, Projects, Leadership & Arena boxes */
+    /* Once in view: zero delay & silky-smooth 0.45s cubic-bezier hover response */
     .side-fly-left.card-in-view,
-    .side-fly-right.card-in-view {
+    .side-fly-right.card-in-view,
+    .bento-card,
+    .project-card,
+    .stat-card,
+    .glass-card,
+    .skill-rocket-item.rocket-docked {
       opacity: 1;
-      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+      transform: translate3d(0, 0, 0) scale(1);
       transition:
-        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.35s ease,
-        border-color 0.35s ease,
-        opacity 0.6s ease-out !important;
-      transition-delay: 0s !important;
+        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+        box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+        border-color 0.45s ease 0s,
+        background-color 0.45s ease 0s !important;
     }
 
+    /* Smooth Individual Box Hover Lift & Glow (Identical across all pages) */
     .side-fly-left.card-in-view:hover,
-    .side-fly-right.card-in-view:hover {
-      transform: translate3d(0, -10px, 0) scale(1.025) !important;
-      border-color: #38bdf8 !important;
+    .side-fly-right.card-in-view:hover,
+    .bento-card:hover,
+    .project-card:hover,
+    .stat-card:hover,
+    .glass-card:hover,
+    .skill-rocket-item.rocket-docked:hover {
+      transform: translate3d(0, -8px, 0) scale(1.018) !important;
+      border-color: rgba(56, 189, 248, 0.75) !important;
       box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.75),
-        0 0 28px rgba(56, 189, 248, 0.45),
-        0 0 15px rgba(168, 85, 247, 0.35) !important;
-      z-index: 15;
+        0 20px 42px -10px rgba(0, 0, 0, 0.8),
+        0 0 28px rgba(56, 189, 248, 0.35),
+        0 0 14px rgba(168, 85, 247, 0.28) !important;
+      z-index: 10;
     }
 
     /* =========================================================================
@@ -3964,15 +3974,19 @@
       applyTransform(false);
 
       function findSection(key) {
-        const map = {
-          profile: '#page-1-splash',
-          background: '#page-2-hero',
-          projects: '#laptop-scroll-track',
-          skills: '#skills',
-          experience: '#work',
-          arena: '#arena'
+        const selectors = {
+          profile:    ['#page-1-splash', 'header', 'body'],
+          background: ['#hero', '#about', '#page-2'],
+          projects:   ['#work', '#projects', '#laptop-scroll-track'],
+          skills:     ['#skills', '#tech-stack', '[id*="skill"]'],
+          experience: ['#leadership', '#experience', '#achievements', '[id*="lead"]', '#work'],
+          arena:      ['#arena', '#simulator', '#contact', 'footer']
         };
-        return document.querySelector(map[key]) || document.querySelector('#hero') || document.body;
+        for (const sel of (selectors[key] || [])) {
+          const el = document.querySelector(sel);
+          if (el) return el;
+        }
+        return document.body;
       }
 
       function jumpToFace(key, label) {
@@ -3998,65 +4012,58 @@
         }, 400);
       }
 
+      let clickedFaceOnDown = null;
+
       scene.addEventListener('pointerdown', (e) => {
-        // Only react to primary mouse button or touch
-        if (e.button !== undefined && e.button !== 0) return;
+        // Do NOT capture pointer if clicking the Roll button
+        if (e.target.closest('#roll-cube-btn')) return;
+
         isDragging = true;
-        activePointerId = e.pointerId;
         totalDragMove = 0;
         startX = e.clientX;
         startY = e.clientY;
         targetRx = currentRx;
         targetRy = currentRy;
+
+        // Record which cube face was pressed BEFORE any drag occurs
+        clickedFaceOnDown = e.target.closest('.cube-face');
+
         cube.classList.add('is-dragging');
-        scene.classList.add('is-grabbing');
-        try { scene.setPointerCapture(e.pointerId); } catch(err) {}
         if (animFrameId) cancelAnimationFrame(animFrameId);
         animFrameId = requestAnimationFrame(renderLoop);
       });
 
-      scene.addEventListener('pointermove', (e) => {
+      window.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
         totalDragMove += Math.hypot(dx, dy);
 
-        targetRy += dx * 0.45;
-        targetRx -= dy * 0.45;
+        if (totalDragMove > 5) {
+          targetRy += dx * 0.45;
+          targetRx -= dy * 0.45;
+        }
 
         startX = e.clientX;
         startY = e.clientY;
       });
 
-      function stopDragging(e) {
+      window.addEventListener('pointerup', (e) => {
         if (!isDragging) return;
         isDragging = false;
         cube.classList.remove('is-dragging');
-        scene.classList.remove('is-grabbing');
         if (animFrameId) cancelAnimationFrame(animFrameId);
-        currentRx = targetRx;
-        currentRy = targetRy;
-        applyTransform(false);
-        const pid = (e && e.pointerId) ? e.pointerId : activePointerId;
-        if (pid !== null) {
-          try { scene.releasePointerCapture(pid); } catch(err) {}
-          activePointerId = null;
+
+        // If user clicked without dragging, trigger the clicked face immediately!
+        if (totalDragMove <= 8) {
+          const faceEl = clickedFaceOnDown || document.elementFromPoint(e.clientX, e.clientY)?.closest('.cube-face');
+          if (faceEl) {
+            const key = faceEl.getAttribute('data-section');
+            const face = cubeFaces.find(f => f.key === key);
+            if (face) jumpToFace(face.key, face.label);
+          }
         }
-      }
-
-      scene.addEventListener('pointerup', stopDragging);
-      scene.addEventListener('pointercancel', stopDragging);
-      window.addEventListener('pointerup', stopDragging);
-      window.addEventListener('pointercancel', stopDragging);
-
-      document.querySelectorAll('.cube-face').forEach(faceEl => {
-        faceEl.addEventListener('click', (e) => {
-          if (totalDragMove > 6) return; // Prevent triggering click during drag
-          e.stopPropagation();
-          const key = faceEl.getAttribute('data-section');
-          const face = cubeFaces.find(f => f.key === key);
-          if (face) jumpToFace(face.key, face.label);
-        });
+        clickedFaceOnDown = null;
       });
 
       if (rollBtn) {
@@ -4074,31 +4081,31 @@
       // =========================================================================
       // PART A: REPEATABLE LEFT / RIGHT FLY-IN FOR EXPERIENCE, PROJECTS & BOXES
       // =========================================================================
-      const excludedContainers = '#page-1-splash, #page-2-hero, #hero, #neural-cube-portal, #laptop-scroll-track, nav, header, footer';
-
-      // Locate Experience, Leadership, Projects, Achievements, and Arena cards strictly outside Hero & Cube
-      const candidateCards = Array.from(document.querySelectorAll(
-        '#work .project-card, #projects .project-card, #experience [class*="card"], #leadership [class*="card"], #achievements [class*="card"], #arena [class*="card"], #certifications .tilt-card'
-      )).filter(el => !el.closest(excludedContainers) && !el.querySelector('#neural-cube-portal'));
-
-      // Also grab direct child cards inside lower sections (Experience, Leadership, Work, Arena, Certifications)
-      document.querySelectorAll('#work, #experience, #leadership, #arena, #certifications').forEach(sec => {
-        if (sec.matches(excludedContainers) || sec.id.toLowerCase().includes('skill')) return;
-        sec.querySelectorAll(':scope > div > div, :scope > div > article').forEach(box => {
-          if (!box.closest(excludedContainers) && !box.querySelector('#neural-cube-portal') && box.offsetHeight > 70 && box.offsetHeight < 750) {
-            if (!candidateCards.includes(box)) candidateCards.push(box);
-          }
-        });
+      // 1. Clean up any previously attached classes or inline transforms
+      document.querySelectorAll('.side-fly-left, .side-fly-right, .card-in-view').forEach(el => {
+        el.classList.remove('side-fly-left', 'side-fly-right', 'card-in-view');
+        el.style.transform = '';
+        el.style.transitionDelay = '';
       });
 
-      // Assign alternating left/right fly-in classes
-      candidateCards.forEach((card, idx) => {
-        if (card.closest('[id*="skill"]')) return; // Skills gets the special rocket animation below
-        card.classList.remove('slide-left', 'slide-right');
-        card.style.opacity = '';
-        card.style.transform = '';
+      const excludedSelector = '#page-1-splash, #neural-cube-portal, #laptop-scroll-track, nav, header';
+      const cardSelector = '.bento-card, .project-card, .stat-card, .glass-card, .achievement-card, .exp-card, .skill-card, .arena-card, article, [class*="-card"]';
+
+      // 2. Collect all candidate individual cards
+      let allIndividualCards = Array.from(document.querySelectorAll(cardSelector)).filter(el => {
+        if (el.closest(excludedSelector)) return false;
+        if (el.id === 'neural-cube-portal' || el.classList.contains('neural-cube-card')) return false;
+        // CRITICAL: Exclude any wrapper that contains other cards inside it!
+        const nestedCards = Array.from(el.querySelectorAll(cardSelector)).filter(child => child !== el);
+        return nestedCards.length === 0;
+      });
+
+      // 3. Apply alternating Left/Right scroll entrance ONLY to individual cards outside Skills
+      const flyInCards = allIndividualCards.filter(el => !el.closest('#skills, [id*="skill"]'));
+
+      flyInCards.forEach((card, idx) => {
         card.classList.add(idx % 2 === 0 ? 'side-fly-left' : 'side-fly-right');
-        card.style.transitionDelay = `${(idx % 4) * 0.1}s`;
+        card.style.setProperty('--entrance-delay', `${(idx % 3) * 0.08}s`);
       });
 
       // Repeatable IntersectionObserver (triggers EVERY time user scrolls in/out)
@@ -4116,10 +4123,12 @@
       }, { threshold: 0.14, rootMargin: '0px 0px -40px 0px' });
 
       candidateCards.forEach(card => repeatableCardObserver.observe(card));
+    });
+  </script>
 
-      // =========================================================================
-      // PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER (WAAPI)
-      // =========================================================================
+  <!-- =========================================================================
+     PART B: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER (WAAPI)
+     ========================================================================= -->
       const skillsSection = document.getElementById('skills');
       let isCollisionRunning = false;
       let hasCollisionPlayed = false;
@@ -4297,26 +4306,8 @@
       });
 
       // =========================================================================
-      // PART C: SNAPPY 3D MOUSE TILT ON LOWER SECTION CARDS
+      // PART C: SKILLS SECTION — SYNCHRONIZED COLLISION ANIMATION CONTROLLER (WAAPI)
       // =========================================================================
-      candidateCards.forEach(box => {
-        box.addEventListener('mousemove', (e) => {
-          const rect = box.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const tiltY = ((x / rect.width) - 0.5) * 10;
-          const tiltX = ((y / rect.height) - 0.5) * -10;
-          const transformVal = `perspective(800px) translate3d(0, -8px, 0) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
-          box.style.transform = transformVal;
-          box.style.setProperty('transform', transformVal, 'important');
-        });
-
-        box.addEventListener('mouseleave', () => {
-          box.style.transform = '';
-          box.style.removeProperty('transform');
-        });
-      });
-    });
   </script>
 
   <!-- =====================================================================

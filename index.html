@@ -112,7 +112,7 @@
       -webkit-backdrop-filter: blur(18px);
       transform-style: preserve-3d;
       will-change: transform;
-      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.5s ease;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.5s ease;
       overflow: hidden;
     }
 
@@ -120,7 +120,6 @@
     .bento-card:hover,
     .exp-card:hover,
     .stat-card:hover {
-      transform: none !important;
       border-color: var(--border-glow);
       box-shadow: var(--shadow-ambient);
     }
@@ -959,14 +958,12 @@
     }
 
     .skill-card:hover {
-      transform: none !important;
       border-color: rgba(56, 189, 248, 0.75) !important;
       box-shadow:
         0 20px 40px -10px rgba(0, 0, 0, 0.8),
         0 0 25px rgba(56, 189, 248, 0.35),
         0 0 12px rgba(168, 85, 247, 0.25) !important;
       transition:
-        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
         box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
         border-color 0.45s ease !important;
     }
@@ -978,14 +975,12 @@
     }
 
     .project-card:hover {
-      transform: none !important;
       border-color: rgba(56, 189, 248, 0.75) !important;
       box-shadow:
         0 20px 40px -10px rgba(0, 0, 0, 0.8),
         0 0 25px rgba(56, 189, 248, 0.35),
         0 0 12px rgba(168, 85, 247, 0.25) !important;
       transition:
-        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
         box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
         border-color 0.45s ease !important;
     }
@@ -3671,26 +3666,9 @@
 
     // 5. 3D PERSPECTIVE TILT PHYSICS & CURSOR SPOTLIGHT
     function initTiltCards() {
-      const cards = Array.from(document.querySelectorAll('.tilt-card')).filter(card =>
-        !card.classList.contains('skill-card') &&
-        !card.classList.contains('project-card') &&
-        !card.classList.contains('side-fly-left') &&
-        !card.classList.contains('side-fly-right')
-      );
-      cards.forEach(card => {
-        card.onmousemove = (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          card.style.setProperty('--mouse-x', `${x}px`);
-          card.style.setProperty('--mouse-y', `${y}px`);
-
-          // Card tilt removed to prevent edge flicker; mouse coords preserved for spotlight gradient
-        };
-        card.onmouseleave = () => {
-          card.style.transform = '';
-        };
-      });
+      if (typeof window.attachSilkyCardHover === 'function') {
+        document.querySelectorAll('.skill-card, #page-2-hero .tilt-card, #hero .tilt-card').forEach(window.attachSilkyCardHover);
+      }
     }
 
     window.addEventListener('mousemove', (e) => {
@@ -4339,15 +4317,154 @@
         card.style.transitionDelay = `${(idx % 4) * 0.1}s`;
       });
 
-      // Silky smooth card hover (lerp-based, replaces jerky raw mousemove)
+      // Silky smooth card hover (flicker-free lerp-based hover with cached page-coordinate hysteresis)
+      const silkyTrackedCards = new Set();
+      let silkyActiveCard = null;
+      let silkyLastClientX = -9999;
+      let silkyLastClientY = -9999;
+      let silkyLastTarget = null;
+      let silkyListenersAttached = false;
+
+      const SILKY_OVERLAY_SELECTOR = 'nav, header, #resume-modal, [role="dialog"], #cinematic-lightbox, #gallery-preview-modal';
+
+      function isSilkyCardDisabled(card) {
+        return !card || card.classList.contains('rocket-thruster-active') || card.classList.contains('is-colliding');
+      }
+
+      function handleSilkyPointerUpdate(e) {
+        if (e && e.type === 'pointermove') {
+          silkyLastClientX = e.clientX;
+          silkyLastClientY = e.clientY;
+          silkyLastTarget = e.target;
+        }
+
+        if (silkyLastClientX < 0 || silkyLastClientY < 0) return;
+
+        const currentTarget = (e && e.type === 'pointermove' && e.target)
+          ? e.target
+          : (document.elementFromPoint(silkyLastClientX, silkyLastClientY) || silkyLastTarget);
+
+        const pointerX = silkyLastClientX + window.scrollX;
+        const pointerY = silkyLastClientY + window.scrollY;
+
+        // Clean up detached cards from DOM
+        if (silkyActiveCard && !document.body.contains(silkyActiveCard)) {
+          silkyActiveCard = null;
+        }
+
+        // Overlay check: dismiss hover if pointer is over fixed navigation, modals, or lightboxes
+        if (currentTarget && currentTarget.closest && currentTarget.closest(SILKY_OVERLAY_SELECTOR)) {
+          if (silkyActiveCard) {
+            silkyActiveCard._silkyCtrl.stopHover();
+            silkyActiveCard = null;
+          }
+          return;
+        }
+
+        // Active card check
+        if (silkyActiveCard) {
+          if (isSilkyCardDisabled(silkyActiveCard)) {
+            silkyActiveCard._silkyCtrl.stopHover();
+            silkyActiveCard = null;
+          } else {
+            // Check if pointer directly entered another tracked card
+            let enteredOther = null;
+            if (currentTarget && currentTarget.nodeType === 1) {
+              for (const c of silkyTrackedCards) {
+                if (!document.body.contains(c)) {
+                  silkyTrackedCards.delete(c);
+                  continue;
+                }
+                if (c !== silkyActiveCard && (c === currentTarget || c.contains(currentTarget)) && !isSilkyCardDisabled(c)) {
+                  enteredOther = c;
+                  break;
+                }
+              }
+            }
+
+            if (enteredOther) {
+              silkyActiveCard._silkyCtrl.stopHover();
+              silkyActiveCard = enteredOther;
+              silkyActiveCard._silkyCtrl.startHover(pointerX, pointerY);
+              return;
+            }
+
+            // Hysteresis: decide hover solely from pointer's page coordinates against cached restRect + 4px buffer
+            const rest = silkyActiveCard._silkyCtrl.getRestRect();
+            if (rest) {
+              const insideBuffered =
+                pointerX >= rest.left - 4 &&
+                pointerX <= rest.left + rest.width + 4 &&
+                pointerY >= rest.top - 4 &&
+                pointerY <= rest.top + rest.height + 4;
+
+              if (insideBuffered) {
+                silkyActiveCard._silkyCtrl.updateTarget(pointerX, pointerY);
+                return;
+              }
+            }
+
+            // Exited buffered restRect
+            silkyActiveCard._silkyCtrl.stopHover();
+            silkyActiveCard = null;
+          }
+        }
+
+        // When no card is active, check if pointer is resting on any card
+        if (!silkyActiveCard && currentTarget && currentTarget.nodeType === 1) {
+          for (const c of silkyTrackedCards) {
+            if (!document.body.contains(c)) {
+              silkyTrackedCards.delete(c);
+              continue;
+            }
+            if (isSilkyCardDisabled(c)) continue;
+            if (c === currentTarget || c.contains(currentTarget)) {
+              const rect = c.getBoundingClientRect();
+              if (
+                silkyLastClientX >= rect.left &&
+                silkyLastClientX <= rect.right &&
+                silkyLastClientY >= rect.top &&
+                silkyLastClientY <= rect.bottom
+              ) {
+                silkyActiveCard = c;
+                silkyActiveCard._silkyCtrl.startHover(pointerX, pointerY);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      function ensureSilkyListeners() {
+        if (silkyListenersAttached) return;
+        silkyListenersAttached = true;
+        window.addEventListener('pointermove', handleSilkyPointerUpdate, { passive: true });
+        window.addEventListener('scroll', handleSilkyPointerUpdate, { passive: true });
+        window.addEventListener('blur', () => {
+          if (silkyActiveCard) {
+            silkyActiveCard._silkyCtrl.stopHover();
+            silkyActiveCard = null;
+          }
+        });
+        document.addEventListener('mouseleave', () => {
+          if (silkyActiveCard) {
+            silkyActiveCard._silkyCtrl.stopHover();
+            silkyActiveCard = null;
+          }
+        });
+      }
+
       function attachSilkyCardHover(card) {
+        if (!card || card.nodeType !== 1) return;
+        if (silkyTrackedCards.has(card)) return;
+
         let currentX = 0, currentY = 0, currentLift = 0;
         let targetX = 0, targetY = 0, targetLift = 0;
         let rafId = null;
         let hovering = false;
+        let restRect = null;
 
         function updateCard() {
-          // Smooth interpolation (lerp = 0.14) so motion is buttery-smooth, never jerky
           currentX += (targetX - currentX) * 0.14;
           currentY += (targetY - currentY) * 0.14;
           currentLift += (targetLift - currentLift) * 0.14;
@@ -4365,37 +4482,70 @@
           } else {
             card.style.transform = '';
             rafId = null;
+            restRect = null;
           }
         }
 
-        card.addEventListener('mouseenter', () => {
-          if (card.classList.contains('rocket-thruster-active')) return;
-          hovering = true;
-          targetLift = -8;
-          card.style.transition = 'box-shadow 0.4s ease, border-color 0.4s ease';
-          if (!rafId) rafId = requestAnimationFrame(updateCard);
-        });
+        const ctrl = {
+          isHovering: () => hovering,
+          getRestRect: () => restRect,
+          startHover: (pointerX, pointerY) => {
+            if (isSilkyCardDisabled(card)) return false;
+            hovering = true;
+            targetLift = -6;
+            card.style.transition = 'box-shadow 0.4s ease, border-color 0.4s ease';
 
-        card.addEventListener('mousemove', (e) => {
-          if (!hovering || card.classList.contains('rocket-thruster-active')) return;
-          const r = card.getBoundingClientRect();
-          const nx = (e.clientX - r.left) / r.width - 0.5;
-          const ny = (e.clientY - r.top) / r.height - 0.5;
-          targetY = nx * 8;   // Gentle, smooth horizontal tilt
-          targetX = -ny * 8;  // Gentle, smooth vertical tilt
-        });
+            // Cache restRect in page coordinates BEFORE transform starts
+            const r = card.getBoundingClientRect();
+            restRect = {
+              left: r.left + window.scrollX,
+              top: r.top + window.scrollY,
+              width: r.width,
+              height: r.height
+            };
 
-        card.addEventListener('mouseleave', () => {
-          hovering = false;
-          targetX = 0;
-          targetY = 0;
-          targetLift = 0;
-          if (!rafId) rafId = requestAnimationFrame(updateCard);
-        });
+            ctrl.updateTarget(pointerX, pointerY);
+            if (!rafId) rafId = requestAnimationFrame(updateCard);
+            return true;
+          },
+          updateTarget: (pointerX, pointerY) => {
+            if (!hovering || !restRect) return;
+            const nx = (pointerX - restRect.left) / restRect.width - 0.5;
+            const ny = (pointerY - restRect.top) / restRect.height - 0.5;
+            targetY = nx * 8;
+            targetX = -ny * 8;
+            targetLift = -6;
+
+            const mouseX = pointerX - restRect.left;
+            const mouseY = pointerY - restRect.top;
+            card.style.setProperty('--mouse-x', `${mouseX.toFixed(1)}px`);
+            card.style.setProperty('--mouse-y', `${mouseY.toFixed(1)}px`);
+          },
+          stopHover: () => {
+            if (!hovering) return;
+            hovering = false;
+            targetX = 0;
+            targetY = 0;
+            targetLift = 0;
+            if (!rafId) rafId = requestAnimationFrame(updateCard);
+          }
+        };
+
+        card._silkyCtrl = ctrl;
+        silkyTrackedCards.add(card);
+        ensureSilkyListeners();
       }
 
+      window.attachSilkyCardHover = attachSilkyCardHover;
+
+      // 1. Attach to all candidate cards
       candidateCards.forEach(card => {
-        // attachSilkyCardHover(card);
+        attachSilkyCardHover(card);
+      });
+
+      // 2. Also apply the same effect to .project-card, .skill-card, and hero stat cards
+      document.querySelectorAll('.project-card, .skill-card, #page-2-hero .tilt-card, #hero .tilt-card').forEach(card => {
+        attachSilkyCardHover(card);
       });
 
       // Repeatable IntersectionObserver (triggers EVERY time user scrolls in/out)

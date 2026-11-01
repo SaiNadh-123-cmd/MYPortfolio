@@ -420,6 +420,31 @@
       pointer-events: none;
     }
 
+    /* Footer Contact Section & 3D Parallax Layers */
+    #contact {
+      position: relative !important;
+      overflow: hidden !important;
+      background: transparent !important;
+    }
+
+    #contact-bg-layer {
+      position: absolute;
+      inset: -3%;
+      background: linear-gradient(to bottom, rgba(4,8,20,.55), rgba(4,8,20,.15) 40%, rgba(4,8,20,.5)), url('./assets/contact-bg.jpg') center / cover no-repeat;
+      z-index: 0;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    #contact-leaves-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
     .macbook-wrapper {
       position: absolute !important;
       bottom: 50px !important;
@@ -2980,8 +3005,14 @@
     <!-- =====================================================================
        CONTACT & EXECUTIVE FOOTER (Akshay Mehta Signature Style)
   ====================================================================== -->
-  <footer id="contact" class="pt-20 pb-28 px-4 sm:px-6 lg:px-10 border-t mt-16" style="border-color: var(--border-subtle);">
-    <div class="max-w-7xl mx-auto">
+  <footer id="contact" class="pt-20 pb-28 px-4 sm:px-6 lg:px-10 border-t mt-16 relative overflow-hidden" style="border-color: var(--border-subtle);">
+    <!-- Blue Moon Lake Parallax Photo Layer -->
+    <div id="contact-bg-layer" aria-hidden="true"></div>
+
+    <!-- 3D Falling Icy Maple Leaves & Snow Sparkles Canvas (Three.js WebGL) -->
+    <canvas id="contact-leaves-canvas"></canvas>
+
+    <div class="max-w-7xl mx-auto relative z-[2]">
       <div class="tilt-card rounded-3xl p-8 sm:p-12 lg:p-14 border text-center relative overflow-hidden">
         <div class="tilt-content max-w-3xl mx-auto space-y-6">
           <span class="px-3.5 py-1.5 rounded-full text-xs font-mono-tech pill-badge">
@@ -3679,7 +3710,11 @@
     // 5. 3D PERSPECTIVE TILT PHYSICS & CURSOR SPOTLIGHT
     function initTiltCards() {
       if (typeof window.attachSilkyCardHover === 'function') {
-        document.querySelectorAll('.skill-card, #page-2-hero .tilt-card, #hero .tilt-card').forEach(window.attachSilkyCardHover);
+        document.querySelectorAll('.skill-card, #page-2-hero .tilt-card, #hero .tilt-card').forEach(card => {
+          if (!card.closest('#contact')) {
+            window.attachSilkyCardHover(card);
+          }
+        });
       }
     }
 
@@ -6388,4 +6423,672 @@
 
 
   
-  </body>
+    <!-- =========================================================================
+       FOOTER: SMOOTH 3D CARD TILT & 3D FALLING ICY MAPLE LEAVES WITH SNOW SPARKLES
+  ========================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const footer = document.getElementById('contact');
+      const contactCard = document.querySelector('#contact .tilt-card');
+      const contactBgLayer = document.getElementById('contact-bg-layer');
+      const leavesCanvas = document.getElementById('contact-leaves-canvas');
+
+      if (!footer || !contactCard || !leavesCanvas) return;
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      // =======================================================================
+      // (A) SMOOTH 3D TILT CONTROLLER FOR FOOTER CARD ONLY (LERP 0.1)
+      // =======================================================================
+      const tiltContent = contactCard.querySelector('.tilt-content');
+      const pillBadge = contactCard.querySelector('.pill-badge');
+      const heading = contactCard.querySelector('h2');
+      const buttonsRow = contactCard.querySelector('.flex.flex-wrap');
+
+      let restRect = null;
+      let isCardHovered = false;
+      let currRotX = 0, currRotY = 0, currScale = 1;
+      let targetRotX = 0, targetRotY = 0, targetScale = 1;
+      let currNx = 0, currNy = 0, targetNx = 0, targetNy = 0;
+
+      function updateRestRect() {
+        if (!contactCard) return;
+        const prevTransform = contactCard.style.transform;
+        contactCard.style.transform = 'none';
+        const r = contactCard.getBoundingClientRect();
+        contactCard.style.transform = prevTransform;
+
+        restRect = {
+          left: r.left + window.scrollX,
+          top: r.top + window.scrollY,
+          width: r.width,
+          height: r.height
+        };
+      }
+
+      updateRestRect();
+      window.addEventListener('resize', updateRestRect, { passive: true });
+      window.addEventListener('scroll', updateRestRect, { passive: true });
+
+      // Mouse Parallax & Wind State for Footer
+      let targetMouseX = 0;
+      let targetMouseY = 0;
+      let smoothMouseX = 0;
+      let smoothMouseY = 0;
+      let prevSmoothMouseX = 0;
+      let prevSmoothMouseY = 0;
+      let hasMouseMoved = false;
+
+      window.addEventListener('pointermove', (e) => {
+        hasMouseMoved = true;
+        if (!restRect) updateRestRect();
+
+        const pageX = e.clientX + window.scrollX;
+        const pageY = e.clientY + window.scrollY;
+
+        // Mouse coordinates normalized to [-1, 1] relative to footer viewport center
+        const fRect = footer.getBoundingClientRect();
+        const fCenterX = fRect.left + fRect.width * 0.5;
+        const fCenterY = fRect.top + fRect.height * 0.5;
+        targetMouseX = Math.max(-1, Math.min(1, (e.clientX - fCenterX) / (window.innerWidth * 0.5)));
+        targetMouseY = Math.max(-1, Math.min(1, (fCenterY - e.clientY) / (window.innerHeight * 0.5)));
+
+        // --- Card Hover Logic with RestRect (+6px Hysteresis Buffer) ---
+        if (!isCardHovered) {
+          if (
+            pageX >= restRect.left &&
+            pageX <= restRect.left + restRect.width &&
+            pageY >= restRect.top &&
+            pageY <= restRect.top + restRect.height
+          ) {
+            isCardHovered = true;
+          }
+        }
+
+        if (isCardHovered) {
+          // Decide inside ONLY with restRect expanded by 6px (zero flicker)
+          const inside =
+            pageX >= restRect.left - 6 &&
+            pageX <= restRect.left + restRect.width + 6 &&
+            pageY >= restRect.top - 6 &&
+            pageY <= restRect.top + restRect.height + 6;
+
+          if (inside) {
+            const nx = Math.max(-1, Math.min(1, (pageX - (restRect.left + restRect.width * 0.5)) / (restRect.width * 0.5)));
+            const ny = Math.max(-1, Math.min(1, (pageY - (restRect.top + restRect.height * 0.5)) / (restRect.height * 0.5)));
+
+            targetRotX = -ny * 7;
+            targetRotY = nx * 7;
+            targetScale = 1.012;
+            targetNx = nx;
+            targetNy = ny;
+
+            // Update radial glare coordinates inside card
+            const mouseX = pageX - restRect.left;
+            const mouseY = pageY - restRect.top;
+            contactCard.style.setProperty('--mouse-x', `${mouseX.toFixed(1)}px`);
+            contactCard.style.setProperty('--mouse-y', `${mouseY.toFixed(1)}px`);
+          } else {
+            isCardHovered = false;
+            targetRotX = 0;
+            targetRotY = 0;
+            targetScale = 1;
+            targetNx = 0;
+            targetNy = 0;
+          }
+        }
+      }, { passive: true });
+
+      document.addEventListener('mouseleave', () => {
+        isCardHovered = false;
+        targetRotX = 0;
+        targetRotY = 0;
+        targetScale = 1;
+        targetNx = 0;
+        targetNy = 0;
+      });
+
+      function updateCardTilt(timeNow) {
+        if (!contactCard || prefersReducedMotion) return;
+
+        if (!isCardHovered) {
+          // Idle breathing tilt: ±0.7deg sine tilt over a 7s cycle
+          const idle = Math.sin(timeNow * (2 * Math.PI / 7)) * 0.7;
+          targetRotX = idle * 0.6;
+          targetRotY = idle;
+          targetScale = 1.0;
+          targetNx = (idle / 0.7) * 0.08;
+          targetNy = 0;
+        }
+
+        currRotX += (targetRotX - currRotX) * 0.1;
+        currRotY += (targetRotY - currRotY) * 0.1;
+        currScale += (targetScale - currScale) * 0.1;
+        currNx += (targetNx - currNx) * 0.1;
+        currNy += (targetNy - currNy) * 0.1;
+
+        contactCard.style.transform = `perspective(1200px) rotateX(${currRotX.toFixed(2)}deg) rotateY(${currRotY.toFixed(2)}deg) scale(${currScale.toFixed(4)})`;
+
+        if (tiltContent) tiltContent.style.transform = `translate3d(${(currNx * 10).toFixed(2)}px, ${(currNy * 8).toFixed(2)}px, 0)`;
+        if (pillBadge) pillBadge.style.transform = `translate3d(${(currNx * 6).toFixed(2)}px, ${(currNy * 5).toFixed(2)}px, 0)`;
+        if (heading) heading.style.transform = `translate3d(${(currNx * 10).toFixed(2)}px, ${(currNy * 8).toFixed(2)}px, 0)`;
+        if (buttonsRow) buttonsRow.style.transform = `translate3d(${(currNx * 14).toFixed(2)}px, ${(currNy * 11).toFixed(2)}px, 0)`;
+      }
+
+      // =======================================================================
+      // (B) 3D FALLING ICY MAPLE LEAVES & SNOW SPARKLES (THREE.JS WEBGL)
+      // =======================================================================
+      if (typeof THREE === 'undefined') return;
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas: leavesCanvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: 'high-performance'
+        });
+      } catch (e) {
+        return; // Silent fallback if WebGL not supported
+      }
+
+      const scene = new THREE.Scene();
+      let fw = footer.clientWidth || window.innerWidth;
+      let fh = footer.clientHeight || window.innerHeight;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      const camera = new THREE.PerspectiveCamera(45, fw / fh, 0.1, 50);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+
+      renderer.setSize(fw, fh, false);
+      renderer.setPixelRatio(dpr);
+
+      // --- Lighting (Cool ambient + point light near moon at top-right) ---
+      const coolAmbient = new THREE.AmbientLight(0x6095c5, 0.85);
+      scene.add(coolAmbient);
+
+      // Moon point light in upper-right position
+      const moonLight = new THREE.PointLight(0xc6edff, 2.8, 40);
+      moonLight.position.set(4.5, 4.5, 4);
+      scene.add(moonLight);
+
+      // Subtle cyan-blue rim light from lower left
+      const rimLight = new THREE.DirectionalLight(0x286095, 0.6);
+      rimLight.position.set(-4, -3, -1);
+      scene.add(rimLight);
+
+      // --- Maple Leaf Curled Geometry ---
+      function makeMapleLeafGeometry() {
+        const shape = new THREE.Shape();
+        const halfPts = [
+          [0, -0.65],
+          [0.08, -0.56],
+          [0.22, -0.48],
+          [0.44, -0.42], // lower basal lobe
+          [0.50, -0.30], // lobe apex
+          [0.34, -0.22], // sinus 1
+          [0.48, -0.08], // mid lobe sub-tooth
+          [0.66, 0.06],  // mid lobe tooth
+          [0.74, 0.20],  // main lateral lobe tip
+          [0.56, 0.28],  // tooth
+          [0.42, 0.32],  // sinus 2
+          [0.42, 0.46],  // upper lobe tooth
+          [0.28, 0.54],  // upper tooth
+          [0.18, 0.62],  // apical tooth
+          [0, 0.74]      // central apex
+        ];
+
+        shape.moveTo(halfPts[0][0], halfPts[0][1]);
+        for (let i = 1; i < halfPts.length; i++) {
+          shape.lineTo(halfPts[i][0], halfPts[i][1]);
+        }
+        for (let i = halfPts.length - 2; i >= 0; i--) {
+          shape.lineTo(-halfPts[i][0], halfPts[i][1]);
+        }
+        shape.closePath();
+
+        const geom = new THREE.ShapeGeometry(shape, 14);
+        const posAttr = geom.attributes.position;
+        for (let i = 0; i < posAttr.count; i++) {
+          const x = posAttr.getX(i);
+          const y = posAttr.getY(i);
+          let z = posAttr.getZ(i);
+
+          // Fold along midrib (|x|) and gentle arch along length (y*y)
+          z += Math.abs(x) * 0.18 + 0.12 * y * y;
+          posAttr.setXYZ(i, x, y, z);
+        }
+        geom.computeVertexNormals();
+        return geom;
+      }
+
+      const leafGeometry = makeMapleLeafGeometry();
+
+      // --- Offscreen Icy Texture (Frosty gradient, glowing veins, ice crystal sparkles) ---
+      function makeIcyTexture() {
+        const tCanvas = document.createElement('canvas');
+        tCanvas.width = 512;
+        tCanvas.height = 512;
+        const ctx = tCanvas.getContext('2d');
+        if (!ctx) return null;
+
+        ctx.clearRect(0, 0, 512, 512);
+
+        const cx = 256, cy = 256;
+
+        // Translucent frosty radial fill
+        const rad = ctx.createRadialGradient(cx, 280, 20, cx, 240, 240);
+        rad.addColorStop(0, 'rgba(235, 252, 255, 0.95)');
+        rad.addColorStop(0.35, 'rgba(145, 230, 255, 0.88)');
+        rad.addColorStop(0.75, 'rgba(40, 140, 225, 0.82)');
+        rad.addColorStop(1, 'rgba(15, 60, 150, 0)');
+
+        ctx.fillStyle = rad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 230, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glowing central midrib
+        ctx.save();
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = 'rgba(240, 255, 255, 0.95)';
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, 470);
+        ctx.lineTo(cx, 40);
+        ctx.stroke();
+
+        // Radiating primary lateral veins to the 4 other lobes
+        const lateralVeins = [
+          [cx, 320, cx - 140, 190],
+          [cx, 320, cx + 140, 190],
+          [cx, 390, cx - 110, 360],
+          [cx, 390, cx + 110, 360]
+        ];
+
+        ctx.lineWidth = 2.4;
+        lateralVeins.forEach(([x1, y1, x2, y2]) => {
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.quadraticCurveTo((x1 + x2) * 0.5 - 10, (y1 + y2) * 0.5, x2, y2);
+          ctx.stroke();
+        });
+
+        // Faint branching veinlets
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = 'rgba(210, 248, 255, 0.6)';
+        for (let v = 0; v < 10; v++) {
+          const vy = 120 + v * 32;
+          ctx.beginPath();
+          ctx.moveTo(cx, vy);
+          ctx.lineTo(cx - 50 - (v % 3) * 20, vy - 25);
+          ctx.moveTo(cx, vy);
+          ctx.lineTo(cx + 50 + (v % 3) * 20, vy - 25);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Ice crystal sparkle dots along veins and contour
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        for (let s = 0; s < 85; s++) {
+          const sx = cx + (Math.random() - 0.5) * 320;
+          const sy = cy + (Math.random() - 0.5) * 360;
+          const r = 1.0 + Math.random() * 2.2;
+          ctx.beginPath();
+          ctx.arc(sx, sy, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Delicate 4-pointed cross flare on larger sparkles
+          if (r > 2.0) {
+            ctx.strokeStyle = 'rgba(200, 245, 255, 0.8)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(sx - 5, sy);
+            ctx.lineTo(sx + 5, sy);
+            ctx.moveTo(sx, sy - 5);
+            ctx.lineTo(sx, sy + 5);
+            ctx.stroke();
+          }
+        }
+
+        const texture = new THREE.CanvasTexture(tCanvas);
+        texture.generateMipmaps = true;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        return texture;
+      }
+
+      const leafTexture = makeIcyTexture();
+
+      // 3 Colour Variants: Ice Blue, Pale White-Blue, Deeper Royal Blue
+      const matIceBlue = new THREE.MeshStandardMaterial({
+        map: leafTexture,
+        color: 0xa8edff,
+        emissive: 0x184268,
+        emissiveIntensity: 0.55,
+        roughness: 0.35,
+        metalness: 0.15,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+
+      const matPaleWhiteBlue = new THREE.MeshStandardMaterial({
+        map: leafTexture,
+        color: 0xe6f9ff,
+        emissive: 0x285680,
+        emissiveIntensity: 0.65,
+        roughness: 0.3,
+        metalness: 0.2,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+
+      const matRoyalBlue = new THREE.MeshStandardMaterial({
+        map: leafTexture,
+        color: 0x5aa8ff,
+        emissive: 0x122c54,
+        emissiveIntensity: 0.5,
+        roughness: 0.4,
+        metalness: 0.15,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+
+      const materials = [matIceBlue, matPaleWhiteBlue, matRoyalBlue];
+
+      // --- Leaves Instances & State ---
+      const isMobile = fw < 768;
+      const leafCount = isMobile ? 22 : 45;
+      const leaves = [];
+
+      function spawnLeaf(l, initial = false) {
+        l.x = (Math.random() - 0.5) * 16;
+        l.y = initial ? (Math.random() * 15 - 7.5) : (8 + Math.random() * 3.5);
+        l.z = -6 + Math.random() * 9; // -6 to +3
+
+        l.fallSpeed = 0.3 + Math.random() * 0.5; // 0.3 - 0.8 units/s
+        l.swayPhase = Math.random() * Math.PI * 2;
+        l.swaySpeed = 0.7 + Math.random() * 1.1;
+        l.swayAmp = 0.3 + Math.random() * 0.5;
+
+        // 3D tumble speeds on all 3 axes
+        l.rotX = Math.random() * Math.PI * 2;
+        l.rotY = Math.random() * Math.PI * 2;
+        l.rotZ = Math.random() * Math.PI * 2;
+        l.rotSpeedX = (Math.random() - 0.5) * 1.5;
+        l.rotSpeedY = (Math.random() - 0.5) * 1.8;
+        l.rotSpeedZ = (Math.random() - 0.5) * 1.2;
+
+        const s = 0.65 + Math.random() * 0.75;
+        l.scale = s;
+        l.mesh.scale.set(s, s, s);
+
+        l.pushX = 0;
+        l.pushY = 0;
+        l.pushVx = 0;
+        l.pushVy = 0;
+
+        l.mesh.position.set(l.x, l.y, l.z);
+        l.mesh.rotation.set(l.rotX, l.rotY, l.rotZ);
+      }
+
+      for (let i = 0; i < leafCount; i++) {
+        const mat = materials[i % materials.length].clone();
+        const mesh = new THREE.Mesh(leafGeometry, mat);
+        scene.add(mesh);
+
+        const l = { mesh: mesh, mat: mat };
+        spawnLeaf(l, true);
+        leaves.push(l);
+      }
+
+      // --- Snow Sparkles Points System (~140 particles) ---
+      function makeSnowSprite() {
+        const sCanvas = document.createElement('canvas');
+        sCanvas.width = 64;
+        sCanvas.height = 64;
+        const sCtx = sCanvas.getContext('2d');
+        if (!sCtx) return null;
+
+        const grad = sCtx.createRadialGradient(32, 32, 2, 32, 32, 30);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.35, 'rgba(195, 240, 255, 0.85)');
+        grad.addColorStop(1, 'rgba(120, 210, 255, 0)');
+
+        sCtx.fillStyle = grad;
+        sCtx.beginPath();
+        sCtx.arc(32, 32, 30, 0, Math.PI * 2);
+        sCtx.fill();
+
+        return new THREE.CanvasTexture(sCanvas);
+      }
+
+      const snowSprite = makeSnowSprite();
+      const snowCount = 140;
+      const snowGeo = new THREE.BufferGeometry();
+      const snowPos = new Float32Array(snowCount * 3);
+      const snowSpeeds = new Float32Array(snowCount);
+      const snowTwinkles = new Float32Array(snowCount);
+
+      for (let i = 0; i < snowCount; i++) {
+        snowPos[i * 3 + 0] = (Math.random() - 0.5) * 18;
+        snowPos[i * 3 + 1] = (Math.random() - 0.5) * 16;
+        snowPos[i * 3 + 2] = -6 + Math.random() * 9;
+        snowSpeeds[i] = 0.2 + Math.random() * 0.45;
+        snowTwinkles[i] = Math.random() * Math.PI * 2;
+      }
+      snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
+
+      const snowMat = new THREE.PointsMaterial({
+        size: 0.22,
+        map: snowSprite,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        opacity: 0.85
+      });
+      const snowPoints = new THREE.Points(snowGeo, snowMat);
+      scene.add(snowPoints);
+
+      // --- Resize Handler ---
+      function onFooterResize() {
+        fw = footer.clientWidth || window.innerWidth;
+        fh = footer.clientHeight || window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        camera.aspect = fw / fh;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(fw, fh, false);
+        renderer.setPixelRatio(dpr);
+
+        if (prefersReducedMotion) {
+          renderer.render(scene, camera);
+        }
+      }
+
+      window.addEventListener('resize', onFooterResize, { passive: true });
+
+      // --- Combined Animation Loop for Footer ---
+      let time = 0;
+      let lastTime = performance.now();
+      let isFooterVisible = false;
+      let rafId = null;
+
+      function updateFooterScene(dt) {
+        time += dt;
+
+        // Auto-drift for touch devices
+        if (!hasHover || !hasMouseMoved) {
+          targetMouseX = Math.sin(time * 0.42) * 0.32;
+          targetMouseY = Math.cos(time * 0.35) * 0.22;
+        }
+
+        // Eased mouse interpolation (lerp 0.06)
+        prevSmoothMouseX = smoothMouseX;
+        prevSmoothMouseY = smoothMouseY;
+        smoothMouseX += (targetMouseX - smoothMouseX) * 0.06;
+        smoothMouseY += (targetMouseY - smoothMouseY) * 0.06;
+
+        const mouseVx = smoothMouseX - prevSmoothMouseX;
+        const mouseVy = smoothMouseY - prevSmoothMouseY;
+        const mouseSpeed = Math.hypot(mouseVx, mouseVy);
+
+        // (A) Update 3D Tilt & Layered Parallax for the Footer Card
+        updateCardTilt(time);
+
+        // (B1) Camera Parallax (+-0.5 x, +-0.3 y)
+        camera.position.x = smoothMouseX * 0.5;
+        camera.position.y = smoothMouseY * 0.3;
+        camera.lookAt(0, 0, 0);
+
+        // (B2) Background Photo Depth Parallax (shifts opposite to mouse by up to 12px)
+        if (contactBgLayer) {
+          const bgX = -smoothMouseX * 12;
+          const bgY = smoothMouseY * 12;
+          contactBgLayer.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0)`;
+        }
+
+        // Global gentle breeze
+        const globalWind = Math.sin(time * 0.36) * 0.35 + Math.sin(time * 0.8) * 0.16 + Math.cos(time * 0.22) * 0.2;
+
+        const hasActivePush = mouseSpeed > 0.001;
+        const mouseDirX = hasActivePush ? (mouseVx / mouseSpeed) : 0;
+        const mouseDirY = hasActivePush ? (mouseVy / mouseSpeed) : 0;
+
+        // (B3) Update Icy Leaves
+        for (let i = 0; i < leaves.length; i++) {
+          const l = leaves[i];
+
+          l.rotX += l.rotSpeedX * dt;
+          l.rotY += l.rotSpeedY * dt;
+          l.rotZ += (l.rotSpeedZ + Math.sin(l.swayPhase + time * l.swaySpeed) * 0.35) * dt;
+          l.mesh.rotation.set(l.rotX, l.rotY, l.rotZ);
+
+          l.y -= l.fallSpeed * dt;
+          const sway = Math.sin(l.swayPhase + time * l.swaySpeed) * l.swayAmp;
+          const targetX = l.x + sway + globalWind;
+
+          // Interactive cursor wind push
+          if (hasActivePush) {
+            const perspectiveFactor = 10 / Math.max(1, 10 - l.z);
+            const projX = (targetX * perspectiveFactor) / 6.0;
+            const projY = (l.y * perspectiveFactor) / 4.0;
+
+            const dx = projX - smoothMouseX;
+            const dy = projY - smoothMouseY;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < 0.65) {
+              const pushStrength = (0.65 - dist) * mouseSpeed * 2.8;
+              l.pushVx += mouseDirX * pushStrength;
+              l.pushVy += mouseDirY * pushStrength;
+            }
+          }
+
+          l.pushVx *= 0.92;
+          l.pushVy *= 0.92;
+          l.pushX += l.pushVx;
+          l.pushY += l.pushVy;
+          l.pushX *= 0.94;
+          l.pushY *= 0.94;
+
+          l.mesh.position.set(targetX + l.pushX, l.y + l.pushY, l.z);
+
+          // Depth of field opacity
+          if (l.z > 2.0) {
+            l.mat.opacity = 0.50; // out-of-focus foreground
+          } else if (l.z < -2.5) {
+            l.mat.opacity = 0.45 + (l.z + 6) / 3.5 * 0.35;
+          } else {
+            l.mat.opacity = 0.88;
+          }
+
+          if (l.y < -7.8) {
+            spawnLeaf(l, false);
+          }
+        }
+
+        // (B4) Update Snow Sparkles
+        const pos = snowGeo.attributes.position.array;
+        for (let i = 0; i < snowCount; i++) {
+          pos[i * 3 + 1] -= snowSpeeds[i] * dt;
+          pos[i * 3 + 0] += Math.sin(time * 0.5 + snowTwinkles[i]) * 0.003;
+
+          if (pos[i * 3 + 1] < -8) {
+            pos[i * 3 + 1] = 8;
+            pos[i * 3 + 0] = (Math.random() - 0.5) * 18;
+          }
+        }
+        snowGeo.attributes.position.needsUpdate = true;
+      }
+
+      function footerLoop(now) {
+        if (!isFooterVisible || document.hidden) {
+          rafId = null;
+          return;
+        }
+
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+
+        updateFooterScene(dt);
+        renderer.render(scene, camera);
+
+        rafId = requestAnimationFrame(footerLoop);
+      }
+
+      function startFooterAnimation() {
+        if (prefersReducedMotion) {
+          renderer.render(scene, camera);
+          return;
+        }
+        if (!rafId && isFooterVisible && !document.hidden) {
+          lastTime = performance.now();
+          rafId = requestAnimationFrame(footerLoop);
+        }
+      }
+
+      function stopFooterAnimation() {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+
+      const footerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          isFooterVisible = entry.isIntersecting;
+          if (isFooterVisible) {
+            updateRestRect();
+            startFooterAnimation();
+          } else {
+            stopFooterAnimation();
+          }
+        });
+      }, { threshold: 0 });
+
+      footerObserver.observe(footer);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          stopFooterAnimation();
+        } else if (isFooterVisible) {
+          startFooterAnimation();
+        }
+      });
+
+      if (prefersReducedMotion) {
+        renderer.render(scene, camera);
+      }
+    });
+  </script>
+</body>

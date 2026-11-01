@@ -399,7 +399,16 @@
       width: 100% !important;
       overflow: hidden !important;
       display: block !important;
-      background: radial-gradient(circle at 50% 60%, #140d2b 0%, #06040d 75%) !important;
+      background: linear-gradient(rgba(5,4,12,.25), rgba(5,4,12,.55)), url('./assets/space-bg.jpg') center / cover no-repeat !important;
+    }
+
+    #space-bg-layer {
+      position: absolute;
+      inset: -4%;
+      background: linear-gradient(rgba(5,4,12,.25), rgba(5,4,12,.55)), url('./assets/space-bg.jpg') center / cover no-repeat;
+      z-index: 0;
+      pointer-events: none;
+      will-change: transform;
     }
 
     #laptop-bg-canvas {
@@ -1948,7 +1957,10 @@
   <!-- 3D Scroll-Triggered Laptop Intro -->
   <section id="laptop-scroll-track">
     <div class="laptop-sticky-frame">
-      <!-- Continuous 3D DNA + Coding Streams Background -->
+      <!-- Deep Space Parallax Photo Layer (shifts opposite to mouse) -->
+      <div id="space-bg-layer" aria-hidden="true"></div>
+
+      <!-- 3D Astra-Style Interactive Starfield Canvas -->
       <canvas id="laptop-bg-canvas"></canvas>
 
       <!-- Bottom-Pinned Realistic 3D MacBook Pro -->
@@ -4032,80 +4044,304 @@
     });
   </script>
 
+  <!-- 3D Interactive Astra-Style Starfield & Deep Space Parallax -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const canvas = document.getElementById('laptop-bg-canvas');
-      if (!canvas) return;
+      const track = document.getElementById('laptop-scroll-track');
+      const spaceBgLayer = document.getElementById('space-bg-layer');
+      if (!canvas || !track) return;
+
       const ctx = canvas.getContext('2d');
-      let w, h, time = 0;
+      if (!ctx) return;
+
+      let w = 0, h = 0, dpr = 1;
+      let time = 0;
+      let stars = [];
+
+      // Mouse tracking & Parallax state
+      let targetMouseX = 0;
+      let targetMouseY = 0;
+      let smoothMouseX = 0;
+      let smoothMouseY = 0;
+      let prevSmoothMouseX = 0;
+      let prevSmoothMouseY = 0;
+      let mouseVelocityX = 0;
+      let mouseVelocityY = 0;
+      let hasPointerMoved = false;
+
+      const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Color palette: mostly white, with a few soft cool and warm cosmic tints
+      const starPalettes = [
+        { r: 255, g: 255, b: 255 }, // pure white (majority)
+        { r: 248, g: 250, b: 255 }, // crisp starlight white
+        { r: 210, g: 232, b: 255 }, // cool cyan / blue tint
+        { r: 190, g: 220, b: 255 }, // ice blue tint
+        { r: 255, g: 240, b: 220 }, // soft warm amber
+        { r: 255, g: 226, b: 196 }, // golden starlight
+        { r: 235, g: 220, b: 255 }  // subtle nebula violet
+      ];
+
+      function createStar(randomizeZ = true) {
+        // ~68% chance of white/crisp, remainder tinted
+        const paletteIdx = Math.random() < 0.68
+          ? (Math.random() < 0.5 ? 0 : 1)
+          : Math.floor(Math.random() * starPalettes.length);
+        const color = starPalettes[paletteIdx];
+
+        return {
+          x: (Math.random() * 2 - 1), // normalized -1 to 1
+          y: (Math.random() * 2 - 1), // normalized -1 to 1
+          z: randomizeZ ? (0.12 + Math.random() * 0.88) : 1.0, // depth 0.12 (near) to 1.0 (far)
+          baseRadius: 0.4 + Math.random() * 1.4, // radius 0.4..1.8 px
+          twinklePhase: Math.random() * Math.PI * 2,
+          twinkleSpeed: 1.2 + Math.random() * 2.4,
+          baseAlpha: 0.45 + Math.random() * 0.55,
+          color: color
+        };
+      }
+
+      function initStars() {
+        // ~450 stars on desktop, ~220 on screens under 768px wide
+        const count = w < 768 ? 220 : 450;
+        stars = [];
+        for (let i = 0; i < count; i++) {
+          stars.push(createStar(true));
+        }
+      }
 
       function resize() {
-        w = canvas.width = canvas.parentElement.clientWidth;
-        h = canvas.height = canvas.parentElement.clientHeight;
+        const parent = canvas.parentElement || document.body;
+        w = parent.clientWidth || window.innerWidth;
+        h = parent.clientHeight || window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (stars.length === 0 || (w < 768 && stars.length > 280) || (w >= 768 && stars.length < 350)) {
+          initStars();
+        }
+
+        if (prefersReducedMotion) {
+          drawStatic();
+        }
       }
+
+      window.addEventListener('resize', resize, { passive: true });
       resize();
-      window.addEventListener('resize', resize);
 
-      const codeSnippets = [
-        "const AI = new NeuralCore();", "SELECT * FROM ast_nodes;", "async function deployMVP()",
-        "01101001 01000001", "GNN.forward(graph)", "React.useThree()", "git push origin main",
-        "λ => transform(3D)", "VoltIntercept.scan()", "CodeChef::Diamond"
-      ];
-      const streams = Array.from({ length: 28 }, (_, i) => ({
-        x: Math.random() * 2000,
-        y: Math.random() * 1200,
-        z: 0.3 + Math.random() * 0.9,
-        speed: 0.5 + Math.random() * 1.4,
-        text: codeSnippets[i % codeSnippets.length]
-      }));
+      // Mouse parallax tracking relative to section centre (-1..1)
+      window.addEventListener('pointermove', (e) => {
+        hasPointerMoved = true;
+        const centerX = window.innerWidth * 0.5;
+        const centerY = window.innerHeight * 0.5;
+        targetMouseX = Math.max(-1, Math.min(1, (e.clientX - centerX) / centerX));
+        targetMouseY = Math.max(-1, Math.min(1, (e.clientY - centerY) / centerY));
+      }, { passive: true });
 
-      function animateBg() {
+      function getScrollLidProgress() {
+        const rect = track.getBoundingClientRect();
+        const scrollDistance = -rect.top;
+        const maxScroll = rect.height - window.innerHeight;
+        if (maxScroll <= 0) return 0;
+        return Math.max(0, Math.min(1, scrollDistance / maxScroll));
+      }
+
+      function drawStatic() {
         ctx.clearRect(0, 0, w, h);
-        time += 0.025;
+        ctx.save();
+        ctx.translate(w * 0.5, h * 0.5);
 
-        streams.forEach(s => {
-          s.y -= s.speed;
-          if (s.y < -30) { s.y = h + 30; s.x = Math.random() * w; }
-          ctx.font = `${Math.floor(11 * s.z)}px monospace`;
-          ctx.fillStyle = `rgba(168, 85, 247, ${0.18 * s.z})`;
-          ctx.fillText(s.text, s.x % w, s.y);
-        });
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          const zScale = Math.max(0.12, s.z);
+          const proj = 0.6 / zScale;
+          const sx = s.x * w * proj;
+          const sy = s.y * h * proj;
 
-        [w * 0.16, w * 0.84].forEach((centerX, idx) => {
-          const numPairs = 26;
-          const spacing = h / numPairs;
-          for (let i = 0; i < numPairs; i++) {
-            const y = i * spacing + ((time * 25) % spacing);
-            const angle = i * 0.38 + time * (idx === 0 ? 1 : -1);
-            const radius = Math.min(w * 0.07, 65);
+          if (Math.abs(sx) > w * 0.52 || Math.abs(sy) > h * 0.52) continue;
 
-            const x1 = centerX + Math.sin(angle) * radius;
-            const z1 = Math.cos(angle);
-            const x2 = centerX + Math.sin(angle + Math.PI) * radius;
-            const z2 = Math.cos(angle + Math.PI);
+          const depthScale = 0.4 + (1 - s.z) * 1.4;
+          const radius = Math.max(0.4, Math.min(2.5, s.baseRadius * depthScale));
+          const depthAlpha = 0.3 + (1 - s.z) * 0.7;
+          const alpha = s.baseAlpha * depthAlpha;
 
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
-            ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${alpha.toFixed(2)})`;
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        time += 0.016;
+
+        // Auto-drift for touch devices or if no mouse movement has occurred
+        if (!hasHover || !hasPointerMoved) {
+          targetMouseX = Math.sin(time * 0.5) * 0.38;
+          targetMouseY = Math.cos(time * 0.36) * 0.28;
+        }
+
+        // Mouse easing: lerp 0.06 towards target
+        prevSmoothMouseX = smoothMouseX;
+        prevSmoothMouseY = smoothMouseY;
+        smoothMouseX += (targetMouseX - smoothMouseX) * 0.06;
+        smoothMouseY += (targetMouseY - smoothMouseY) * 0.06;
+
+        mouseVelocityX = smoothMouseX - prevSmoothMouseX;
+        mouseVelocityY = smoothMouseY - prevSmoothMouseY;
+        const mouseMoveSpeed = Math.hypot(mouseVelocityX, mouseVelocityY);
+
+        // Background photo depth parallax (max +-14px, shifted slightly opposite to mouse)
+        if (spaceBgLayer) {
+          const bgX = -smoothMouseX * 14;
+          const bgY = -smoothMouseY * 14;
+          spaceBgLayer.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0)`;
+        }
+
+        // Scroll speed link: as lid progress goes from 0 to 1, drift speed increases up to 3x
+        const lidProgress = getScrollLidProgress();
+        const speedMultiplier = 1 + lidProgress * 2; // 1x -> 3x
+        const driftStep = 0.00065 * speedMultiplier;
+
+        // Rotate whole starfield by up to +-3 degrees with mouse
+        const maxRotationRad = 3 * (Math.PI / 180); // ~0.05236 rad
+        const rotationAngle = smoothMouseX * maxRotationRad;
+
+        ctx.save();
+        ctx.translate(w * 0.5, h * 0.5);
+        ctx.rotate(rotationAngle);
+
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+
+          // Move star towards viewer
+          s.z -= driftStep;
+
+          // Perspective projection: screenX = center + x * W * 0.6 / z-scale
+          const zScale = Math.max(0.12, s.z);
+          const proj = 0.6 / zScale;
+          let sx = s.x * w * proj;
+          let sy = s.y * h * proj;
+
+          // Parallax offset: mouse * (1 - z) * 40px
+          const depthParallax = (1 - s.z) * 40;
+          sx += smoothMouseX * depthParallax;
+          sy += smoothMouseY * depthParallax;
+
+          // Wrap stars that pass near or drift far outside viewport
+          const boundX = w * 0.62;
+          const boundY = h * 0.62;
+          if (s.z <= 0.12 || Math.abs(sx) > boundX || Math.abs(sy) > boundY) {
+            stars[i] = createStar(false); // respawn at far depth z = 1.0
+            continue;
+          }
+
+          // Radius & Alpha scaled by depth (nearer = bigger & brighter)
+          const depthScale = 0.4 + (1 - s.z) * 1.4;
+          const radius = Math.max(0.4, Math.min(2.5, s.baseRadius * depthScale));
+
+          // Subtle twinkle
+          const twinkle = 0.72 + 0.28 * Math.sin(time * s.twinkleSpeed + s.twinklePhase);
+          const depthAlpha = 0.25 + (1 - s.z) * 0.75;
+          const alpha = Math.max(0.1, Math.min(1, s.baseAlpha * depthAlpha * twinkle));
+
+          // Near stars motion streak in the direction of mouse movement (max 14px)
+          if (s.z < 0.55 && mouseMoveSpeed > 0.0008) {
+            const streakWeight = (0.55 - s.z) / 0.45;
+            const rawStreak = mouseMoveSpeed * 320 * streakWeight;
+            const streakLen = Math.min(14, rawStreak);
+
+            if (streakLen > 0.8) {
+              const dirX = (mouseVelocityX / mouseMoveSpeed) * streakLen;
+              const dirY = (mouseVelocityY / mouseMoveSpeed) * streakLen;
+
+              ctx.beginPath();
+              ctx.moveTo(sx - dirX, sy - dirY);
+              ctx.lineTo(sx, sy);
+              ctx.strokeStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${(alpha * 0.75).toFixed(2)})`;
+              ctx.lineWidth = radius * 1.35;
+              ctx.lineCap = 'round';
+              ctx.stroke();
+            }
+          }
+
+          // Draw the star point
+          ctx.beginPath();
+          ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${alpha.toFixed(2)})`;
+          ctx.fill();
+
+          // Soft subtle halo for bright nearest stars
+          if (s.z < 0.32 && radius > 1.35) {
             ctx.beginPath();
-            ctx.moveTo(x1, y);
-            ctx.lineTo(x2, y);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(x1, y, 3.5 + (z1 + 1) * 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(168, 85, 247, ${0.45 + (z1 + 1) * 0.25})`;
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(x2, y, 3.5 + (z2 + 1) * 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(34, 211, 238, ${0.45 + (z2 + 1) * 0.25})`;
+            ctx.arc(sx, sy, radius * 2.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${(alpha * 0.18).toFixed(2)})`;
             ctx.fill();
           }
-        });
+        }
 
-        requestAnimationFrame(animateBg);
+        ctx.restore();
       }
-      animateBg();
+
+      // IntersectionObserver lifecycle: run rAF ONLY when #laptop-scroll-track is in viewport
+      let isSectionVisible = false;
+      let rafId = null;
+
+      function loop() {
+        if (!isSectionVisible || document.hidden) {
+          rafId = null;
+          return;
+        }
+        render();
+        rafId = requestAnimationFrame(loop);
+      }
+
+      function startAnimation() {
+        if (prefersReducedMotion) {
+          drawStatic();
+          return;
+        }
+        if (!rafId && isSectionVisible && !document.hidden) {
+          rafId = requestAnimationFrame(loop);
+        }
+      }
+
+      function stopAnimation() {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+
+      const trackObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          isSectionVisible = entry.isIntersecting;
+          if (isSectionVisible) {
+            startAnimation();
+          } else {
+            stopAnimation();
+          }
+        });
+      }, { threshold: 0 });
+
+      trackObserver.observe(track);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          stopAnimation();
+        } else if (isSectionVisible) {
+          startAnimation();
+        }
+      });
     });
   </script>
   <!-- 3D Navigation Cube Script -->

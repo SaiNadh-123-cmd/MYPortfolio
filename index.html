@@ -399,13 +399,13 @@
       width: 100% !important;
       overflow: hidden !important;
       display: block !important;
-      background: linear-gradient(rgba(5,4,12,.25), rgba(5,4,12,.55)), url('./assets/space-bg.jpg') center / cover no-repeat !important;
+      background: linear-gradient(to top, rgba(5,3,12,.55), transparent 35%), url('./assets/page3-bg.jpg') center / cover no-repeat !important;
     }
 
-    #space-bg-layer {
+    #p3-bg-layer {
       position: absolute;
-      inset: -4%;
-      background: linear-gradient(rgba(5,4,12,.25), rgba(5,4,12,.55)), url('./assets/space-bg.jpg') center / cover no-repeat;
+      inset: -3%;
+      background: linear-gradient(to top, rgba(5,3,12,.55), transparent 35%), url('./assets/page3-bg.jpg') center / cover no-repeat;
       z-index: 0;
       pointer-events: none;
       will-change: transform;
@@ -1957,10 +1957,10 @@
   <!-- 3D Scroll-Triggered Laptop Intro -->
   <section id="laptop-scroll-track">
     <div class="laptop-sticky-frame">
-      <!-- Deep Space Parallax Photo Layer (shifts opposite to mouse) -->
-      <div id="space-bg-layer" aria-hidden="true"></div>
+      <!-- High-Def Parallax Photo Layer (shifts opposite to mouse) -->
+      <div id="p3-bg-layer" aria-hidden="true"></div>
 
-      <!-- 3D Astra-Style Interactive Starfield Canvas -->
+      <!-- Realistic 3D Falling Petals WebGL Canvas (Three.js) -->
       <canvas id="laptop-bg-canvas"></canvas>
 
       <!-- Bottom-Pinned Realistic 3D MacBook Pro -->
@@ -4044,273 +4044,383 @@
     });
   </script>
 
-  <!-- 3D Interactive Astra-Style Starfield & Deep Space Parallax -->
+  <!-- Realistic 3D Falling Pink Petals (Three.js WebGL) & Depth Parallax -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const canvas = document.getElementById('laptop-bg-canvas');
       const track = document.getElementById('laptop-scroll-track');
-      const spaceBgLayer = document.getElementById('space-bg-layer');
+      const p3BgLayer = document.getElementById('p3-bg-layer');
       if (!canvas || !track) return;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      // Ensure Three.js is loaded
+      if (typeof THREE === 'undefined') return;
 
-      let w = 0, h = 0, dpr = 1;
-      let time = 0;
-      let stars = [];
+      // Check WebGL availability
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: 'high-performance'
+        });
+      } catch (e) {
+        return; // Silent graceful fallback to background image
+      }
 
-      // Mouse tracking & Parallax state
+      const scene = new THREE.Scene();
+
+      let w = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+      let h = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 50);
+      camera.position.set(0, 0, 10);
+      camera.lookAt(0, 0, 0);
+
+      renderer.setSize(w, h, false);
+      renderer.setPixelRatio(dpr);
+
+      // --- Lighting (Moon glow at top-center, ambient pink, purple rim) ---
+      const ambientLight = new THREE.AmbientLight(0xffd6ec, 0.85);
+      scene.add(ambientLight);
+
+      // Warm pink/white point light aligned with the moon in the background illustration
+      const moonLight = new THREE.PointLight(0xffcce4, 2.4, 35);
+      moonLight.position.set(0, 5.2, 3);
+      scene.add(moonLight);
+
+      // Soft purple rim light from side
+      const rimLight = new THREE.DirectionalLight(0xa855f7, 0.7);
+      rimLight.position.set(-4, -2, -1);
+      scene.add(rimLight);
+
+      // --- Petal Geometry (Curled teardrop plane) ---
+      const geom = new THREE.PlaneGeometry(1, 1.4, 6, 8);
+      const posAttr = geom.attributes.position;
+      for (let i = 0; i < posAttr.count; i++) {
+        let x = posAttr.getX(i);
+        let y = posAttr.getY(i);
+        let z = posAttr.getZ(i);
+
+        // Teardrop taper: width tapers smoothly toward both ends
+        const ny = (y + 0.7) / 1.4;
+        const widthScale = Math.sin(Math.max(0, Math.min(1, ny)) * Math.PI) * 0.92 + 0.08;
+        x *= widthScale;
+
+        // Realistic natural petal curl along length and width
+        z += 0.28 * x * x + 0.14 * Math.sin(ny * Math.PI);
+
+        posAttr.setXYZ(i, x, y, z);
+      }
+      geom.computeVertexNormals();
+
+      // --- Offscreen Petal Texture (Soft gradient, faint veins, alpha feathered edge) ---
+      function makePetalTexture() {
+        const texCanvas = document.createElement('canvas');
+        texCanvas.width = 256;
+        texCanvas.height = 360;
+        const tCtx = texCanvas.getContext('2d');
+        if (!tCtx) return null;
+
+        tCtx.clearRect(0, 0, 256, 360);
+
+        const cx = 128, cy = 180;
+        const radGrad = tCtx.createRadialGradient(cx, cy, 12, cx, cy, 155);
+        radGrad.addColorStop(0, 'rgba(255, 240, 248, 1)');      // delicate pale pink at vein center
+        radGrad.addColorStop(0.42, 'rgba(255, 192, 222, 0.98)'); // soft cherry petal body
+        radGrad.addColorStop(0.82, 'rgba(235, 105, 168, 0.92)'); // richer magenta tone toward edge
+        radGrad.addColorStop(1, 'rgba(215, 65, 138, 0)');        // softly feathered alpha contour
+
+        tCtx.fillStyle = radGrad;
+        tCtx.beginPath();
+        tCtx.ellipse(cx, cy, 98, 158, 0, 0, Math.PI * 2);
+        tCtx.fill();
+
+        // Delicate central vein
+        tCtx.strokeStyle = 'rgba(255, 248, 252, 0.45)';
+        tCtx.lineWidth = 1.6;
+        tCtx.beginPath();
+        tCtx.moveTo(cx, 325);
+        tCtx.quadraticCurveTo(cx - 2, cy, cx, 35);
+        tCtx.stroke();
+
+        // Subtle radiating lateral veins
+        tCtx.strokeStyle = 'rgba(255, 242, 250, 0.2)';
+        tCtx.lineWidth = 1.0;
+        for (let side = -1; side <= 1; side += 2) {
+          for (let v = 0; v < 4; v++) {
+            const vy = 100 + v * 42;
+            tCtx.beginPath();
+            tCtx.moveTo(cx, vy);
+            tCtx.quadraticCurveTo(cx + side * 32, vy - 14, cx + side * 68, vy - 36);
+            tCtx.stroke();
+          }
+        }
+
+        const texture = new THREE.CanvasTexture(texCanvas);
+        texture.generateMipmaps = true;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        return texture;
+      }
+
+      const petalTexture = makePetalTexture();
+
+      // Two color variants: pale cherry blossom pink & deeper vibrant magenta pink
+      const matPale = new THREE.MeshStandardMaterial({
+        map: petalTexture,
+        color: 0xffd8ec,
+        emissive: 0x5a1835,
+        emissiveIntensity: 0.25,
+        roughness: 0.55,
+        metalness: 0.08,
+        transparent: true,
+        opacity: 0.88,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+
+      const matDeep = new THREE.MeshStandardMaterial({
+        map: petalTexture,
+        color: 0xff8ab8,
+        emissive: 0x6e143c,
+        emissiveIntensity: 0.35,
+        roughness: 0.52,
+        metalness: 0.08,
+        transparent: true,
+        opacity: 0.92,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+
+      // --- Petal Instances & State ---
+      const isMobile = w < 768;
+      const count = isMobile ? 28 : 60;
+      const petals = [];
+
+      function spawnPetal(p, initial = false) {
+        // Broad x spread across field of view
+        p.x = (Math.random() - 0.5) * 16;
+        p.y = initial ? (Math.random() * 15 - 7.5) : (8 + Math.random() * 3.5);
+        p.z = -6 + Math.random() * 9; // depth from -6 to +3
+
+        p.fallSpeed = 0.3 + Math.random() * 0.6; // 0.3 - 0.9 units/s
+        p.swayPhase = Math.random() * Math.PI * 2;
+        p.swaySpeed = 0.8 + Math.random() * 1.3;
+        p.swayAmp = 0.3 + Math.random() * 0.55;
+
+        // 3D tumble speeds on all 3 axes
+        p.rotX = Math.random() * Math.PI * 2;
+        p.rotY = Math.random() * Math.PI * 2;
+        p.rotZ = Math.random() * Math.PI * 2;
+        p.rotSpeedX = (Math.random() - 0.5) * 1.6;
+        p.rotSpeedY = (Math.random() - 0.5) * 1.9;
+        p.rotSpeedZ = (Math.random() - 0.5) * 1.3;
+
+        // Random scale 0.6 - 1.4
+        const s = 0.6 + Math.random() * 0.8;
+        p.mesh.scale.set(s, s, s);
+
+        // Interactive wind push offsets
+        p.pushX = 0;
+        p.pushY = 0;
+        p.pushVx = 0;
+        p.pushVy = 0;
+
+        p.mesh.position.set(p.x, p.y, p.z);
+        p.mesh.rotation.set(p.rotX, p.rotY, p.rotZ);
+      }
+
+      for (let i = 0; i < count; i++) {
+        // Clone material so individual opacities (depth of field) don't conflict
+        const mat = (i % 2 === 0 ? matPale : matDeep).clone();
+        const mesh = new THREE.Mesh(geom, mat);
+        scene.add(mesh);
+
+        const p = { mesh: mesh, mat: mat };
+        spawnPetal(p, true);
+        petals.push(p);
+      }
+
+      // --- Mouse & Parallax State ---
       let targetMouseX = 0;
       let targetMouseY = 0;
       let smoothMouseX = 0;
       let smoothMouseY = 0;
       let prevSmoothMouseX = 0;
       let prevSmoothMouseY = 0;
-      let mouseVelocityX = 0;
-      let mouseVelocityY = 0;
       let hasPointerMoved = false;
 
       const hasHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Color palette: mostly white, with a few soft cool and warm cosmic tints
-      const starPalettes = [
-        { r: 255, g: 255, b: 255 }, // pure white (majority)
-        { r: 248, g: 250, b: 255 }, // crisp starlight white
-        { r: 210, g: 232, b: 255 }, // cool cyan / blue tint
-        { r: 190, g: 220, b: 255 }, // ice blue tint
-        { r: 255, g: 240, b: 220 }, // soft warm amber
-        { r: 255, g: 226, b: 196 }, // golden starlight
-        { r: 235, g: 220, b: 255 }  // subtle nebula violet
-      ];
+      window.addEventListener('pointermove', (e) => {
+        hasPointerMoved = true;
+        const cx = window.innerWidth * 0.5;
+        const cy = window.innerHeight * 0.5;
+        targetMouseX = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+        targetMouseY = Math.max(-1, Math.min(1, (cy - e.clientY) / cy));
+      }, { passive: true });
 
-      function createStar(randomizeZ = true) {
-        // ~68% chance of white/crisp, remainder tinted
-        const paletteIdx = Math.random() < 0.68
-          ? (Math.random() < 0.5 ? 0 : 1)
-          : Math.floor(Math.random() * starPalettes.length);
-        const color = starPalettes[paletteIdx];
-
-        return {
-          x: (Math.random() * 2 - 1), // normalized -1 to 1
-          y: (Math.random() * 2 - 1), // normalized -1 to 1
-          z: randomizeZ ? (0.12 + Math.random() * 0.88) : 1.0, // depth 0.12 (near) to 1.0 (far)
-          baseRadius: 0.4 + Math.random() * 1.4, // radius 0.4..1.8 px
-          twinklePhase: Math.random() * Math.PI * 2,
-          twinkleSpeed: 1.2 + Math.random() * 2.4,
-          baseAlpha: 0.45 + Math.random() * 0.55,
-          color: color
-        };
+      function getScrollLidProgress() {
+        const rect = track.getBoundingClientRect();
+        const scrollDist = -rect.top;
+        const maxScroll = rect.height - window.innerHeight;
+        if (maxScroll <= 0) return 0;
+        return Math.max(0, Math.min(1, scrollDist / maxScroll));
       }
 
-      function initStars() {
-        // ~450 stars on desktop, ~220 on screens under 768px wide
-        const count = w < 768 ? 220 : 450;
-        stars = [];
-        for (let i = 0; i < count; i++) {
-          stars.push(createStar(true));
-        }
-      }
-
-      function resize() {
+      function onResize() {
         const parent = canvas.parentElement || document.body;
         w = parent.clientWidth || window.innerWidth;
         h = parent.clientHeight || window.innerHeight;
         dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-        canvas.width = Math.floor(w * dpr);
-        canvas.height = Math.floor(h * dpr);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
 
-        if (stars.length === 0 || (w < 768 && stars.length > 280) || (w >= 768 && stars.length < 350)) {
-          initStars();
-        }
+        renderer.setSize(w, h, false);
+        renderer.setPixelRatio(dpr);
 
         if (prefersReducedMotion) {
-          drawStatic();
+          renderer.render(scene, camera);
         }
       }
 
-      window.addEventListener('resize', resize, { passive: true });
-      resize();
+      window.addEventListener('resize', onResize, { passive: true });
 
-      // Mouse parallax tracking relative to section centre (-1..1)
-      window.addEventListener('pointermove', (e) => {
-        hasPointerMoved = true;
-        const centerX = window.innerWidth * 0.5;
-        const centerY = window.innerHeight * 0.5;
-        targetMouseX = Math.max(-1, Math.min(1, (e.clientX - centerX) / centerX));
-        targetMouseY = Math.max(-1, Math.min(1, (e.clientY - centerY) / centerY));
-      }, { passive: true });
+      // --- Animation Loop ---
+      let time = 0;
+      let lastTime = performance.now();
 
-      function getScrollLidProgress() {
-        const rect = track.getBoundingClientRect();
-        const scrollDistance = -rect.top;
-        const maxScroll = rect.height - window.innerHeight;
-        if (maxScroll <= 0) return 0;
-        return Math.max(0, Math.min(1, scrollDistance / maxScroll));
-      }
+      function update(dt) {
+        time += dt;
 
-      function drawStatic() {
-        ctx.clearRect(0, 0, w, h);
-        ctx.save();
-        ctx.translate(w * 0.5, h * 0.5);
-
-        for (let i = 0; i < stars.length; i++) {
-          const s = stars[i];
-          const zScale = Math.max(0.12, s.z);
-          const proj = 0.6 / zScale;
-          const sx = s.x * w * proj;
-          const sy = s.y * h * proj;
-
-          if (Math.abs(sx) > w * 0.52 || Math.abs(sy) > h * 0.52) continue;
-
-          const depthScale = 0.4 + (1 - s.z) * 1.4;
-          const radius = Math.max(0.4, Math.min(2.5, s.baseRadius * depthScale));
-          const depthAlpha = 0.3 + (1 - s.z) * 0.7;
-          const alpha = s.baseAlpha * depthAlpha;
-
-          ctx.beginPath();
-          ctx.arc(sx, sy, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${alpha.toFixed(2)})`;
-          ctx.fill();
-        }
-        ctx.restore();
-      }
-
-      function render() {
-        ctx.clearRect(0, 0, w, h);
-        time += 0.016;
-
-        // Auto-drift for touch devices or if no mouse movement has occurred
+        // Automatic slow sine drift on touch screens or before pointer moves
         if (!hasHover || !hasPointerMoved) {
-          targetMouseX = Math.sin(time * 0.5) * 0.38;
-          targetMouseY = Math.cos(time * 0.36) * 0.28;
+          targetMouseX = Math.sin(time * 0.45) * 0.35;
+          targetMouseY = Math.cos(time * 0.32) * 0.25;
         }
 
-        // Mouse easing: lerp 0.06 towards target
+        // Mouse easing: lerp 0.06
         prevSmoothMouseX = smoothMouseX;
         prevSmoothMouseY = smoothMouseY;
         smoothMouseX += (targetMouseX - smoothMouseX) * 0.06;
         smoothMouseY += (targetMouseY - smoothMouseY) * 0.06;
 
-        mouseVelocityX = smoothMouseX - prevSmoothMouseX;
-        mouseVelocityY = smoothMouseY - prevSmoothMouseY;
-        const mouseMoveSpeed = Math.hypot(mouseVelocityX, mouseVelocityY);
+        const mouseVx = smoothMouseX - prevSmoothMouseX;
+        const mouseVy = smoothMouseY - prevSmoothMouseY;
+        const mouseSpeed = Math.hypot(mouseVx, mouseVy);
 
-        // Background photo depth parallax (max +-14px, shifted slightly opposite to mouse)
-        if (spaceBgLayer) {
-          const bgX = -smoothMouseX * 14;
-          const bgY = -smoothMouseY * 14;
-          spaceBgLayer.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0)`;
+        // (1) Camera parallax: eased shift of +-0.5 units on x and +-0.3 on y
+        camera.position.x = smoothMouseX * 0.5;
+        camera.position.y = smoothMouseY * 0.3;
+        camera.lookAt(0, 0, 0);
+
+        // (2) Background photo depth parallax: shifts opposite to mouse by up to 12px
+        if (p3BgLayer) {
+          const bgX = -smoothMouseX * 12;
+          const bgY = -smoothMouseY * 12;
+          p3BgLayer.style.transform = `translate3d(${bgX.toFixed(2)}px, ${bgY.toFixed(2)}px, 0)`;
         }
 
-        // Scroll speed link: as lid progress goes from 0 to 1, drift speed increases up to 3x
+        // Global wind from 2-3 summed sines
+        const globalWind = Math.sin(time * 0.38) * 0.38 + Math.sin(time * 0.85) * 0.18 + Math.cos(time * 0.2) * 0.22;
+
+        // Scroll link: as MacBook lid opens, increase wind slightly
         const lidProgress = getScrollLidProgress();
-        const speedMultiplier = 1 + lidProgress * 2; // 1x -> 3x
-        const driftStep = 0.00065 * speedMultiplier;
+        const windMultiplier = 1 + lidProgress * 0.8;
+        const fallMultiplier = 1 + lidProgress * 0.45;
 
-        // Rotate whole starfield by up to +-3 degrees with mouse
-        const maxRotationRad = 3 * (Math.PI / 180); // ~0.05236 rad
-        const rotationAngle = smoothMouseX * maxRotationRad;
+        // Interactive wind push from cursor
+        const hasActiveMousePush = mouseSpeed > 0.001;
+        const mouseDirX = hasActiveMousePush ? (mouseVx / mouseSpeed) : 0;
+        const mouseDirY = hasActiveMousePush ? (mouseVy / mouseSpeed) : 0;
 
-        ctx.save();
-        ctx.translate(w * 0.5, h * 0.5);
-        ctx.rotate(rotationAngle);
+        for (let i = 0; i < petals.length; i++) {
+          const p = petals[i];
 
-        for (let i = 0; i < stars.length; i++) {
-          const s = stars[i];
+          // 3D Tumble on all 3 axes
+          p.rotX += p.rotSpeedX * dt;
+          p.rotY += p.rotSpeedY * dt;
+          p.rotZ += (p.rotSpeedZ + Math.sin(p.swayPhase + time * p.swaySpeed) * 0.4) * dt;
+          p.mesh.rotation.set(p.rotX, p.rotY, p.rotZ);
 
-          // Move star towards viewer
-          s.z -= driftStep;
+          // Falling and swaying
+          p.y -= p.fallSpeed * fallMultiplier * dt;
+          const sway = Math.sin(p.swayPhase + time * p.swaySpeed) * p.swayAmp;
+          const targetX = p.x + sway + (globalWind * windMultiplier);
 
-          // Perspective projection: screenX = center + x * W * 0.6 / z-scale
-          const zScale = Math.max(0.12, s.z);
-          const proj = 0.6 / zScale;
-          let sx = s.x * w * proj;
-          let sy = s.y * h * proj;
+          // Cursor proximity wind push: project petal to screen space and check distance
+          if (hasActiveMousePush) {
+            // Factor from camera perspective: camera at z = 10
+            const perspectiveFactor = 10 / Math.max(1, 10 - p.z);
+            const projX = (targetX * perspectiveFactor) / 6.2;
+            const projY = (p.y * perspectiveFactor) / 4.0;
 
-          // Parallax offset: mouse * (1 - z) * 40px
-          const depthParallax = (1 - s.z) * 40;
-          sx += smoothMouseX * depthParallax;
-          sy += smoothMouseY * depthParallax;
+            const dx = projX - smoothMouseX;
+            const dy = projY - smoothMouseY;
+            const dist = Math.hypot(dx, dy);
 
-          // Wrap stars that pass near or drift far outside viewport
-          const boundX = w * 0.62;
-          const boundY = h * 0.62;
-          if (s.z <= 0.12 || Math.abs(sx) > boundX || Math.abs(sy) > boundY) {
-            stars[i] = createStar(false); // respawn at far depth z = 1.0
-            continue;
-          }
-
-          // Radius & Alpha scaled by depth (nearer = bigger & brighter)
-          const depthScale = 0.4 + (1 - s.z) * 1.4;
-          const radius = Math.max(0.4, Math.min(2.5, s.baseRadius * depthScale));
-
-          // Subtle twinkle
-          const twinkle = 0.72 + 0.28 * Math.sin(time * s.twinkleSpeed + s.twinklePhase);
-          const depthAlpha = 0.25 + (1 - s.z) * 0.75;
-          const alpha = Math.max(0.1, Math.min(1, s.baseAlpha * depthAlpha * twinkle));
-
-          // Near stars motion streak in the direction of mouse movement (max 14px)
-          if (s.z < 0.55 && mouseMoveSpeed > 0.0008) {
-            const streakWeight = (0.55 - s.z) / 0.45;
-            const rawStreak = mouseMoveSpeed * 320 * streakWeight;
-            const streakLen = Math.min(14, rawStreak);
-
-            if (streakLen > 0.8) {
-              const dirX = (mouseVelocityX / mouseMoveSpeed) * streakLen;
-              const dirY = (mouseVelocityY / mouseMoveSpeed) * streakLen;
-
-              ctx.beginPath();
-              ctx.moveTo(sx - dirX, sy - dirY);
-              ctx.lineTo(sx, sy);
-              ctx.strokeStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${(alpha * 0.75).toFixed(2)})`;
-              ctx.lineWidth = radius * 1.35;
-              ctx.lineCap = 'round';
-              ctx.stroke();
+            if (dist < 0.65) {
+              const pushStrength = (0.65 - dist) * mouseSpeed * 2.8;
+              p.pushVx += mouseDirX * pushStrength;
+              p.pushVy += mouseDirY * pushStrength;
             }
           }
 
-          // Draw the star point
-          ctx.beginPath();
-          ctx.arc(sx, sy, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${alpha.toFixed(2)})`;
-          ctx.fill();
+          // Smooth decay of push force (spring back, no snapping)
+          p.pushVx *= 0.92;
+          p.pushVy *= 0.92;
+          p.pushX += p.pushVx;
+          p.pushY += p.pushVy;
+          p.pushX *= 0.94;
+          p.pushY *= 0.94;
 
-          // Soft subtle halo for bright nearest stars
-          if (s.z < 0.32 && radius > 1.35) {
-            ctx.beginPath();
-            ctx.arc(sx, sy, radius * 2.2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${s.color.r}, ${s.color.g}, ${s.color.b}, ${(alpha * 0.18).toFixed(2)})`;
-            ctx.fill();
+          p.mesh.position.set(targetX + p.pushX, p.y + p.pushY, p.z);
+
+          // Depth of field: near petals (z > 2) have lower opacity (.55), far ones dimmer
+          if (p.z > 2.0) {
+            p.mat.opacity = 0.55;
+          } else if (p.z < -2.5) {
+            p.mat.opacity = 0.45 + (p.z + 6) / 3.5 * 0.35;
+          } else {
+            p.mat.opacity = 0.88;
+          }
+
+          // Infinite loop: respawn above top when falling below screen
+          if (p.y < -7.8) {
+            spawnPetal(p, false);
           }
         }
-
-        ctx.restore();
       }
 
-      // IntersectionObserver lifecycle: run rAF ONLY when #laptop-scroll-track is in viewport
+      // --- Lifecycle & IntersectionObserver ---
       let isSectionVisible = false;
       let rafId = null;
 
-      function loop() {
+      function loop(now) {
         if (!isSectionVisible || document.hidden) {
           rafId = null;
           return;
         }
-        render();
+
+        const dt = Math.min((now - lastTime) / 1000, 0.05); // cap delta time for smooth recovery
+        lastTime = now;
+
+        update(dt);
+        renderer.render(scene, camera);
+
         rafId = requestAnimationFrame(loop);
       }
 
       function startAnimation() {
         if (prefersReducedMotion) {
-          drawStatic();
+          renderer.render(scene, camera);
           return;
         }
         if (!rafId && isSectionVisible && !document.hidden) {
+          lastTime = performance.now();
           rafId = requestAnimationFrame(loop);
         }
       }
@@ -4342,9 +4452,13 @@
           startAnimation();
         }
       });
+
+      if (prefersReducedMotion) {
+        renderer.render(scene, camera);
+      }
     });
   </script>
-  <!-- 3D Navigation Cube Script -->
+<!-- 3D Navigation Cube Script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const cube = document.getElementById('nav-cube');
